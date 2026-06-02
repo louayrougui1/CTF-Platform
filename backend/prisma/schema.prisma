@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum SubmissionStatus {
+  CORRECT
+  WRONG
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+
+  // relations
+  teams        TeamMember[]
+  submissions  Submission[]
+  ownedEvents  Event[]       @relation("EventOwner")
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime @default(now())
+
+  ownerId String
+  owner   User   @relation("EventOwner", fields: [ownerId], references: [id])
+
+  // relations
+  teams      Team[]
+  challenges Challenge[]
+}
+
+model Team {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  eventId String
+  event   Event @relation(fields: [eventId], references: [id])
+
+  members TeamMember[]
+}
+
+model TeamMember {
+  id     String @id @default(uuid())
+  role   Role   @default(MEMBER)
+
+  userId String
+  teamId String
+
+  user User @relation(fields: [userId], references: [id])
+  team Team @relation(fields: [teamId], references: [id])
+
+  @@unique([userId, teamId])
+}
+
+model Challenge {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  flag        String
+  points      Int      @default(100)
+  createdAt   DateTime @default(now())
+
+  eventId String
+  event   Event @relation(fields: [eventId], references: [id])
+
+  submissions Submission[]
+}
+
+model Submission {
+  id        String   @id @default(uuid())
+  flag      String
+  status    SubmissionStatus
+  createdAt DateTime @default(now())
+
+  userId      String
+  challengeId String
+
+  user      User      @relation(fields: [userId], references: [id])
+  challenge Challenge @relation(fields: [challengeId], references: [id])
+
+  @@index([userId])
+  @@index([challengeId])
+}
