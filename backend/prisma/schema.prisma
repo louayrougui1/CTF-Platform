@@ -29,6 +29,7 @@ model User {
   username  String   @unique
   password  String
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // relations
   teams        TeamMember[]
@@ -43,37 +44,47 @@ model Event {
   startDate   DateTime?
   endDate     DateTime?
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   ownerId String
-  owner   User   @relation("EventOwner", fields: [ownerId], references: [id])
+  owner   User   @relation("EventOwner", fields: [ownerId], references: [id], onDelete: Cascade)
 
   // relations
   teams      Team[]
   challenges Challenge[]
+
+  @@index([ownerId])
 }
 
 model Team {
   id        String   @id @default(uuid())
   name      String
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   eventId String
-  event   Event @relation(fields: [eventId], references: [id])
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   members TeamMember[]
+
+  @@index([eventId])
 }
 
 model TeamMember {
-  id     String @id @default(uuid())
-  role   Role   @default(MEMBER)
+  id        String   @id @default(uuid())
+  role      Role     @default(MEMBER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   userId String
   teamId String
 
-  user User @relation(fields: [userId], references: [id])
-  team Team @relation(fields: [teamId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   @@unique([userId, teamId])
+  @@index([userId])
+  @@index([teamId])
 }
 
 model Challenge {
@@ -83,11 +94,14 @@ model Challenge {
   flag        String
   points      Int      @default(100)
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   eventId String
-  event   Event @relation(fields: [eventId], references: [id])
+  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   submissions Submission[]
+
+  @@index([eventId])
 }
 
 model Submission {
@@ -99,8 +113,10 @@ model Submission {
   userId      String
   challengeId String
 
-  user      User      @relation(fields: [userId], references: [id])
-  challenge Challenge @relation(fields: [challengeId], references: [id])
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([challengeId])
