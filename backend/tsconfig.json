@@ -15,7 +15,7 @@
     "sourceMap": true,
     "rootDir": "./src",
     "outDir": "./dist",
-    "incremental": true,
+    "incremental": false,
     "skipLibCheck": true,
     "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
@@ -23,13 +23,8 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
   },
-  "include": [
-    "src"
-  ],
+  "include": ["src"],
   "paths": {
-    "*": [
-      "node_modules/*",
-      "src/*"
-    ]
+    "*": ["node_modules/*", "src/*"]
   }
 }
