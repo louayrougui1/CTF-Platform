@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import { Controller, Post, Request, UseGuards, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalGuard } from './guards/local.guard';
-import { JwtGuard } from './guards/jwt.guard';
+import { RegisterDto } from './dto/register.dto';
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -11,11 +11,12 @@ export class AuthController {
   login(@Request() req) {
     return this.authService.login(req.user);
   }
-  @UseGuards(JwtGuard)
-  @Get('profile')
-  getProfile(@Request() req) {
-    console.log('inside authcontroller status controller');
-    console.log(req.user);
-    return req.user;
+  @Post('register')
+  register(@Body() dto: RegisterDto) {
+    return this.authService.register(dto);
+  }
+  @Post('refresh')
+  refresh(@Body('refresh_token') token: string) {
+    return this.authService.refresh(token);
   }
 }
