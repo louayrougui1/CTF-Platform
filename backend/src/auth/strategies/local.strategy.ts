@@ -22,7 +22,7 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
     const errors = await validate(dto);
 
     if (errors.length > 0) {
-      throw new BadRequestException(errors);
+      throw new BadRequestException(errors[0].constraints);
     }
 
     const user = await this.authService.validateUser(dto);
