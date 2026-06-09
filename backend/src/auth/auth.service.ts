@@ -9,6 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -40,6 +41,14 @@ export class AuthService {
       },
     );
   }
+  setRefreshTokenCookie(res: Response, refreshToken: string) {
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
+    });
+  }
 
   async validateUser({ email, password }: AuthPayloadDto) {
     const user = await this.prisma.user.findUnique({
@@ -60,18 +69,19 @@ export class AuthService {
   }
 
   // 2. Login (generate JWT)
-  async login(user: any) {
+  async login(user: any, res: Response) {
     const { password, ...safeUser } = user;
     console.log('Logging in user:', safeUser); // Debugging log
     const accessToken = this.generateAccessToken(safeUser);
     const refreshToken = this.generateRefreshToken(safeUser);
+    this.setRefreshTokenCookie(res, refreshToken);
+
     return {
       access_token: accessToken,
-      refresh_token: refreshToken,
       user: safeUser,
     };
   }
-  async register({ email, username, password }: RegisterDto) {
+  async register({ email, username, password }: RegisterDto, res: Response) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     try {
@@ -87,6 +97,8 @@ export class AuthService {
       console.log('New user created:', safeUser); // Debugging log
       const accessToken = this.generateAccessToken(safeUser);
       const refreshToken = this.generateRefreshToken(safeUser);
+      this.setRefreshTokenCookie(res, refreshToken);
+
       return {
         access_token: accessToken,
         refresh_token: refreshToken,
@@ -100,29 +112,35 @@ export class AuthService {
       throw new InternalServerErrorException('Failed to create user');
     }
   }
-  async refresh(refreshToken: string) {
+  async refresh(refreshToken: string, res: Response) {
+    let payload: any;
     try {
-      const payload = this.jwtService.verify(refreshToken, {
+      payload = this.jwtService.verify(refreshToken, {
         secret: process.env.JWT_REFRESH_SECRET,
       });
-
-      const user = await this.prisma.user.findUnique({
-        where: { id: payload.sub },
-      });
-
-      if (!user) {
-        throw new UnauthorizedException('User not found');
-      }
-
-      const { password, ...safeUser } = user;
-
-      return {
-        access_token: this.generateAccessToken(safeUser),
-        refresh_token: this.generateRefreshToken(safeUser),
-        user: safeUser,
-      };
     } catch (error) {
       throw new UnauthorizedException('Invalid or Expired refresh token');
     }
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload!.sub },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    const { password, ...safeUser } = user;
+    this.setRefreshTokenCookie(res, refreshToken);
+
+    return {
+      access_token: this.generateAccessToken(safeUser),
+      user: safeUser,
+    };
+  }
+  logout(res: Response) {
+    res.clearCookie('refresh_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
   }
 }
