@@ -106,7 +106,7 @@ export class AuthService {
       };
     } catch (error: any) {
       if (error.code === 'P2002') {
-        throw new BadRequestException('Email or username already in use');
+        throw new BadRequestException('Email already in use');
       }
 
       throw new InternalServerErrorException('Failed to create user');
@@ -122,7 +122,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or Expired refresh token');
     }
     const user = await this.prisma.user.findUnique({
-      where: { id: payload!.sub },
+      where: { id: payload.sub },
     });
 
     if (!user) {
@@ -142,5 +142,47 @@ export class AuthService {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
     });
+  }
+
+  async googleLogin(profile: any, res: Response) {
+    // 1. Check if a user already exists with this googleId (returning Google user)
+    let user = await this.prisma.user.findUnique({
+      where: { googleId: profile.googleId },
+    });
+
+    if (!user) {
+      // 2. Check if a normal account exists with the same email (account linking)
+      const existingUser = await this.prisma.user.findUnique({
+        where: { email: profile.email },
+      });
+
+      if (existingUser) {
+        // 3. Link the Google account to the existing normal account
+        user = await this.prisma.user.update({
+          where: { id: existingUser.id },
+          data: { googleId: profile.googleId },
+        });
+      } else {
+        // 4. No account at all — create a new Google-only user
+        user = await this.prisma.user.create({
+          data: {
+            email: profile.email,
+            username: profile.firstName + ' ' + profile.lastName,
+            password: null,
+            googleId: profile.googleId,
+          },
+        });
+      }
+    }
+
+    const { password, ...safeUser } = user;
+    const accessToken = this.generateAccessToken(safeUser);
+    const refreshToken = this.generateRefreshToken(safeUser);
+    this.setRefreshTokenCookie(res, refreshToken);
+
+    return {
+      access_token: accessToken,
+      user: safeUser,
+    };
   }
 }

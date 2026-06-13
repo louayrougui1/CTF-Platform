@@ -4,6 +4,10 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategies/local.strategy';
+import googleOAuthConfig from './config/google-oauth.config';
+import { ConfigModule } from '@nestjs/config';
+import { GoogleAuthGuard } from './guards/google.guard';
+import { GoogleStrategy } from './strategies/google.strategy';
 @Module({
   imports: [
     PassportModule,
@@ -11,8 +15,9 @@ import { LocalStrategy } from './strategies/local.strategy';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '30m' },
     }),
+    ConfigModule.forFeature(googleOAuthConfig),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy],
+  providers: [AuthService, LocalStrategy, GoogleStrategy],
 })
 export class AuthModule {}
