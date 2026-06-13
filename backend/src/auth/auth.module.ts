@@ -6,7 +6,6 @@ import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategies/local.strategy';
 import googleOAuthConfig from './config/google-oauth.config';
 import { ConfigModule } from '@nestjs/config';
-import { GoogleAuthGuard } from './guards/google.guard';
 import { GoogleStrategy } from './strategies/google.strategy';
 @Module({
   imports: [

@@ -1,20 +1,21 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
-enum Role {
+
+enum EventRole {
   OWNER
   ADMIN
+  MEMBER
+}
+
+enum TeamRole {
+  CAPTAIN
   MEMBER
 }
 
@@ -24,36 +25,34 @@ enum SubmissionStatus {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  username  String   
+  id           String   @id @default(uuid())
+  email        String   @unique
+  username     String
+  password     String?
+  googleId     String?  @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  password  String?  // nullable for Google-only users
-  googleId  String?  @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // relations
   teams        TeamMember[]
   submissions  Submission[]
   ownedEvents  Event[]       @relation("EventOwner")
+  eventMembers EventMember[]
 }
 
 model Event {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   title       String
   description String?
   startDate   DateTime?
   endDate     DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  ownerId     String
 
-  ownerId String
-  owner   User   @relation("EventOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-
-  // relations
+  owner      User          @relation("EventOwner", fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   teams      Team[]
   challenges Challenge[]
+  members    EventMember[] 
 
   @@index([ownerId])
 }
@@ -63,26 +62,40 @@ model Team {
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  eventId   String
 
-  eventId String
-  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
-
+  event   Event        @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   members TeamMember[]
 
   @@index([eventId])
 }
 
+model EventMember {
+  id        String    @id @default(uuid())
+  role      EventRole @default(MEMBER)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  userId    String
+  eventId   String
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([userId, eventId])
+  @@index([userId])
+  @@index([eventId])
+}
+
 model TeamMember {
   id        String   @id @default(uuid())
-  role      Role     @default(MEMBER)
+  role      TeamRole @default(MEMBER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  userId    String
+  teamId    String
 
-  userId String
-  teamId String
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@unique([userId, teamId])
   @@index([userId])
@@ -97,28 +110,26 @@ model Challenge {
   points      Int      @default(100)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  eventId     String
 
-  eventId String
-  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-
+  event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   submissions Submission[]
 
   @@index([eventId])
+
 }
 
 model Submission {
-  id        String   @id @default(uuid())
-  flag      String
-  status    SubmissionStatus
-  createdAt DateTime @default(now())
-
+  id          String           @id @default(uuid())
+  flag        String
+  status      SubmissionStatus
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
   userId      String
   challengeId String
 
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-
-  updatedAt DateTime @updatedAt
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([userId])
   @@index([challengeId])
