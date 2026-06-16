@@ -7,9 +7,10 @@ import { UserModule } from './user/user.module';
 import { EventModule } from './event/event.module';
 import { TeamModule } from './team/team.module';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
+import { EventMemberModule } from './event-member/event-member.module';
 
 @Module({
-  imports: [AuthModule, PrismaModule, UserModule, EventModule, TeamModule, LeaderboardModule],
+  imports: [AuthModule, PrismaModule, UserModule, EventModule, TeamModule, LeaderboardModule, EventMemberModule],
   controllers: [AppController],
   providers: [AppService],
 })

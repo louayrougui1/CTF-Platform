@@ -42,4 +42,18 @@ export class TeamService {
 
     return { memberCount, teamCount, challengeCount, solveCount };
   }
+
+  async getEventTeams(eventId: string) {
+    await this.findEventOrThrow(eventId);
+
+    return this.prisma.team.findMany({
+      where: { eventId },
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  }
 }
