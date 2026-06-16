@@ -49,11 +49,6 @@ export class EventController {
     return this.eventsService.getEventTeams(id);
   }
 
-  @Get(':id/leaderboard')
-  getEventLeaderboard(@Param('id') id: string) {
-    return this.eventsService.getEventLeaderboard(id);
-  }
-
   @Get(':id/stats')
   getEventStats(@Param('id') id: string) {
     return this.eventsService.getEventStats(id);

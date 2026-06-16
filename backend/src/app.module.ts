@@ -6,9 +6,10 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UserModule } from './user/user.module';
 import { EventModule } from './event/event.module';
 import { TeamModule } from './team/team.module';
+import { LeaderboardModule } from './leaderboard/leaderboard.module';
 
 @Module({
-  imports: [AuthModule, PrismaModule, UserModule, EventModule, TeamModule],
+  imports: [AuthModule, PrismaModule, UserModule, EventModule, TeamModule, LeaderboardModule],
   controllers: [AppController],
   providers: [AppService],
 })
