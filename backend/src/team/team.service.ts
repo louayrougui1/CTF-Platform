@@ -6,6 +6,7 @@ import {
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
+import { CreateTeamDto } from './dto/createTeam.dto';
 
 @Injectable()
 export class TeamService {
@@ -52,21 +53,21 @@ export class TeamService {
 
   // ─── Existing Methods ──────────────────────────────────────────────────────
 
-  async getEventStats(eventId: string) {
-    await this.findEventOrThrow(eventId);
+  // async getEventStats(eventId: string) {
+  //   await this.findEventOrThrow(eventId);
 
-    const [memberCount, teamCount, challengeCount, solveCount] =
-      await Promise.all([
-        this.prisma.eventMember.count({ where: { eventId } }),
-        this.prisma.team.count({ where: { eventId } }),
-        this.prisma.challenge.count({ where: { eventId } }),
-        this.prisma.submission.count({
-          where: { challenge: { eventId }, status: 'CORRECT' },
-        }),
-      ]);
+  //   const [memberCount, teamCount, challengeCount, solveCount] =
+  //     await Promise.all([
+  //       this.prisma.eventMember.count({ where: { eventId } }),
+  //       this.prisma.team.count({ where: { eventId } }),
+  //       this.prisma.challenge.count({ where: { eventId } }),
+  //       this.prisma.submission.count({
+  //         where: { challenge: { eventId }, status: 'CORRECT' },
+  //       }),
+  //     ]);
 
-    return { memberCount, teamCount, challengeCount, solveCount };
-  }
+  //   return { memberCount, teamCount, challengeCount, solveCount };
+  // }
 
   async getEventTeams(eventId: string) {
     await this.findEventOrThrow(eventId);
@@ -87,8 +88,7 @@ export class TeamService {
   async createTeam(
     eventId: string,
     userId: string,
-    name: string,
-    teamPassword: string,
+    { name, teamPassword }: CreateTeamDto,
   ) {
     await this.findEventOrThrow(eventId);
     await this.assertEventMember(eventId, userId);
@@ -135,8 +135,8 @@ export class TeamService {
   async joinTeam(
     eventId: string,
     teamId: string,
-    userId: string,
     password: string,
+    userId: string,
   ) {
     await this.findEventOrThrow(eventId);
     await this.assertEventMember(eventId, userId);
@@ -187,7 +187,7 @@ export class TeamService {
       where: { userId_teamId: { userId, teamId } },
     });
 
-    return { message: 'Successfully left the team' };
+    return { message: 'Left the team successfully' };
   }
 
   async deleteTeam(teamId: string, userId: string) {
@@ -205,7 +205,7 @@ export class TeamService {
 
     await this.prisma.team.delete({ where: { id: teamId } });
 
-    return { message: 'Team successfully deleted' };
+    return { message: 'Team deleted successfully' };
   }
 
   async getTeamDetails(eventId: string, userId: string) {

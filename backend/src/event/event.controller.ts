@@ -22,6 +22,11 @@ import type { Request } from 'express';
 export class EventController {
   constructor(private readonly eventsService: EventService) {}
 
+  @Get('stats')
+  getEventStats(@Param('eventId') eventId: string) {
+    return this.eventsService.getEventStats(eventId);
+  }
+
   @Get()
   getActiveEvents() {
     return this.eventsService.getActiveEvents();

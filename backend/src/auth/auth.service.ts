@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { AuthPayloadDto } from './dto/auth.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
 import { Response } from 'express';
@@ -83,32 +83,42 @@ export class AuthService {
   }
   async register({ email, username, password }: RegisterDto, res: Response) {
     const hashedPassword = await bcrypt.hash(password, 10);
-
     try {
-      const newUser = await this.prisma.user.create({
-        data: {
-          email,
-          username,
-          password: hashedPassword,
-        },
-      });
+      // Check if an OAuth-only account exists with this email
+      const existing = await this.prisma.user.findUnique({ where: { email } });
 
-      const { password, ...safeUser } = newUser;
-      console.log('New user created:', safeUser); // Debugging log
+      let user;
+
+      if (existing) {
+        if (existing.password !== null) {
+          // Has a password already — genuine duplicate
+          throw new BadRequestException('Email already in use');
+        }
+
+        // OAuth-only account — silently link by adding the password
+        user = await this.prisma.user.update({
+          where: { id: existing.id },
+          data: { password: hashedPassword },
+        });
+      } else {
+        // Fresh registration
+        user = await this.prisma.user.create({
+          data: { email, username, password: hashedPassword },
+        });
+      }
+
+      const { password, ...safeUser } = user;
+
       const accessToken = this.generateAccessToken(safeUser);
       const refreshToken = this.generateRefreshToken(safeUser);
       this.setRefreshTokenCookie(res, refreshToken);
 
       return {
         access_token: accessToken,
-        refresh_token: refreshToken,
         user: safeUser,
       };
     } catch (error: any) {
-      if (error.code === 'P2002') {
-        throw new BadRequestException('Email already in use');
-      }
-
+      if (error instanceof BadRequestException) throw error;
       throw new InternalServerErrorException('Failed to create user');
     }
   }
