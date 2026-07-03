@@ -8,9 +8,10 @@ import { EventModule } from './event/event.module';
 import { TeamModule } from './team/team.module';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { EventMemberModule } from './event-member/event-member.module';
+import { ChallengeModule } from './challenge/challenge.module';
 
 @Module({
-  imports: [AuthModule, PrismaModule, UserModule, EventModule, TeamModule, LeaderboardModule, EventMemberModule],
+  imports: [AuthModule, PrismaModule, UserModule, EventModule, TeamModule, LeaderboardModule, EventMemberModule, ChallengeModule],
   controllers: [AppController],
   providers: [AppService],
 })
