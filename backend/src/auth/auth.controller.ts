@@ -11,8 +11,11 @@ import {
 import { AuthService } from './auth.service';
 import { LocalGuard } from './guards/local.guard';
 import { RegisterDto } from './dto/register.dto';
+import { VerifyOtpDto } from './dto/verifyOtp.dto';
 import type { Response, Request } from 'express';
 import { GoogleAuthGuard } from './guards/google.guard';
+import { ResendOtpDto } from './dto/resendOtp.dto';
+
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -21,6 +24,19 @@ export class AuthController {
   @UseGuards(LocalGuard)
   login(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     return this.authService.login(req.user, res);
+  }
+
+  @Post('verify-email')
+  verifyEmail(
+    @Body() dto: VerifyOtpDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.verifyEmail(dto, res);
+  }
+
+  @Post('resend-otp')
+  resendOtp(@Body() dto: ResendOtpDto) {
+    return this.authService.resendOtp(dto);
   }
 
   @Post('register')

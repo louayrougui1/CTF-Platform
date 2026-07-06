@@ -7,6 +7,8 @@ import { LocalStrategy } from './strategies/local.strategy';
 import googleOAuthConfig from './config/google-oauth.config';
 import { ConfigModule } from '@nestjs/config';
 import { GoogleStrategy } from './strategies/google.strategy';
+import { MailerService } from './otp/sendEmail';
+import { OtpService } from './otp/otp.service';
 @Module({
   imports: [
     PassportModule,
@@ -17,6 +19,12 @@ import { GoogleStrategy } from './strategies/google.strategy';
     ConfigModule.forFeature(googleOAuthConfig),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, GoogleStrategy],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    GoogleStrategy,
+    MailerService,
+    OtpService,
+  ],
 })
 export class AuthModule {}

@@ -5,17 +5,24 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthPayloadDto } from './dto/auth.dto';
+import { VerifyOtpDto } from './dto/verifyOtp.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { MailerService } from './otp/sendEmail';
+import { OtpService } from './otp/otp.service';
+import { OtpPurpose } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
 import { Response } from 'express';
+import { ResendOtpDto } from './dto/resendOtp.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private mailService: MailerService,
+    private otpService: OtpService,
   ) {}
   private generateAccessToken(user: any) {
     return this.jwtService.sign(
@@ -59,6 +66,11 @@ export class AuthService {
       return null;
     }
 
+    if (!user.emailVerified) {
+      throw new UnauthorizedException(
+        'Please verify your email before logging in.',
+      );
+    }
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
@@ -107,16 +119,30 @@ export class AuthService {
         });
       }
 
-      const { password, ...safeUser } = user;
+      const otp = await this.otpService.createOtp(
+        user.id,
+        OtpPurpose.EMAIL_VERIFICATION,
+      );
 
-      const accessToken = this.generateAccessToken(safeUser);
-      const refreshToken = this.generateRefreshToken(safeUser);
-      this.setRefreshTokenCookie(res, refreshToken);
+      await this.mailService.sendOtpEmail(
+        user.email,
+        otp,
+        'Email Verification',
+      );
 
       return {
-        access_token: accessToken,
-        user: safeUser,
+        message: 'Verification code sent.',
       };
+      // const { password, ...safeUser } = user;
+
+      // const accessToken = this.generateAccessToken(safeUser);
+      // const refreshToken = this.generateRefreshToken(safeUser);
+      // this.setRefreshTokenCookie(res, refreshToken);
+
+      // return {
+      //   access_token: accessToken,
+      //   user: safeUser,
+      // };
     } catch (error: any) {
       if (error instanceof BadRequestException) throw error;
       throw new InternalServerErrorException('Failed to create user');
@@ -180,6 +206,7 @@ export class AuthService {
             username: profile.firstName + ' ' + profile.lastName,
             password: null,
             googleId: profile.googleId,
+            emailVerified: true,
           },
         });
       }
@@ -193,6 +220,67 @@ export class AuthService {
     return {
       access_token: accessToken,
       user: safeUser,
+    };
+  }
+
+  async verifyEmail(dto: VerifyOtpDto, res: Response) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (!user) throw new BadRequestException('User not found');
+
+    await this.otpService.verifyOtp(
+      user.id,
+      OtpPurpose.EMAIL_VERIFICATION,
+      dto.code,
+    );
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerified: true,
+      },
+    });
+
+    const { password, ...safeUser } = updatedUser;
+
+    const accessToken = this.generateAccessToken(safeUser);
+    const refreshToken = this.generateRefreshToken(safeUser);
+
+    this.setRefreshTokenCookie(res, refreshToken);
+
+    return {
+      access_token: accessToken,
+      user: safeUser,
+    };
+  }
+  async resendOtp({ email }: ResendOtpDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (user.emailVerified) {
+      throw new BadRequestException('Email is already verified');
+    }
+
+    const otp = await this.otpService.createOtp(
+      user.id,
+      OtpPurpose.EMAIL_VERIFICATION,
+    );
+
+    await this.mailService.sendOtpEmail(
+      user.email,
+      otp,
+      OtpPurpose.EMAIL_VERIFICATION,
+    );
+
+    return {
+      message: 'A new verification code has been sent.',
     };
   }
 }
