@@ -863,51 +863,192 @@
       },
       "ResendOtpDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ]
       },
       "RegisterDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "username",
+          "password"
+        ]
       },
       "UpdateUserDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "username": {
+            "type": "string"
+          }
+        }
       },
       "CreateEventDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "startDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endDate": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "description",
+          "startDate",
+          "endDate"
+        ]
       },
       "UpdateEventDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "startDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endDate": {
+            "format": "date-time",
+            "type": "string"
+          }
+        }
       },
       "CreateTeamDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "teamPassword": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "teamPassword"
+        ]
       },
       "JoinTeamDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "password"
+        ]
       },
       "AddAdminDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "eventId": {
+            "type": "string"
+          },
+          "userIdToPromote": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "eventId",
+          "userIdToPromote"
+        ]
       },
       "RemoveAdminDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "eventId": {
+            "type": "string"
+          },
+          "userIdToRemove": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "eventId",
+          "userIdToRemove"
+        ]
       },
       "CreateChallengeDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "flag": {
+            "type": "string"
+          },
+          "points": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "title",
+          "description",
+          "flag",
+          "points"
+        ]
       },
       "UpdateChallengeDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "flag": {
+            "type": "string"
+          },
+          "points": {
+            "type": "number"
+          }
+        }
       },
       "SubmitFlagDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "flag": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "flag"
+        ]
       }
     }
   }
