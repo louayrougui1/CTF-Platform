@@ -10,9 +10,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "App"
-        ]
+        "tags": ["App"]
       }
     },
     "/auth/login": {
@@ -24,9 +22,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Auth"
-        ]
+        "tags": ["Auth"]
       }
     },
     "/auth/verify-email": {
@@ -48,9 +44,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Auth"
-        ]
+        "tags": ["Auth"]
       }
     },
     "/auth/resend-otp": {
@@ -72,9 +66,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Auth"
-        ]
+        "tags": ["Auth"]
       }
     },
     "/auth/register": {
@@ -96,9 +88,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Auth"
-        ]
+        "tags": ["Auth"]
       }
     },
     "/auth/refresh": {
@@ -110,9 +100,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Auth"
-        ]
+        "tags": ["Auth"]
       }
     },
     "/auth/logout": {
@@ -124,9 +112,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Auth"
-        ]
+        "tags": ["Auth"]
       }
     },
     "/auth/google/login": {
@@ -138,9 +124,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Auth"
-        ]
+        "tags": ["Auth"]
       }
     },
     "/auth/google/callback": {
@@ -152,9 +136,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Auth"
-        ]
+        "tags": ["Auth"]
       }
     },
     "/user/profile": {
@@ -166,9 +148,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "User"
-        ]
+        "tags": ["User"]
       },
       "patch": {
         "operationId": "UserController_updateProfile",
@@ -188,9 +168,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "User"
-        ]
+        "tags": ["User"]
       }
     },
     "/events/stats": {
@@ -211,9 +189,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Event"
-        ]
+        "tags": ["Event"]
       }
     },
     "/events": {
@@ -225,9 +201,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Event"
-        ]
+        "tags": ["Event"]
       },
       "post": {
         "operationId": "EventController_createEvent",
@@ -247,9 +221,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Event"
-        ]
+        "tags": ["Event"]
       }
     },
     "/events/mine": {
@@ -261,9 +233,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Event"
-        ]
+        "tags": ["Event"]
       }
     },
     "/events/{id}": {
@@ -284,9 +254,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Event"
-        ]
+        "tags": ["Event"]
       },
       "patch": {
         "operationId": "EventController_updateEvent",
@@ -315,9 +283,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Event"
-        ]
+        "tags": ["Event"]
       },
       "delete": {
         "operationId": "EventController_deleteEvent",
@@ -336,9 +302,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Event"
-        ]
+        "tags": ["Event"]
       }
     },
     "/events/{eventId}/teams": {
@@ -359,9 +323,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Team"
-        ]
+        "tags": ["Team"]
       },
       "post": {
         "operationId": "TeamController_createTeam",
@@ -390,9 +352,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Team"
-        ]
+        "tags": ["Team"]
       }
     },
     "/events/{eventId}/teams/me": {
@@ -413,9 +373,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Team"
-        ]
+        "tags": ["Team"]
       }
     },
     "/events/{eventId}/teams/{teamId}/join": {
@@ -454,9 +412,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Team"
-        ]
+        "tags": ["Team"]
       }
     },
     "/events/{eventId}/teams/{teamId}/leave": {
@@ -477,9 +433,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Team"
-        ]
+        "tags": ["Team"]
       }
     },
     "/events/{eventId}/teams/{teamId}": {
@@ -500,9 +454,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Team"
-        ]
+        "tags": ["Team"]
       }
     },
     "/leaderboard/{id}/leaderboard": {
@@ -523,9 +475,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Leaderboard"
-        ]
+        "tags": ["Leaderboard"]
       }
     },
     "/event-member/{id}/members": {
@@ -546,9 +496,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "EventMember"
-        ]
+        "tags": ["EventMember"]
       }
     },
     "/event-member/{id}/join": {
@@ -569,9 +517,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "EventMember"
-        ]
+        "tags": ["EventMember"]
       }
     },
     "/event-member/{id}/leave": {
@@ -592,9 +538,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "EventMember"
-        ]
+        "tags": ["EventMember"]
       }
     },
     "/event-member/admins": {
@@ -616,9 +560,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "EventMember"
-        ]
+        "tags": ["EventMember"]
       },
       "delete": {
         "operationId": "EventMemberController_removeEventAdmin",
@@ -638,9 +580,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "EventMember"
-        ]
+        "tags": ["EventMember"]
       }
     },
     "/events/{eventId}/challenges": {
@@ -661,9 +601,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Challenge"
-        ]
+        "tags": ["Challenge"]
       },
       "post": {
         "operationId": "ChallengeController_createChallenge",
@@ -692,9 +630,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Challenge"
-        ]
+        "tags": ["Challenge"]
       }
     },
     "/events/{eventId}/challenges/{id}": {
@@ -715,9 +651,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Challenge"
-        ]
+        "tags": ["Challenge"]
       },
       "patch": {
         "operationId": "ChallengeController_updateChallenge",
@@ -746,9 +680,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Challenge"
-        ]
+        "tags": ["Challenge"]
       },
       "delete": {
         "operationId": "ChallengeController_deleteChallenge",
@@ -767,9 +699,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Challenge"
-        ]
+        "tags": ["Challenge"]
       }
     },
     "/events/{eventId}/challenges/{id}/stats": {
@@ -790,9 +720,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Challenge"
-        ]
+        "tags": ["Challenge"]
       }
     },
     "/events/{eventId}/challenges/{id}/submit": {
@@ -823,9 +751,7 @@
             "description": ""
           }
         },
-        "tags": [
-          "Challenge"
-        ]
+        "tags": ["Challenge"]
       }
     }
   },
@@ -856,10 +782,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "email",
-          "code"
-        ]
+        "required": ["email", "code"]
       },
       "ResendOtpDto": {
         "type": "object",
@@ -868,9 +791,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "email"
-        ]
+        "required": ["email"]
       },
       "RegisterDto": {
         "type": "object",
@@ -885,11 +806,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "email",
-          "username",
-          "password"
-        ]
+        "required": ["email", "username", "password"]
       },
       "UpdateUserDto": {
         "type": "object",
@@ -917,12 +834,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "title",
-          "description",
-          "startDate",
-          "endDate"
-        ]
+        "required": ["title", "description", "startDate", "endDate"]
       },
       "UpdateEventDto": {
         "type": "object",
@@ -953,10 +865,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "name",
-          "teamPassword"
-        ]
+        "required": ["name", "teamPassword"]
       },
       "JoinTeamDto": {
         "type": "object",
@@ -965,9 +874,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "password"
-        ]
+        "required": ["password"]
       },
       "AddAdminDto": {
         "type": "object",
@@ -979,10 +886,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "eventId",
-          "userIdToPromote"
-        ]
+        "required": ["eventId", "userIdToPromote"]
       },
       "RemoveAdminDto": {
         "type": "object",
@@ -994,10 +898,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "eventId",
-          "userIdToRemove"
-        ]
+        "required": ["eventId", "userIdToRemove"]
       },
       "CreateChallengeDto": {
         "type": "object",
@@ -1015,12 +916,7 @@
             "type": "number"
           }
         },
-        "required": [
-          "title",
-          "description",
-          "flag",
-          "points"
-        ]
+        "required": ["title", "description", "flag", "points"]
       },
       "UpdateChallengeDto": {
         "type": "object",
@@ -1046,9 +942,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "flag"
-        ]
+        "required": ["flag"]
       }
     }
   }

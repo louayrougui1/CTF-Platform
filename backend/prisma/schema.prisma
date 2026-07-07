@@ -95,6 +95,7 @@ model Team {
   event   Event        @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   members TeamMember[]
 
+  @@unique([eventId, name])
   @@index([eventId])
 }
 

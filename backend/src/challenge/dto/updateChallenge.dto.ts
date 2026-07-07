@@ -13,19 +13,22 @@ export class UpdateChallengeDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(120)
-  title: string;
+  @IsOptional()
+  title?: string;
 
   @ApiPropertyOptional()
   @IsString()
   @IsNotEmpty()
   @MaxLength(120)
-  description: string;
+  @IsOptional()
+  description?: string;
 
   @ApiPropertyOptional()
   @IsString()
   @IsNotEmpty()
   @MaxLength(120)
-  flag: string;
+  @IsOptional()
+  flag?: string;
 
   @ApiPropertyOptional()
   @IsInt()

@@ -7,6 +7,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { CreateTeamDto } from './dto/createTeam.dto';
+import { UpdateTeamDto } from './dto/updateTeam.dto';
 
 @Injectable()
 export class TeamService {
@@ -49,6 +50,23 @@ export class TeamService {
     if (!member)
       throw new ForbiddenException('You are not a member of this event');
     return member;
+  }
+
+  private async assertTeamCaptain(teamId: string, userId: string) {
+    const team = await this.findTeamOrThrow(teamId, true);
+
+    const membership = (team as any).members.find(
+      (m: any) => m.userId === userId,
+    );
+    if (!membership)
+      throw new ForbiddenException('You are not a member of this team');
+
+    if (membership.role !== 'CAPTAIN')
+      throw new ForbiddenException(
+        'Only the team captain can perform this action',
+      );
+
+    return team;
   }
 
   // ─── Existing Methods ──────────────────────────────────────────────────────
@@ -110,26 +128,34 @@ export class TeamService {
       throw new ConflictException(
         `A team named with the same name already exists in this event`,
       );
-
-    return this.prisma.team.create({
-      data: {
-        name,
-        teamPassword,
-        eventId,
-        members: {
-          create: { userId, role: 'CAPTAIN' },
+    try {
+      return this.prisma.team.create({
+        data: {
+          name,
+          teamPassword,
+          eventId,
+          members: {
+            create: { userId, role: 'CAPTAIN' },
+          },
         },
-      },
-      select: {
-        id: true,
-        name: true,
-        eventId: true,
-        createdAt: true,
-        members: {
-          select: { userId: true, role: true },
+        select: {
+          id: true,
+          name: true,
+          eventId: true,
+          createdAt: true,
+          members: {
+            select: { userId: true, role: true },
+          },
         },
-      },
-    });
+      });
+    } catch (err: any) {
+      if (err.code === 'P2002') {
+        throw new ConflictException(
+          `A team named with the same name already exists in this event`,
+        );
+      }
+      throw err;
+    }
   }
 
   async joinTeam(
@@ -239,6 +265,90 @@ export class TeamService {
         email: m.user.email,
         role: m.role,
         joinedAt: m.createdAt,
+      })),
+    };
+  }
+  async updateTeam(teamId: string, userId: string, { name }: UpdateTeamDto) {
+    const team = await this.assertTeamCaptain(teamId, userId);
+
+    if (name && name !== team.name) {
+      const nameConflict = await this.prisma.team.findFirst({
+        where: { eventId: team.eventId, name, id: { not: teamId } },
+      });
+      if (nameConflict)
+        throw new ConflictException(
+          `A team named with the same name already exists in this event`,
+        );
+    }
+
+    return this.prisma.team.update({
+      where: { id: teamId },
+      data: {
+        ...(name && { name }),
+      },
+      select: {
+        id: true,
+        name: true,
+        eventId: true,
+        updatedAt: true,
+      },
+    });
+  }
+
+  async kickMember(teamId: string, captainId: string, targetUserId: string) {
+    const team = await this.assertTeamCaptain(teamId, captainId);
+
+    if (targetUserId === captainId)
+      throw new BadRequestException(
+        'Captains cannot kick themselves; delete the team instead',
+      );
+
+    const targetMembership = (team as any).members.find(
+      (m: any) => m.userId === targetUserId,
+    );
+    if (!targetMembership)
+      throw new NotFoundException('That user is not a member of this team');
+
+    await this.prisma.teamMember.delete({
+      where: { userId_teamId: { userId: targetUserId, teamId } },
+    });
+
+    return { message: 'Member removed from the team successfully' };
+  }
+
+  async getTeamById(eventId: string, teamId: string, userId: string) {
+    await this.findEventOrThrow(eventId);
+    await this.assertEventMember(eventId, userId);
+
+    const team = await this.prisma.team.findFirst({
+      where: {
+        id: teamId,
+        eventId,
+      },
+      include: {
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!team) throw new NotFoundException('Team not found in this event');
+
+    return {
+      id: team.id,
+      name: team.name,
+      createdAt: team.createdAt,
+      members: team.members.map((m) => ({
+        userId: m.user.id,
+        username: m.user.username,
+        role: m.role,
       })),
     };
   }

@@ -47,24 +47,24 @@ export class UpdateEventDto {
   @IsString()
   @Length(3, 100)
   @IsOptional()
-  title: string;
+  title?: string;
 
   @ApiPropertyOptional()
   @IsString()
   @Length(0, 500)
   @IsOptional()
-  description: string;
+  description?: string;
 
   @ApiPropertyOptional()
   @Type(() => Date)
   @IsDate()
   @IsOptional()
-  startDate: Date;
+  startDate?: Date;
 
   @ApiPropertyOptional()
   @Type(() => Date)
   @IsDate()
   @MinDurationFromStart(30)
   @IsOptional()
-  endDate: Date;
+  endDate?: Date;
 }
