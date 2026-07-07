@@ -9,6 +9,7 @@ import {
   ValidationArguments,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
 
 /**
  * Custom decorator enforcing a minimum gap (in minutes) between
@@ -42,18 +43,22 @@ function MinDurationFromStart(
 }
 
 export class CreateEventDto {
+  @ApiProperty()
   @IsString()
   @Length(3, 100)
   title: string;
 
+  @ApiProperty()
   @IsString()
   @Length(0, 500)
   description: string;
 
+  @ApiProperty()
   @Type(() => Date)
   @IsDate()
   startDate: Date;
 
+  @ApiProperty()
   @Type(() => Date)
   @IsDate()
   @MinDurationFromStart(30)
