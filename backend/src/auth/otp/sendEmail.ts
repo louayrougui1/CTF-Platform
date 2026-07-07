@@ -14,7 +14,6 @@ export class MailerService {
   });
 
   async sendOtpEmail(email: string, code: string, purpose: string) {
-    console.log(`[MAIL] To: ${email} | Purpose: ${purpose} | Code: ${code}`);
     await this.transporter.sendMail({
       from: process.env.MAIL_FROM,
       to: email,
