@@ -15,6 +15,10 @@ import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from './dto/register.dto';
 import { Response } from 'express';
 import { ResendOtpDto } from './dto/resendOtp.dto';
+import * as crypto from 'crypto';
+// ...existing imports
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -254,6 +258,118 @@ export class AuthService {
       access_token: accessToken,
       user: safeUser,
     };
+  }
+
+  // inside AuthService
+
+  private hashToken(token: string): string {
+    return crypto.createHash('sha256').update(token).digest('hex');
+  }
+
+  private setResetTokenCookie(res: Response, token: string) {
+    res.cookie('reset_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 5 * 60 * 1000, // 5 minutes
+    });
+  }
+
+  private clearResetTokenCookie(res: Response) {
+    res.clearCookie('reset_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
+  }
+
+  async forgotPassword({ email }: ForgotPasswordDto) {
+    const genericResponse = {
+      message:
+        'If an account exists for that email, a reset code has been sent.',
+    };
+
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return genericResponse;
+    }
+
+    const otp = await this.otpService.createOtp(
+      user.id,
+      OtpPurpose.PASSWORD_RESET,
+    );
+    await this.mailService.sendOtpEmail(user.email, otp, 'Password Reset');
+
+    return genericResponse;
+  }
+
+  async verifyResetOtp(dto: VerifyOtpDto, res: Response) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid code');
+    }
+
+    await this.otpService.verifyOtp(
+      user.id,
+      OtpPurpose.PASSWORD_RESET,
+      dto.code,
+    );
+
+    // Invalidate any previously issued, still-unused reset tokens for this user
+    await this.prisma.passwordResetToken.deleteMany({
+      where: { userId: user.id, usedAt: null },
+    });
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = this.hashToken(rawToken);
+
+    await this.prisma.passwordResetToken.create({
+      data: {
+        userId: user.id,
+        tokenHash,
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+      },
+    });
+
+    this.setResetTokenCookie(res, rawToken);
+
+    return { message: 'Code verified. You may now reset your password.' };
+  }
+
+  async resetPassword(dto: ResetPasswordDto, rawToken: string, res: Response) {
+    if (!rawToken) {
+      throw new UnauthorizedException('Missing reset token');
+    }
+
+    const tokenHash = this.hashToken(rawToken);
+
+    const resetToken = await this.prisma.passwordResetToken.findUnique({
+      where: { tokenHash },
+    });
+
+    if (!resetToken || resetToken.usedAt || resetToken.expiresAt < new Date()) {
+      throw new UnauthorizedException('Invalid or expired reset token');
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.newPassword, 10);
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: resetToken.userId },
+        data: { password: hashedPassword },
+      }),
+      this.prisma.passwordResetToken.update({
+        where: { id: resetToken.id },
+        data: { usedAt: new Date() },
+      }),
+    ]);
+
+    this.clearResetTokenCookie(res);
+
+    return { message: 'Password has been reset successfully.' };
   }
   async resendOtp({ email }: ResendOtpDto) {
     const user = await this.prisma.user.findUnique({

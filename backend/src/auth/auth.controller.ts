@@ -23,6 +23,8 @@ import {
 } from '@nestjs/swagger';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { AuthMessageResponseDto } from './dto/auth-message-response.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -103,5 +105,31 @@ export class AuthController {
     // (or POST it via a form — depends on your frontend flow)
     const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:5173';
     res.redirect(`${frontendUrl}/?token=${result.access_token}`);
+  }
+  @Post('forgot-password')
+  @ApiCreatedResponse({ type: AuthMessageResponseDto })
+  forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto);
+  }
+
+  @Post('verify-reset-otp')
+  @ApiCreatedResponse({ type: AuthMessageResponseDto })
+  verifyResetOtp(
+    @Body() dto: VerifyOtpDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.verifyResetOtp(dto, res);
+  }
+
+  @ApiCookieAuth('reset_token')
+  @Post('reset-password')
+  @ApiCreatedResponse({ type: AuthMessageResponseDto })
+  resetPassword(
+    @Body() dto: ResetPasswordDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const resetToken = req.cookies['reset_token'];
+    return this.authService.resetPassword(dto, resetToken, res);
   }
 }
