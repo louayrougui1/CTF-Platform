@@ -15,6 +15,14 @@ import { VerifyOtpDto } from './dto/verifyOtp.dto';
 import type { Response, Request } from 'express';
 import { GoogleAuthGuard } from './guards/google.guard';
 import { ResendOtpDto } from './dto/resendOtp.dto';
+import { AuthPayloadDto } from './dto/auth.dto';
+import {
+  ApiCookieAuth,
+  ApiCreatedResponse,
+  ApiOperation,
+} from '@nestjs/swagger';
+import { AuthResponseDto } from './dto/auth-response.dto';
+import { AuthMessageResponseDto } from './dto/auth-message-response.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -22,11 +30,17 @@ export class AuthController {
 
   @Post('login')
   @UseGuards(LocalGuard)
-  login(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  @ApiCreatedResponse({ type: AuthResponseDto })
+  login(
+    @Body() dto: AuthPayloadDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     return this.authService.login(req.user, res);
   }
 
   @Post('verify-email')
+  @ApiCreatedResponse({ type: AuthResponseDto })
   verifyEmail(
     @Body() dto: VerifyOtpDto,
     @Res({ passthrough: true }) res: Response,
@@ -35,11 +49,13 @@ export class AuthController {
   }
 
   @Post('resend-otp')
+  @ApiCreatedResponse({ type: AuthMessageResponseDto })
   resendOtp(@Body() dto: ResendOtpDto) {
     return this.authService.resendOtp(dto);
   }
 
   @Post('register')
+  @ApiCreatedResponse({ type: AuthMessageResponseDto })
   register(
     @Body() dto: RegisterDto,
     @Res({ passthrough: true }) res: Response,
@@ -47,15 +63,21 @@ export class AuthController {
     return this.authService.register(dto, res);
   }
 
+  @ApiCookieAuth('refresh_token')
   @Post('refresh')
+  @ApiCreatedResponse({ type: AuthResponseDto })
   refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const refreshToken = req.cookies['refresh_token'];
     if (!refreshToken) throw new UnauthorizedException('No refresh token');
     return this.authService.refresh(refreshToken, res);
   }
 
+  @ApiCookieAuth('refresh_token')
   @Post('logout')
-  logout(@Res({ passthrough: true }) res: Response) {
+  @ApiCreatedResponse({ type: AuthMessageResponseDto })
+  logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const refreshToken = req.cookies['refresh_token'];
+    if (!refreshToken) throw new UnauthorizedException('No refresh token');
     this.authService.logout(res);
     return { message: 'Logged out' };
   }
@@ -66,6 +88,10 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
+  @ApiOperation({
+    summary: 'Google OAuth callback',
+    description: 'Redirects to frontend with token in URL query parameter',
+  })
   async googleCallback(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,

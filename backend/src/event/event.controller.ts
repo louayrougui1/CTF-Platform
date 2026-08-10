@@ -16,28 +16,40 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { CreateEventDto } from './dto/eventCreate.dto';
 import { UpdateEventDto } from './dto/updateEvent.dto';
 import type { Request } from 'express';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiCreatedResponse,
+} from '@nestjs/swagger';
+import { EventResponseDto } from './dto/event-response.dto';
+import { EventStatsResponseDto } from './dto/event-stats-response.dto';
 
 @Controller('events')
+@ApiBearerAuth()
 @UseGuards(JwtGuard)
 export class EventController {
   constructor(private readonly eventsService: EventService) {}
 
-  @Get('stats')
+  @Get('stats/:eventId')
+  @ApiOkResponse({ type: EventStatsResponseDto })
   getEventStats(@Param('eventId') eventId: string) {
     return this.eventsService.getEventStats(eventId);
   }
 
   @Get()
+  @ApiOkResponse({ type: EventResponseDto, isArray: true })
   getActiveEvents() {
     return this.eventsService.getActiveEvents();
   }
 
   @Get('mine')
+  @ApiOkResponse({ type: EventResponseDto, isArray: true })
   getMyEvents(@Req() req: Request) {
     return this.eventsService.getMyEvents(req.user);
   }
 
   @Get(':id')
+  @ApiOkResponse({ type: EventResponseDto })
   getEvent(@Param('id') id: string) {
     return this.eventsService.getEvent(id);
   }
@@ -45,11 +57,13 @@ export class EventController {
   // ─── MUTATIONS ────────────────────────────────────────────────────────────
 
   @Post()
+  @ApiCreatedResponse({ type: EventResponseDto })
   createEvent(@Req() req: Request, @Body() dto: CreateEventDto) {
     return this.eventsService.createEvent(req.user, dto);
   }
 
   @Patch(':id')
+  @ApiOkResponse({ type: EventResponseDto })
   updateEvent(
     @Param('id') id: string,
     @Req() req: Request,
@@ -60,6 +74,7 @@ export class EventController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: EventResponseDto })
   deleteEvent(@Param('id') id: string, @Req() req: Request) {
     return this.eventsService.deleteEvent(req.user, id);
   }

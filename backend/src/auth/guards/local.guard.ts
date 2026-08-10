@@ -6,7 +6,6 @@ export class LocalGuard extends AuthGuard('local') {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    console.log('Local Guard hit...');
     //"now will run validate function inside localStrategy"
     return super.canActivate(context);
   }

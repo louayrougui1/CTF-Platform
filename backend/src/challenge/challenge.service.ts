@@ -8,7 +8,7 @@ import {
 import { CreateChallengeDto } from './dto/challengeCreate.dto';
 import { UpdateChallengeDto } from './dto/updateChallenge.dto';
 import { SubmitFlagDto } from './dto/submitFlag.dto';
-
+import { StorageService } from '../storage/storage.service';
 // Public-facing select — never expose the `flag` field here.
 const CHALLENGE_SELECT = {
   id: true,
@@ -18,11 +18,16 @@ const CHALLENGE_SELECT = {
   eventId: true,
   createdAt: true,
   updatedAt: true,
+  hasFile: true,
+  fileUrl: true,
 } as const;
 
 @Injectable()
 export class ChallengeService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storageService: StorageService,
+  ) {}
 
   // ─── PRIVATE HELPERS ────────────────────────────────────────────────────────
 
@@ -71,16 +76,30 @@ export class ChallengeService {
   // ─── QUERIES ────────────────────────────────────────────────────────────────
 
   async getChallengesByEvent(eventId: string) {
-    return this.prisma.challenge.findMany({
+    const challenges = await this.prisma.challenge.findMany({
       where: { eventId },
       select: CHALLENGE_SELECT,
-      orderBy: { createdAt: 'asc' },
     });
+
+    return Promise.all(
+      challenges.map(async (c) => {
+        if (c.hasFile && c.fileUrl) {
+          c.fileUrl = await this.storageService.getSignedUrl(c.fileUrl);
+        }
+        return c;
+      }),
+    );
   }
 
   async getChallenge(id: string) {
     const challenge = await this.findChallengeOrThrow(id);
     const { flag, ...challengeData } = challenge;
+    if (challengeData.hasFile && challengeData.fileUrl) {
+      // challenge.fileUrl currently holds the PATH — convert to a live signed URL
+      challengeData.fileUrl = await this.storageService.getSignedUrl(
+        challengeData.fileUrl,
+      );
+    }
 
     return challengeData;
   }
@@ -100,26 +119,52 @@ export class ChallengeService {
 
   // ─── MUTATIONS ──────────────────────────────────────────────────────────────
 
-  async createChallenge(user: any, eventId: string, dto: CreateChallengeDto) {
+  async createChallenge(
+    user: any,
+    eventId: string,
+    dto: CreateChallengeDto,
+    file?: Express.Multer.File,
+  ) {
     await this.assertEventOwnerOrAdmin(eventId, user.id);
-
+    let fileUrl: string | undefined;
+    if (file) {
+      const { path } = await this.storageService.upload(file);
+      fileUrl = path; // storing the storage PATH, not a signed URL — see note below
+    }
     return this.prisma.challenge.create({
       data: {
         ...dto,
         eventId,
+        hasFile: !!file,
+        fileUrl,
       },
       select: CHALLENGE_SELECT,
     });
   }
 
-  async updateChallenge(user: any, id: string, dto: UpdateChallengeDto) {
+  async updateChallenge(
+    user: any,
+    id: string,
+    dto: UpdateChallengeDto,
+    file?: Express.Multer.File,
+  ) {
     const challenge = await this.findChallengeOrThrow(id);
 
     await this.assertEventOwnerOrAdmin(challenge.eventId, user.id);
 
+    let fileUrl: string | undefined;
+    if (file) {
+      const { path } = await this.storageService.upload(file);
+      fileUrl = path; // storing the storage PATH, not a signed URL — see note below
+    }
+
     return this.prisma.challenge.update({
       where: { id },
-      data: dto,
+      data: {
+        ...dto,
+        hasFile: !!file,
+        fileUrl,
+      },
       select: CHALLENGE_SELECT,
     });
   }

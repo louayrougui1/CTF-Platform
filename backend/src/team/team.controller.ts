@@ -18,23 +18,39 @@ import type { Request } from 'express';
 import { CreateTeamDto } from './dto/createTeam.dto';
 import { JoinTeamDto } from './dto/joinTeam.dto';
 import { UpdateTeamDto } from './dto/updateTeam.dto';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiCreatedResponse,
+} from '@nestjs/swagger';
+import { TeamListResponseDto } from './dto/team-list-response.dto';
+import { TeamDetailResponseDto } from './dto/team-detail-response.dto';
+import { TeamByIdResponseDto } from './dto/team-by-id-response.dto';
+import { TeamCreateResponseDto } from './dto/team-create-response.dto';
+import { TeamMembershipResponseDto } from './dto/team-membership-response.dto';
+import { TeamUpdateResponseDto } from './dto/team-update-response.dto';
+import { TeamMessageResponseDto } from './dto/team-message-response.dto';
 
 @UseGuards(JwtGuard)
+@ApiBearerAuth()
 @Controller('events/:eventId/teams')
 export class TeamController {
   constructor(private readonly teamService: TeamService) {}
 
   @Get()
+  @ApiOkResponse({ type: TeamListResponseDto, isArray: true })
   getEventTeams(@Param('eventId') eventId: string) {
     return this.teamService.getEventTeams(eventId);
   }
 
   @Get('me')
+  @ApiOkResponse({ type: TeamDetailResponseDto })
   getTeamDetails(@Param('eventId') eventId: string, @Req() req: Request) {
     const userId = (req.user as any).id;
     return this.teamService.getTeamDetails(eventId, userId);
   }
   @Get(':teamId')
+  @ApiOkResponse({ type: TeamByIdResponseDto })
   getTeamById(
     @Param('eventId') eventId: string,
     @Param('teamId') teamId: string,
@@ -46,6 +62,7 @@ export class TeamController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse({ type: TeamCreateResponseDto })
   createTeam(
     @Param('eventId') eventId: string,
     @Body() dto: CreateTeamDto,
@@ -57,6 +74,7 @@ export class TeamController {
 
   @Post(':teamId/join')
   @HttpCode(HttpStatus.OK)
+  @ApiCreatedResponse({ type: TeamMembershipResponseDto })
   joinTeam(
     @Param('eventId') eventId: string,
     @Param('teamId') teamId: string,
@@ -69,6 +87,7 @@ export class TeamController {
 
   @Patch(':teamId')
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: TeamUpdateResponseDto })
   updateTeam(
     @Param('teamId') teamId: string,
     @Body() dto: UpdateTeamDto,
@@ -79,6 +98,7 @@ export class TeamController {
   }
   @Delete(':teamId/leave')
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: TeamMessageResponseDto })
   leaveTeam(@Param('teamId') teamId: string, @Req() req: Request) {
     const captainId = (req.user as any).id;
     return this.teamService.leaveTeam(teamId, captainId);
@@ -86,6 +106,7 @@ export class TeamController {
 
   @Delete(':teamId')
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: TeamMessageResponseDto })
   deleteTeam(@Param('teamId') teamId: string, @Req() req: Request) {
     const captainId = (req.user as any).id;
     return this.teamService.deleteTeam(teamId, captainId);
@@ -93,6 +114,7 @@ export class TeamController {
 
   @Delete(':teamId/members/:userId')
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: TeamMessageResponseDto })
   kickMember(
     @Param('teamId') teamId: string,
     @Param('userId') targetUserId: string,

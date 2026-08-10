@@ -131,21 +131,42 @@ model TeamMember {
   @@index([teamId])
 }
 
+enum ChallengeCategory {
+  WEB
+  CRYPTO
+  PWN
+  REVERSE
+  FORENSICS
+  OSINT
+  MISC
+}
+
+enum ChallengeDifficulty {
+  EASY
+  MEDIUM
+  HARD
+  EXPERT
+}
+
 model Challenge {
   id          String   @id @default(uuid())
   title       String
   description String
   flag        String
   points      Int      @default(100)
+  category    ChallengeCategory
+  difficulty  ChallengeDifficulty
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   eventId     String
+
+  hasFile     Boolean  @default(false)
+  fileUrl     String?
 
   event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   submissions Submission[]
 
   @@index([eventId])
-
 }
 
 model Submission {

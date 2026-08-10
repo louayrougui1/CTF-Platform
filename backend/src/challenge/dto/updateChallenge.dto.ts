@@ -1,4 +1,4 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsString,
   IsNotEmpty,
@@ -9,26 +9,23 @@ import {
 } from 'class-validator';
 
 export class UpdateChallengeDto {
-  @ApiPropertyOptional()
+  @ApiProperty()
   @IsString()
   @IsNotEmpty()
   @MaxLength(120)
-  @IsOptional()
-  title?: string;
+  title: string;
 
-  @ApiPropertyOptional()
+  @ApiProperty()
   @IsString()
   @IsNotEmpty()
   @MaxLength(120)
-  @IsOptional()
-  description?: string;
+  description: string;
 
-  @ApiPropertyOptional()
+  @ApiProperty()
   @IsString()
   @IsNotEmpty()
   @MaxLength(120)
-  @IsOptional()
-  flag?: string;
+  flag: string;
 
   @ApiPropertyOptional()
   @IsInt()

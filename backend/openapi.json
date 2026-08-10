@@ -17,9 +17,26 @@
       "post": {
         "operationId": "AuthController_login",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthPayloadDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
           }
         },
         "tags": ["Auth"]
@@ -41,7 +58,14 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
           }
         },
         "tags": ["Auth"]
@@ -63,7 +87,14 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthMessageResponseDto"
+                }
+              }
+            }
           }
         },
         "tags": ["Auth"]
@@ -85,7 +116,14 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthMessageResponseDto"
+                }
+              }
+            }
           }
         },
         "tags": ["Auth"]
@@ -97,9 +135,21 @@
         "parameters": [],
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "refresh_token": []
+          }
+        ],
         "tags": ["Auth"]
       }
     },
@@ -109,9 +159,21 @@
         "parameters": [],
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthMessageResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "refresh_token": []
+          }
+        ],
         "tags": ["Auth"]
       }
     },
@@ -129,6 +191,7 @@
     },
     "/auth/google/callback": {
       "get": {
+        "description": "Redirects to frontend with token in URL query parameter",
         "operationId": "AuthController_googleCallback",
         "parameters": [],
         "responses": {
@@ -136,6 +199,7 @@
             "description": ""
           }
         },
+        "summary": "Google OAuth callback",
         "tags": ["Auth"]
       }
     },
@@ -145,9 +209,21 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["User"]
       },
       "patch": {
@@ -165,13 +241,25 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserUpdateResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["User"]
       }
     },
-    "/events/stats": {
+    "/events/stats/{eventId}": {
       "get": {
         "operationId": "EventController_getEventStats",
         "parameters": [
@@ -186,9 +274,21 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventStatsResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["Event"]
       }
     },
@@ -198,9 +298,24 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["Event"]
       },
       "post": {
@@ -218,9 +333,21 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["Event"]
       }
     },
@@ -230,9 +357,24 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["Event"]
       }
     },
@@ -251,9 +393,21 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["Event"]
       },
       "patch": {
@@ -280,9 +434,21 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["Event"]
       },
       "delete": {
@@ -299,9 +465,21 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["Event"]
       }
     },
@@ -320,9 +498,24 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TeamListResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["Team"]
       },
       "post": {
@@ -349,9 +542,21 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamCreateResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["Team"]
       }
     },
@@ -370,9 +575,134 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamDetailResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["Team"]
+      }
+    },
+    "/events/{eventId}/teams/{teamId}": {
+      "get": {
+        "operationId": "TeamController_getTeamById",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamByIdResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["Team"]
+      },
+      "patch": {
+        "operationId": "TeamController_updateTeam",
+        "parameters": [
+          {
+            "name": "teamId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTeamDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamUpdateResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": ["Team"]
+      },
+      "delete": {
+        "operationId": "TeamController_deleteTeam",
+        "parameters": [
+          {
+            "name": "teamId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamMessageResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["Team"]
       }
     },
@@ -408,10 +738,22 @@
           }
         },
         "responses": {
-          "200": {
-            "description": ""
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamMembershipResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["Team"]
       }
     },
@@ -430,15 +772,27 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamMessageResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["Team"]
       }
     },
-    "/events/{eventId}/teams/{teamId}": {
+    "/events/{eventId}/teams/{teamId}/members/{userId}": {
       "delete": {
-        "operationId": "TeamController_deleteTeam",
+        "operationId": "TeamController_kickMember",
         "parameters": [
           {
             "name": "teamId",
@@ -447,22 +801,42 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamMessageResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["Team"]
       }
     },
-    "/leaderboard/{id}/leaderboard": {
+    "/events/{eventId}/leaderboard": {
       "get": {
         "operationId": "LeaderboardController_getEventLeaderboard",
         "parameters": [
           {
-            "name": "id",
+            "name": "eventId",
             "required": true,
             "in": "path",
             "schema": {
@@ -472,18 +846,33 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LeaderboardResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["Leaderboard"]
       }
     },
-    "/event-member/{id}/members": {
+    "/event-member/{eventId}/members": {
       "get": {
         "operationId": "EventMemberController_getEventMembers",
         "parameters": [
           {
-            "name": "id",
+            "name": "eventId",
             "required": true,
             "in": "path",
             "schema": {
@@ -493,18 +882,33 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventMemberResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["EventMember"]
       }
     },
-    "/event-member/{id}/join": {
+    "/event-member/{eventId}/join": {
       "post": {
         "operationId": "EventMemberController_joinEvent",
         "parameters": [
           {
-            "name": "id",
+            "name": "eventId",
             "required": true,
             "in": "path",
             "schema": {
@@ -513,19 +917,31 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": ""
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventMemberScalarResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["EventMember"]
       }
     },
-    "/event-member/{id}/leave": {
+    "/event-member/{eventId}/leave": {
       "delete": {
         "operationId": "EventMemberController_leaveEvent",
         "parameters": [
           {
-            "name": "id",
+            "name": "eventId",
             "required": true,
             "in": "path",
             "schema": {
@@ -535,9 +951,21 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventMemberScalarResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["EventMember"]
       }
     },
@@ -556,10 +984,22 @@
           }
         },
         "responses": {
-          "201": {
-            "description": ""
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventMemberScalarResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["EventMember"]
       },
       "delete": {
@@ -577,9 +1017,21 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventMemberScalarResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["EventMember"]
       }
     },
@@ -598,9 +1050,24 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChallengeResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["Challenge"]
       },
       "post": {
@@ -618,18 +1085,48 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/CreateChallengeDto"
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "flag": {
+                    "type": "string"
+                  },
+                  "points": {
+                    "type": "number"
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChallengeResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["Challenge"]
       }
     },
@@ -648,9 +1145,21 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChallengeResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["Challenge"]
       },
       "patch": {
@@ -668,18 +1177,48 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateChallengeDto"
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "flag": {
+                    "type": "string"
+                  },
+                  "points": {
+                    "type": "number"
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChallengeResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["Challenge"]
       },
       "delete": {
@@ -699,6 +1238,11 @@
             "description": ""
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["Challenge"]
       }
     },
@@ -717,9 +1261,21 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChallengeStatsResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["Challenge"]
       }
     },
@@ -748,9 +1304,21 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionResponseDto"
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": ["Challenge"]
       }
     }
@@ -769,9 +1337,80 @@
         "scheme": "bearer",
         "bearerFormat": "JWT",
         "type": "http"
+      },
+      "refresh_token": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "refresh_token"
       }
     },
     "schemas": {
+      "AuthPayloadDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": ["email", "password"]
+      },
+      "AuthUserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "googleId": {
+            "type": "object",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "emailVerified": {
+            "type": "boolean"
+          },
+          "twoFactorEnabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "username",
+          "googleId",
+          "createdAt",
+          "updatedAt",
+          "emailVerified",
+          "twoFactorEnabled"
+        ]
+      },
+      "AuthResponseDto": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/AuthUserResponseDto"
+          }
+        },
+        "required": ["access_token", "user"]
+      },
       "VerifyOtpDto": {
         "type": "object",
         "properties": {
@@ -793,6 +1432,15 @@
         },
         "required": ["email"]
       },
+      "AuthMessageResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["message"]
+      },
       "RegisterDto": {
         "type": "object",
         "properties": {
@@ -808,6 +1456,28 @@
         },
         "required": ["email", "username", "password"]
       },
+      "UserProfileResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "googleId": {
+            "type": "object",
+            "nullable": true
+          },
+          "hasPassword": {
+            "type": "boolean"
+          }
+        },
+        "required": ["id", "email", "username", "googleId", "hasPassword"]
+      },
       "UpdateUserDto": {
         "type": "object",
         "properties": {
@@ -815,6 +1485,89 @@
             "type": "string"
           }
         }
+      },
+      "UserUpdateResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "googleId": {
+            "type": "object",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "email", "username", "googleId", "updatedAt"]
+      },
+      "EventStatsResponseDto": {
+        "type": "object",
+        "properties": {
+          "memberCount": {
+            "type": "number"
+          },
+          "teamCount": {
+            "type": "number"
+          },
+          "challengeCount": {
+            "type": "number"
+          },
+          "solveCount": {
+            "type": "number"
+          }
+        },
+        "required": ["memberCount", "teamCount", "challengeCount", "solveCount"]
+      },
+      "EventResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "object",
+            "nullable": true
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "startDate",
+          "endDate",
+          "createdAt",
+          "updatedAt"
+        ]
       },
       "CreateEventDto": {
         "type": "object",
@@ -855,6 +1608,103 @@
           }
         }
       },
+      "TeamListResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "name", "createdAt", "updatedAt"]
+      },
+      "TeamDetailMemberResponseDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "joinedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["userId", "username", "email", "role", "joinedAt"]
+      },
+      "TeamDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamDetailMemberResponseDto"
+            }
+          }
+        },
+        "required": ["id", "name", "members"]
+      },
+      "TeamMembersResponseDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        },
+        "required": ["userId", "username", "role"]
+      },
+      "TeamByIdResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamMembersResponseDto"
+            }
+          }
+        },
+        "required": ["id", "name", "createdAt", "members"]
+      },
       "CreateTeamDto": {
         "type": "object",
         "properties": {
@@ -867,6 +1717,43 @@
         },
         "required": ["name", "teamPassword"]
       },
+      "TeamCreateMemberResponseDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        },
+        "required": ["userId", "role"]
+      },
+      "TeamCreateResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamCreateMemberResponseDto"
+            }
+          }
+        },
+        "required": ["id", "name", "eventId", "createdAt", "members"]
+      },
       "JoinTeamDto": {
         "type": "object",
         "properties": {
@@ -875,6 +1762,144 @@
           }
         },
         "required": ["password"]
+      },
+      "TeamMembershipResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "teamId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "role", "teamId", "userId", "createdAt"]
+      },
+      "UpdateTeamDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": ["name"]
+      },
+      "TeamUpdateResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "name", "eventId", "updatedAt"]
+      },
+      "TeamMessageResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["message"]
+      },
+      "LeaderboardResponseDto": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "string"
+          },
+          "teamName": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number"
+          }
+        },
+        "required": ["teamId", "teamName", "score"]
+      },
+      "EventMemberUserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": ["id", "username", "email"]
+      },
+      "EventMemberResponseDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "user": {
+            "$ref": "#/components/schemas/EventMemberUserResponseDto"
+          }
+        },
+        "required": ["role", "createdAt", "user"]
+      },
+      "EventMemberScalarResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "eventId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "createdAt",
+          "updatedAt",
+          "userId",
+          "eventId"
+        ]
       },
       "AddAdminDto": {
         "type": "object",
@@ -900,40 +1925,63 @@
         },
         "required": ["eventId", "userIdToRemove"]
       },
-      "CreateChallengeDto": {
+      "ChallengeResponseDto": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "title": {
             "type": "string"
           },
           "description": {
             "type": "string"
           },
-          "flag": {
+          "points": {
+            "type": "number"
+          },
+          "eventId": {
             "type": "string"
           },
-          "points": {
+          "hasFile": {
+            "type": "boolean"
+          },
+          "fileUrl": {
+            "type": "object",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "points",
+          "eventId",
+          "hasFile",
+          "fileUrl",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "ChallengeStatsResponseDto": {
+        "type": "object",
+        "properties": {
+          "submissionCount": {
+            "type": "number"
+          },
+          "solveCount": {
             "type": "number"
           }
         },
-        "required": ["title", "description", "flag", "points"]
-      },
-      "UpdateChallengeDto": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "flag": {
-            "type": "string"
-          },
-          "points": {
-            "type": "number"
-          }
-        }
+        "required": ["submissionCount", "solveCount"]
       },
       "SubmitFlagDto": {
         "type": "object",
@@ -943,6 +1991,22 @@
           }
         },
         "required": ["flag"]
+      },
+      "SubmissionResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["id", "status", "createdAt"]
       }
     }
   }

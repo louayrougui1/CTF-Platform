@@ -5,8 +5,6 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../auth.service';
 import { AuthPayloadDto } from '../dto/auth.dto';
 import { plainToInstance } from 'class-transformer';
-import { validate } from 'class-validator';
-import { BadRequestException } from '@nestjs/common';
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
   constructor(private authService: AuthService) {
@@ -18,12 +16,6 @@ export class LocalStrategy extends PassportStrategy(Strategy, 'local') {
       email,
       password,
     });
-
-    const errors = await validate(dto);
-
-    if (errors.length > 0) {
-      throw new BadRequestException(errors[0].constraints);
-    }
 
     const user = await this.authService.validateUser(dto);
 

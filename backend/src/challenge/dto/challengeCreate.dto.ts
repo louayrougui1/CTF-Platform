@@ -1,4 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsString,
   IsNotEmpty,
@@ -27,9 +28,10 @@ export class CreateChallengeDto {
   @MaxLength(120)
   flag: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(0)
-  @IsOptional()
   points?: number;
 }
