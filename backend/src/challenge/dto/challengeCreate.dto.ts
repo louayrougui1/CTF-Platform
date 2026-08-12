@@ -7,7 +7,9 @@ import {
   Min,
   IsOptional,
   MaxLength,
+  IsEnum,
 } from 'class-validator';
+import { ChallengeCategory, ChallengeDifficulty } from '@prisma/client';
 
 export class CreateChallengeDto {
   @ApiProperty()
@@ -27,6 +29,14 @@ export class CreateChallengeDto {
   @IsNotEmpty()
   @MaxLength(120)
   flag: string;
+
+  @ApiProperty({ enum: ChallengeCategory })
+  @IsEnum(ChallengeCategory)
+  category: ChallengeCategory;
+
+  @ApiProperty({ enum: ChallengeDifficulty })
+  @IsEnum(ChallengeDifficulty)
+  difficulty: ChallengeDifficulty;
 
   @ApiPropertyOptional()
   @IsOptional()

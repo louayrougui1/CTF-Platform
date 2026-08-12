@@ -68,6 +68,22 @@ export class ChallengeController {
         title: { type: 'string' },
         description: { type: 'string' },
         flag: { type: 'string' },
+        category: {
+          type: 'string',
+          enum: [
+            'WEB',
+            'CRYPTO',
+            'PWN',
+            'REVERSE',
+            'FORENSICS',
+            'OSINT',
+            'MISC',
+          ],
+        },
+        difficulty: {
+          type: 'string',
+          enum: ['EASY', 'MEDIUM', 'HARD', 'EXPERT'],
+        },
         points: { type: 'number' },
         file: {
           type: 'string',
@@ -96,6 +112,22 @@ export class ChallengeController {
         title: { type: 'string' },
         description: { type: 'string' },
         flag: { type: 'string' },
+        category: {
+          type: 'string',
+          enum: [
+            'WEB',
+            'CRYPTO',
+            'PWN',
+            'REVERSE',
+            'FORENSICS',
+            'OSINT',
+            'MISC',
+          ],
+        },
+        difficulty: {
+          type: 'string',
+          enum: ['EASY', 'MEDIUM', 'HARD', 'EXPERT'],
+        },
         points: { type: 'number' },
         file: {
           type: 'string',

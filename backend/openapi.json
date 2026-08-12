@@ -10,7 +10,9 @@
             "description": ""
           }
         },
-        "tags": ["App"]
+        "tags": [
+          "App"
+        ]
       }
     },
     "/auth/login": {
@@ -39,7 +41,9 @@
             }
           }
         },
-        "tags": ["Auth"]
+        "tags": [
+          "Auth"
+        ]
       }
     },
     "/auth/verify-email": {
@@ -68,7 +72,9 @@
             }
           }
         },
-        "tags": ["Auth"]
+        "tags": [
+          "Auth"
+        ]
       }
     },
     "/auth/resend-otp": {
@@ -97,7 +103,9 @@
             }
           }
         },
-        "tags": ["Auth"]
+        "tags": [
+          "Auth"
+        ]
       }
     },
     "/auth/register": {
@@ -126,7 +134,9 @@
             }
           }
         },
-        "tags": ["Auth"]
+        "tags": [
+          "Auth"
+        ]
       }
     },
     "/auth/refresh": {
@@ -150,7 +160,9 @@
             "refresh_token": []
           }
         ],
-        "tags": ["Auth"]
+        "tags": [
+          "Auth"
+        ]
       }
     },
     "/auth/logout": {
@@ -174,7 +186,9 @@
             "refresh_token": []
           }
         ],
-        "tags": ["Auth"]
+        "tags": [
+          "Auth"
+        ]
       }
     },
     "/auth/google/login": {
@@ -186,7 +200,9 @@
             "description": ""
           }
         },
-        "tags": ["Auth"]
+        "tags": [
+          "Auth"
+        ]
       }
     },
     "/auth/google/callback": {
@@ -200,7 +216,107 @@
           }
         },
         "summary": "Google OAuth callback",
-        "tags": ["Auth"]
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/forgot-password": {
+      "post": {
+        "operationId": "AuthController_forgotPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthMessageResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/verify-reset-otp": {
+      "post": {
+        "operationId": "AuthController_verifyResetOtp",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyOtpDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthMessageResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "operationId": "AuthController_resetPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthMessageResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "reset_token": []
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
       }
     },
     "/user/profile": {
@@ -224,7 +340,9 @@
             "bearer": []
           }
         ],
-        "tags": ["User"]
+        "tags": [
+          "User"
+        ]
       },
       "patch": {
         "operationId": "UserController_updateProfile",
@@ -256,7 +374,9 @@
             "bearer": []
           }
         ],
-        "tags": ["User"]
+        "tags": [
+          "User"
+        ]
       }
     },
     "/events/stats/{eventId}": {
@@ -289,7 +409,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Event"]
+        "tags": [
+          "Event"
+        ]
       }
     },
     "/events": {
@@ -316,7 +438,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Event"]
+        "tags": [
+          "Event"
+        ]
       },
       "post": {
         "operationId": "EventController_createEvent",
@@ -348,7 +472,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Event"]
+        "tags": [
+          "Event"
+        ]
       }
     },
     "/events/mine": {
@@ -375,7 +501,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Event"]
+        "tags": [
+          "Event"
+        ]
       }
     },
     "/events/{id}": {
@@ -408,7 +536,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Event"]
+        "tags": [
+          "Event"
+        ]
       },
       "patch": {
         "operationId": "EventController_updateEvent",
@@ -449,7 +579,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Event"]
+        "tags": [
+          "Event"
+        ]
       },
       "delete": {
         "operationId": "EventController_deleteEvent",
@@ -480,7 +612,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Event"]
+        "tags": [
+          "Event"
+        ]
       }
     },
     "/events/{eventId}/teams": {
@@ -516,7 +650,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Team"]
+        "tags": [
+          "Team"
+        ]
       },
       "post": {
         "operationId": "TeamController_createTeam",
@@ -557,7 +693,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Team"]
+        "tags": [
+          "Team"
+        ]
       }
     },
     "/events/{eventId}/teams/me": {
@@ -590,7 +728,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Team"]
+        "tags": [
+          "Team"
+        ]
       }
     },
     "/events/{eventId}/teams/{teamId}": {
@@ -631,7 +771,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Team"]
+        "tags": [
+          "Team"
+        ]
       },
       "patch": {
         "operationId": "TeamController_updateTeam",
@@ -672,7 +814,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Team"]
+        "tags": [
+          "Team"
+        ]
       },
       "delete": {
         "operationId": "TeamController_deleteTeam",
@@ -703,7 +847,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Team"]
+        "tags": [
+          "Team"
+        ]
       }
     },
     "/events/{eventId}/teams/{teamId}/join": {
@@ -754,7 +900,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Team"]
+        "tags": [
+          "Team"
+        ]
       }
     },
     "/events/{eventId}/teams/{teamId}/leave": {
@@ -787,7 +935,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Team"]
+        "tags": [
+          "Team"
+        ]
       }
     },
     "/events/{eventId}/teams/{teamId}/members/{userId}": {
@@ -828,7 +978,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Team"]
+        "tags": [
+          "Team"
+        ]
       }
     },
     "/events/{eventId}/leaderboard": {
@@ -864,7 +1016,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Leaderboard"]
+        "tags": [
+          "Leaderboard"
+        ]
       }
     },
     "/event-member/{eventId}/members": {
@@ -900,7 +1054,9 @@
             "bearer": []
           }
         ],
-        "tags": ["EventMember"]
+        "tags": [
+          "EventMember"
+        ]
       }
     },
     "/event-member/{eventId}/join": {
@@ -933,7 +1089,9 @@
             "bearer": []
           }
         ],
-        "tags": ["EventMember"]
+        "tags": [
+          "EventMember"
+        ]
       }
     },
     "/event-member/{eventId}/leave": {
@@ -966,7 +1124,9 @@
             "bearer": []
           }
         ],
-        "tags": ["EventMember"]
+        "tags": [
+          "EventMember"
+        ]
       }
     },
     "/event-member/admins": {
@@ -1000,7 +1160,9 @@
             "bearer": []
           }
         ],
-        "tags": ["EventMember"]
+        "tags": [
+          "EventMember"
+        ]
       },
       "delete": {
         "operationId": "EventMemberController_removeEventAdmin",
@@ -1032,7 +1194,9 @@
             "bearer": []
           }
         ],
-        "tags": ["EventMember"]
+        "tags": [
+          "EventMember"
+        ]
       }
     },
     "/events/{eventId}/challenges": {
@@ -1068,7 +1232,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Challenge"]
+        "tags": [
+          "Challenge"
+        ]
       },
       "post": {
         "operationId": "ChallengeController_createChallenge",
@@ -1097,6 +1263,27 @@
                   },
                   "flag": {
                     "type": "string"
+                  },
+                  "category": {
+                    "type": "string",
+                    "enum": [
+                      "WEB",
+                      "CRYPTO",
+                      "PWN",
+                      "REVERSE",
+                      "FORENSICS",
+                      "OSINT",
+                      "MISC"
+                    ]
+                  },
+                  "difficulty": {
+                    "type": "string",
+                    "enum": [
+                      "EASY",
+                      "MEDIUM",
+                      "HARD",
+                      "EXPERT"
+                    ]
                   },
                   "points": {
                     "type": "number"
@@ -1127,7 +1314,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Challenge"]
+        "tags": [
+          "Challenge"
+        ]
       }
     },
     "/events/{eventId}/challenges/{id}": {
@@ -1160,7 +1349,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Challenge"]
+        "tags": [
+          "Challenge"
+        ]
       },
       "patch": {
         "operationId": "ChallengeController_updateChallenge",
@@ -1189,6 +1380,27 @@
                   },
                   "flag": {
                     "type": "string"
+                  },
+                  "category": {
+                    "type": "string",
+                    "enum": [
+                      "WEB",
+                      "CRYPTO",
+                      "PWN",
+                      "REVERSE",
+                      "FORENSICS",
+                      "OSINT",
+                      "MISC"
+                    ]
+                  },
+                  "difficulty": {
+                    "type": "string",
+                    "enum": [
+                      "EASY",
+                      "MEDIUM",
+                      "HARD",
+                      "EXPERT"
+                    ]
                   },
                   "points": {
                     "type": "number"
@@ -1219,7 +1431,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Challenge"]
+        "tags": [
+          "Challenge"
+        ]
       },
       "delete": {
         "operationId": "ChallengeController_deleteChallenge",
@@ -1243,7 +1457,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Challenge"]
+        "tags": [
+          "Challenge"
+        ]
       }
     },
     "/events/{eventId}/challenges/{id}/stats": {
@@ -1276,7 +1492,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Challenge"]
+        "tags": [
+          "Challenge"
+        ]
       }
     },
     "/events/{eventId}/challenges/{id}/submit": {
@@ -1319,7 +1537,9 @@
             "bearer": []
           }
         ],
-        "tags": ["Challenge"]
+        "tags": [
+          "Challenge"
+        ]
       }
     }
   },
@@ -1355,7 +1575,10 @@
             "type": "string"
           }
         },
-        "required": ["email", "password"]
+        "required": [
+          "email",
+          "password"
+        ]
       },
       "AuthUserResponseDto": {
         "type": "object",
@@ -1409,7 +1632,10 @@
             "$ref": "#/components/schemas/AuthUserResponseDto"
           }
         },
-        "required": ["access_token", "user"]
+        "required": [
+          "access_token",
+          "user"
+        ]
       },
       "VerifyOtpDto": {
         "type": "object",
@@ -1421,7 +1647,10 @@
             "type": "string"
           }
         },
-        "required": ["email", "code"]
+        "required": [
+          "email",
+          "code"
+        ]
       },
       "ResendOtpDto": {
         "type": "object",
@@ -1430,7 +1659,9 @@
             "type": "string"
           }
         },
-        "required": ["email"]
+        "required": [
+          "email"
+        ]
       },
       "AuthMessageResponseDto": {
         "type": "object",
@@ -1439,7 +1670,9 @@
             "type": "string"
           }
         },
-        "required": ["message"]
+        "required": [
+          "message"
+        ]
       },
       "RegisterDto": {
         "type": "object",
@@ -1454,7 +1687,33 @@
             "type": "string"
           }
         },
-        "required": ["email", "username", "password"]
+        "required": [
+          "email",
+          "username",
+          "password"
+        ]
+      },
+      "ForgotPasswordDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "ResetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "newPassword": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "newPassword"
+        ]
       },
       "UserProfileResponseDto": {
         "type": "object",
@@ -1476,7 +1735,13 @@
             "type": "boolean"
           }
         },
-        "required": ["id", "email", "username", "googleId", "hasPassword"]
+        "required": [
+          "id",
+          "email",
+          "username",
+          "googleId",
+          "hasPassword"
+        ]
       },
       "UpdateUserDto": {
         "type": "object",
@@ -1507,7 +1772,13 @@
             "format": "date-time"
           }
         },
-        "required": ["id", "email", "username", "googleId", "updatedAt"]
+        "required": [
+          "id",
+          "email",
+          "username",
+          "googleId",
+          "updatedAt"
+        ]
       },
       "EventStatsResponseDto": {
         "type": "object",
@@ -1525,7 +1796,12 @@
             "type": "number"
           }
         },
-        "required": ["memberCount", "teamCount", "challengeCount", "solveCount"]
+        "required": [
+          "memberCount",
+          "teamCount",
+          "challengeCount",
+          "solveCount"
+        ]
       },
       "EventResponseDto": {
         "type": "object",
@@ -1587,7 +1863,12 @@
             "type": "string"
           }
         },
-        "required": ["title", "description", "startDate", "endDate"]
+        "required": [
+          "title",
+          "description",
+          "startDate",
+          "endDate"
+        ]
       },
       "UpdateEventDto": {
         "type": "object",
@@ -1626,7 +1907,12 @@
             "format": "date-time"
           }
         },
-        "required": ["id", "name", "createdAt", "updatedAt"]
+        "required": [
+          "id",
+          "name",
+          "createdAt",
+          "updatedAt"
+        ]
       },
       "TeamDetailMemberResponseDto": {
         "type": "object",
@@ -1648,7 +1934,13 @@
             "format": "date-time"
           }
         },
-        "required": ["userId", "username", "email", "role", "joinedAt"]
+        "required": [
+          "userId",
+          "username",
+          "email",
+          "role",
+          "joinedAt"
+        ]
       },
       "TeamDetailResponseDto": {
         "type": "object",
@@ -1666,7 +1958,11 @@
             }
           }
         },
-        "required": ["id", "name", "members"]
+        "required": [
+          "id",
+          "name",
+          "members"
+        ]
       },
       "TeamMembersResponseDto": {
         "type": "object",
@@ -1681,7 +1977,11 @@
             "type": "string"
           }
         },
-        "required": ["userId", "username", "role"]
+        "required": [
+          "userId",
+          "username",
+          "role"
+        ]
       },
       "TeamByIdResponseDto": {
         "type": "object",
@@ -1703,7 +2003,12 @@
             }
           }
         },
-        "required": ["id", "name", "createdAt", "members"]
+        "required": [
+          "id",
+          "name",
+          "createdAt",
+          "members"
+        ]
       },
       "CreateTeamDto": {
         "type": "object",
@@ -1715,7 +2020,10 @@
             "type": "string"
           }
         },
-        "required": ["name", "teamPassword"]
+        "required": [
+          "name",
+          "teamPassword"
+        ]
       },
       "TeamCreateMemberResponseDto": {
         "type": "object",
@@ -1727,7 +2035,10 @@
             "type": "string"
           }
         },
-        "required": ["userId", "role"]
+        "required": [
+          "userId",
+          "role"
+        ]
       },
       "TeamCreateResponseDto": {
         "type": "object",
@@ -1752,7 +2063,13 @@
             }
           }
         },
-        "required": ["id", "name", "eventId", "createdAt", "members"]
+        "required": [
+          "id",
+          "name",
+          "eventId",
+          "createdAt",
+          "members"
+        ]
       },
       "JoinTeamDto": {
         "type": "object",
@@ -1761,7 +2078,9 @@
             "type": "string"
           }
         },
-        "required": ["password"]
+        "required": [
+          "password"
+        ]
       },
       "TeamMembershipResponseDto": {
         "type": "object",
@@ -1783,7 +2102,13 @@
             "format": "date-time"
           }
         },
-        "required": ["id", "role", "teamId", "userId", "createdAt"]
+        "required": [
+          "id",
+          "role",
+          "teamId",
+          "userId",
+          "createdAt"
+        ]
       },
       "UpdateTeamDto": {
         "type": "object",
@@ -1792,7 +2117,9 @@
             "type": "string"
           }
         },
-        "required": ["name"]
+        "required": [
+          "name"
+        ]
       },
       "TeamUpdateResponseDto": {
         "type": "object",
@@ -1811,7 +2138,12 @@
             "format": "date-time"
           }
         },
-        "required": ["id", "name", "eventId", "updatedAt"]
+        "required": [
+          "id",
+          "name",
+          "eventId",
+          "updatedAt"
+        ]
       },
       "TeamMessageResponseDto": {
         "type": "object",
@@ -1820,7 +2152,9 @@
             "type": "string"
           }
         },
-        "required": ["message"]
+        "required": [
+          "message"
+        ]
       },
       "LeaderboardResponseDto": {
         "type": "object",
@@ -1835,7 +2169,11 @@
             "type": "number"
           }
         },
-        "required": ["teamId", "teamName", "score"]
+        "required": [
+          "teamId",
+          "teamName",
+          "score"
+        ]
       },
       "EventMemberUserResponseDto": {
         "type": "object",
@@ -1850,7 +2188,11 @@
             "type": "string"
           }
         },
-        "required": ["id", "username", "email"]
+        "required": [
+          "id",
+          "username",
+          "email"
+        ]
       },
       "EventMemberResponseDto": {
         "type": "object",
@@ -1866,7 +2208,11 @@
             "$ref": "#/components/schemas/EventMemberUserResponseDto"
           }
         },
-        "required": ["role", "createdAt", "user"]
+        "required": [
+          "role",
+          "createdAt",
+          "user"
+        ]
       },
       "EventMemberScalarResponseDto": {
         "type": "object",
@@ -1911,7 +2257,10 @@
             "type": "string"
           }
         },
-        "required": ["eventId", "userIdToPromote"]
+        "required": [
+          "eventId",
+          "userIdToPromote"
+        ]
       },
       "RemoveAdminDto": {
         "type": "object",
@@ -1923,7 +2272,10 @@
             "type": "string"
           }
         },
-        "required": ["eventId", "userIdToRemove"]
+        "required": [
+          "eventId",
+          "userIdToRemove"
+        ]
       },
       "ChallengeResponseDto": {
         "type": "object",
@@ -1981,7 +2333,10 @@
             "type": "number"
           }
         },
-        "required": ["submissionCount", "solveCount"]
+        "required": [
+          "submissionCount",
+          "solveCount"
+        ]
       },
       "SubmitFlagDto": {
         "type": "object",
@@ -1990,7 +2345,9 @@
             "type": "string"
           }
         },
-        "required": ["flag"]
+        "required": [
+          "flag"
+        ]
       },
       "SubmissionResponseDto": {
         "type": "object",
@@ -2006,7 +2363,11 @@
             "format": "date-time"
           }
         },
-        "required": ["id", "status", "createdAt"]
+        "required": [
+          "id",
+          "status",
+          "createdAt"
+        ]
       }
     }
   }
