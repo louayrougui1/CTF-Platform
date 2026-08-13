@@ -9,6 +9,7 @@ import { CreateChallengeDto } from './dto/challengeCreate.dto';
 import { UpdateChallengeDto } from './dto/updateChallenge.dto';
 import { SubmitFlagDto } from './dto/submitFlag.dto';
 import { StorageService } from '../storage/storage.service';
+
 // Public-facing select — never expose the `flag` field here.
 const CHALLENGE_SELECT = {
   id: true,
@@ -21,6 +22,9 @@ const CHALLENGE_SELECT = {
   hasFile: true,
   fileUrl: true,
 } as const;
+
+const NOT_STARTED_MESSAGE =
+  'Challenges will be available when the event starts.';
 
 @Injectable()
 export class ChallengeService {
@@ -73,9 +77,42 @@ export class ChallengeService {
     return event;
   }
 
+  /**
+   * Throws NotFoundException if the user is not a member of the event.
+   * Uses NotFound (not Forbidden) so non-members can't distinguish
+   * "doesn't exist" from "exists but you're not in it".
+   */
+  private async assertEventMember(eventId: string, userId: string) {
+    const membership = await this.prisma.eventMember.findUnique({
+      where: { userId_eventId: { userId, eventId } },
+    });
+
+    if (!membership) {
+      throw new NotFoundException('Event not found');
+    }
+
+    return membership;
+  }
+
+  /** Returns true once the event's startDate has passed (or has none set). */
+  private async hasEventStarted(eventId: string): Promise<boolean> {
+    const event = await this.prisma.event.findUniqueOrThrow({
+      where: { id: eventId },
+      select: { startDate: true },
+    });
+
+    return !event.startDate || event.startDate <= new Date();
+  }
+
   // ─── QUERIES ────────────────────────────────────────────────────────────────
 
-  async getChallengesByEvent(eventId: string) {
+  async getChallengesByEvent(user: any, eventId: string) {
+    await this.assertEventMember(eventId, user.id);
+
+    if (!(await this.hasEventStarted(eventId))) {
+      return { message: NOT_STARTED_MESSAGE };
+    }
+
     const challenges = await this.prisma.challenge.findMany({
       where: { eventId },
       select: CHALLENGE_SELECT,
@@ -91,8 +128,15 @@ export class ChallengeService {
     );
   }
 
-  async getChallenge(id: string) {
+  async getChallenge(user: any, id: string) {
     const challenge = await this.findChallengeOrThrow(id);
+
+    await this.assertEventMember(challenge.eventId, user.id);
+
+    if (!(await this.hasEventStarted(challenge.eventId))) {
+      return { message: NOT_STARTED_MESSAGE };
+    }
+
     const { flag, ...challengeData } = challenge;
     if (challengeData.hasFile && challengeData.fileUrl) {
       // challenge.fileUrl currently holds the PATH — convert to a live signed URL
@@ -104,17 +148,19 @@ export class ChallengeService {
     return challengeData;
   }
 
-  async getChallengeStats(challengeId: string) {
-    await this.findChallengeOrThrow(challengeId);
+  async getChallengeStats(user: any, challengeId: string) {
+    const challenge = await this.findChallengeOrThrow(challengeId);
 
-    const [submissionCount, solveCount] = await Promise.all([
-      this.prisma.submission.count({ where: { challengeId } }),
-      this.prisma.submission.count({
-        where: { challengeId, status: 'CORRECT' },
-      }),
-    ]);
+    await this.assertEventMember(challenge.eventId, user.id);
 
-    return { submissionCount, solveCount };
+    if (!(await this.hasEventStarted(challenge.eventId))) {
+      return { message: NOT_STARTED_MESSAGE };
+    }
+
+    const solveCount = await this.prisma.submission.count({
+      where: { challengeId, status: 'CORRECT' },
+    });
+    return { solveCount };
   }
 
   // ─── MUTATIONS ──────────────────────────────────────────────────────────────
@@ -182,6 +228,12 @@ export class ChallengeService {
 
   async submitFlag(user: any, challengeId: string, dto: SubmitFlagDto) {
     const challenge = await this.findChallengeOrThrow(challengeId);
+
+    await this.assertEventMember(challenge.eventId, user.id);
+
+    if (!(await this.hasEventStarted(challenge.eventId))) {
+      throw new BadRequestException(NOT_STARTED_MESSAGE);
+    }
 
     // If the user already solved this challenge, don't let them re-submit for points.
     const alreadySolved = await this.prisma.submission.findFirst({

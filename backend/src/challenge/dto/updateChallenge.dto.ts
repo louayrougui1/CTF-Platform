@@ -1,33 +1,32 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsString,
-  IsNotEmpty,
   IsInt,
   Min,
   IsOptional,
-  MaxLength,
+  Length,
   IsEnum,
 } from 'class-validator';
 import { ChallengeCategory, ChallengeDifficulty } from '@prisma/client';
 
 export class UpdateChallengeDto {
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsString()
-  @IsNotEmpty()
-  @MaxLength(120)
-  title: string;
+  @Length(1, 120)
+  @IsOptional()
+  title?: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsString()
-  @IsNotEmpty()
-  @MaxLength(120)
-  description: string;
+  @Length(1, 120)
+  @IsOptional()
+  description?: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsString()
-  @IsNotEmpty()
-  @MaxLength(120)
-  flag: string;
+  @Length(1, 120)
+  @IsOptional()
+  flag?: string;
 
   @ApiPropertyOptional({ enum: ChallengeCategory })
   @IsOptional()

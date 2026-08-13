@@ -32,8 +32,8 @@ export class EventController {
 
   @Get('stats/:eventId')
   @ApiOkResponse({ type: EventStatsResponseDto })
-  getEventStats(@Param('eventId') eventId: string) {
-    return this.eventsService.getEventStats(eventId);
+  getEventStats(@Param('eventId') eventId: string, @Req() req: Request) {
+    return this.eventsService.getEventStats(req.user, eventId);
   }
 
   @Get()
@@ -50,8 +50,8 @@ export class EventController {
 
   @Get(':id')
   @ApiOkResponse({ type: EventResponseDto })
-  getEvent(@Param('id') id: string) {
-    return this.eventsService.getEvent(id);
+  getEvent(@Param('id') id: string, @Req() req: Request) {
+    return this.eventsService.getEvent(req.user, id);
   }
 
   // ─── MUTATIONS ────────────────────────────────────────────────────────────

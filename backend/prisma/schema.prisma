@@ -85,6 +85,7 @@ model Event {
   description String?
   startDate   DateTime?
   endDate     DateTime?
+  isPublic    Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   ownerId     String
@@ -93,6 +94,8 @@ model Event {
   teams      Team[]
   challenges Challenge[]
   members    EventMember[]
+  teamMembers TeamMember[]
+
 
   @@index([ownerId])
 }
@@ -133,17 +136,21 @@ model TeamMember {
   role      TeamRole @default(MEMBER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  userId    String
-  teamId    String
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId  String
+  teamId  String
+  eventId String
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team  Team  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@unique([userId, teamId])
+  @@unique([userId, eventId])
   @@index([userId])
   @@index([teamId])
+  @@index([eventId])
 }
-
 enum ChallengeCategory {
   WEB
   CRYPTO

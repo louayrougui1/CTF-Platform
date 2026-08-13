@@ -87,9 +87,9 @@ export class TeamService {
   //   return { memberCount, teamCount, challengeCount, solveCount };
   // }
 
-  async getEventTeams(eventId: string) {
+  async getEventTeams(user: any, eventId: string) {
     await this.findEventOrThrow(eventId);
-
+    await this.assertEventMember(eventId, user.id);
     return this.prisma.team.findMany({
       where: { eventId },
       select: { id: true, name: true, createdAt: true, updatedAt: true },
@@ -129,13 +129,13 @@ export class TeamService {
         `A team named with the same name already exists in this event`,
       );
     try {
-      return this.prisma.team.create({
+      return await this.prisma.team.create({
         data: {
           name,
           teamPassword,
           eventId,
           members: {
-            create: { userId, role: 'CAPTAIN' },
+            create: { userId, role: 'CAPTAIN', eventId },
           },
         },
         select: {
@@ -173,7 +173,10 @@ export class TeamService {
       throw new BadRequestException('Team does not belong to this event');
 
     const existingMembership = await this.prisma.teamMember.findFirst({
-      where: { userId, team: { eventId } },
+      where: {
+        userId,
+        eventId,
+      },
     });
     if (existingMembership)
       throw new ConflictException(
@@ -183,16 +186,31 @@ export class TeamService {
     if (team.teamPassword !== password)
       throw new ForbiddenException('Incorrect team password');
 
-    return this.prisma.teamMember.create({
-      data: { userId, teamId, role: 'MEMBER' },
-      select: {
-        id: true,
-        role: true,
-        teamId: true,
-        userId: true,
-        createdAt: true,
-      },
-    });
+    try {
+      return await this.prisma.teamMember.create({
+        data: {
+          userId,
+          teamId: team.id,
+          eventId: team.eventId,
+          role: 'MEMBER',
+        },
+        select: {
+          id: true,
+          role: true,
+          teamId: true,
+          userId: true,
+          createdAt: true,
+        },
+      });
+    } catch (err: any) {
+      if (err.code === 'P2002') {
+        throw new ConflictException(
+          'You are already a member of a team in this event',
+        );
+      }
+
+      throw err;
+    }
   }
 
   async leaveTeam(teamId: string, userId: string) {
@@ -281,18 +299,27 @@ export class TeamService {
         );
     }
 
-    return this.prisma.team.update({
-      where: { id: teamId },
-      data: {
-        ...(name && { name }),
-      },
-      select: {
-        id: true,
-        name: true,
-        eventId: true,
-        updatedAt: true,
-      },
-    });
+    try {
+      return await this.prisma.team.update({
+        where: { id: teamId },
+        data: {
+          ...(name && { name }),
+        },
+        select: {
+          id: true,
+          name: true,
+          eventId: true,
+          updatedAt: true,
+        },
+      });
+    } catch (err: any) {
+      if (err.code === 'P2002') {
+        throw new ConflictException(
+          `A team named with the same name already exists in this event`,
+        );
+      }
+      throw err;
+    }
   }
 
   async kickMember(teamId: string, captainId: string, targetUserId: string) {

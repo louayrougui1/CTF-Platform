@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
+  ConflictException,
 } from '@nestjs/common';
 import { AuthPayloadDto } from './dto/auth.dto';
 import { VerifyOtpDto } from './dto/verifyOtp.dto';
@@ -35,7 +36,7 @@ export class AuthService {
         email: user.email,
       },
       {
-        expiresIn: '30m',
+        expiresIn: '60m',
       },
     );
   }
@@ -87,7 +88,6 @@ export class AuthService {
   // 2. Login (generate JWT)
   async login(user: any, res: Response) {
     const { password, ...safeUser } = user;
-    console.log('Logging in user:', safeUser); // Debugging log
     const accessToken = this.generateAccessToken(safeUser);
     const refreshToken = this.generateRefreshToken(safeUser);
     this.setRefreshTokenCookie(res, refreshToken);
@@ -118,9 +118,16 @@ export class AuthService {
         });
       } else {
         // Fresh registration
-        user = await this.prisma.user.create({
-          data: { email, username, password: hashedPassword },
-        });
+        try {
+          user = await this.prisma.user.create({
+            data: { email, username, password: hashedPassword },
+          });
+        } catch (err: any) {
+          if (err.code === 'P2002') {
+            throw new ConflictException('Email already in use');
+          }
+          throw err;
+        }
       }
 
       const otp = await this.otpService.createOtp(
@@ -148,7 +155,11 @@ export class AuthService {
       //   user: safeUser,
       // };
     } catch (error: any) {
-      if (error instanceof BadRequestException) throw error;
+      if (
+        error instanceof BadRequestException ||
+        error instanceof ConflictException
+      )
+        throw error;
       throw new InternalServerErrorException('Failed to create user');
     }
   }
@@ -161,6 +172,7 @@ export class AuthService {
     } catch (error) {
       throw new UnauthorizedException('Invalid or Expired refresh token');
     }
+
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
     });
@@ -168,8 +180,10 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
+
     const { password, ...safeUser } = user;
-    this.setRefreshTokenCookie(res, refreshToken);
+    const newRefreshToken = this.generateRefreshToken(safeUser);
+    this.setRefreshTokenCookie(res, newRefreshToken);
 
     return {
       access_token: this.generateAccessToken(safeUser),
@@ -198,21 +212,37 @@ export class AuthService {
 
       if (existingUser) {
         // 3. Link the Google account to the existing normal account
-        user = await this.prisma.user.update({
-          where: { id: existingUser.id },
-          data: { googleId: profile.googleId },
-        });
+        try {
+          user = await this.prisma.user.update({
+            where: { id: existingUser.id },
+            data: { googleId: profile.googleId },
+          });
+        } catch (err: any) {
+          if (err.code === 'P2002') {
+            throw new ConflictException(
+              'Google account already linked to another user',
+            );
+          }
+          throw err;
+        }
       } else {
         // 4. No account at all — create a new Google-only user
-        user = await this.prisma.user.create({
-          data: {
-            email: profile.email,
-            username: profile.firstName + ' ' + profile.lastName,
-            password: null,
-            googleId: profile.googleId,
-            emailVerified: true,
-          },
-        });
+        try {
+          user = await this.prisma.user.create({
+            data: {
+              email: profile.email,
+              username: profile.firstName + ' ' + profile.lastName,
+              password: null,
+              googleId: profile.googleId,
+              emailVerified: true,
+            },
+          });
+        } catch (err: any) {
+          if (err.code === 'P2002') {
+            throw new ConflictException('Email or Google ID already in use');
+          }
+          throw err;
+        }
       }
     }
 

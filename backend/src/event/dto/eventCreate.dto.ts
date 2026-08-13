@@ -50,7 +50,7 @@ export class CreateEventDto {
 
   @ApiProperty()
   @IsString()
-  @Length(0, 500)
+  @Length(1, 500)
   description: string;
 
   @ApiProperty()

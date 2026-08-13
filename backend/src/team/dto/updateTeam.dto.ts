@@ -1,17 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsString,
-  IsNotEmpty,
-  MaxLength,
-  MinLength,
-  IsOptional,
-} from 'class-validator';
+import { IsString, Length, IsOptional } from 'class-validator';
 
 export class UpdateTeamDto {
-  @ApiProperty()
   @IsString()
-  @IsNotEmpty()
-  @MaxLength(50)
-  @IsOptional()
-  name?: string;
+  @Length(1, 50)
+  name: string;
 }

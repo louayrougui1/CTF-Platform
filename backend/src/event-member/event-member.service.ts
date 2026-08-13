@@ -4,6 +4,7 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { AddAdminDto } from './dto/addAdmin.dto';
 import { RemoveAdminDto } from './dto/removeAdmin.dto';
@@ -138,13 +139,20 @@ export class EventMemberService {
       throw new BadRequestException('User is already a member of this event');
     }
 
-    return this.prisma.eventMember.create({
-      data: {
-        userId: user.id,
-        eventId,
-        role: 'MEMBER',
-      },
-    });
+    try {
+      return await this.prisma.eventMember.create({
+        data: {
+          userId: user.id,
+          eventId,
+          role: 'MEMBER',
+        },
+      });
+    } catch (err: any) {
+      if (err.code === 'P2002') {
+        throw new ConflictException('User is already a member of this event');
+      }
+      throw err;
+    }
   }
 
   async leaveEvent(user: any, eventId: string) {

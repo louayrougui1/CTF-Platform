@@ -41,20 +41,20 @@ export class ChallengeController {
 
   @Get()
   @ApiOkResponse({ type: ChallengeResponseDto, isArray: true })
-  getChallengesByEvent(@Param('eventId') eventId: string) {
-    return this.challengeService.getChallengesByEvent(eventId);
+  getChallengesByEvent(@Param('eventId') eventId: string, @Req() req: Request) {
+    return this.challengeService.getChallengesByEvent(req.user, eventId);
   }
 
   @Get(':id')
   @ApiOkResponse({ type: ChallengeResponseDto })
-  getChallenge(@Param('id') id: string) {
-    return this.challengeService.getChallenge(id);
+  getChallenge(@Param('id') id: string, @Req() req: Request) {
+    return this.challengeService.getChallenge(req.user, id);
   }
 
   @Get(':id/stats')
   @ApiOkResponse({ type: ChallengeStatsResponseDto })
-  getChallengeStats(@Param('id') id: string) {
-    return this.challengeService.getChallengeStats(id);
+  getChallengeStats(@Param('id') id: string, @Req() req: Request) {
+    return this.challengeService.getChallengeStats(req.user, id);
   }
 
   // ─── MUTATIONS ──────────────────────────────────────────────────────────────

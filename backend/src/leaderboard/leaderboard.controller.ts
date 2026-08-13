@@ -1,5 +1,5 @@
 import { LeaderboardService } from './leaderboard.service';
-import { Controller, Get, UseGuards, Param } from '@nestjs/common';
+import { Controller, Get, UseGuards, Param, Req } from '@nestjs/common';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 import { LeaderboardResponseDto } from './dto/leaderboard-response.dto';
@@ -11,7 +11,8 @@ export class LeaderboardController {
   constructor(private readonly leaderBoardService: LeaderboardService) {}
   @Get()
   @ApiOkResponse({ type: LeaderboardResponseDto, isArray: true })
-  getEventLeaderboard(@Param('eventId') id: string) {
-    return this.leaderBoardService.getEventLeaderboard(id);
+  getEventLeaderboard(@Param('eventId') id: string, @Req() req: any) {
+    const userId = (req.user as any).id;
+    return this.leaderBoardService.getEventLeaderboard(id, userId);
   }
 }

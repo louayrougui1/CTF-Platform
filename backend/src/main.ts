@@ -3,9 +3,14 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { writeFileSync } from 'fs';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Add cookie-parser middleware to parse cookies from incoming requests
+  app.use(cookieParser()); // 👈 add this line
+
   //app.enableCors();
   app.useGlobalPipes(
     new ValidationPipe({

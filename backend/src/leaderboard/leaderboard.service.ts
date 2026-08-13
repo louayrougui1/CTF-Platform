@@ -2,10 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotFoundException } from '@nestjs/common';
 import { ForbiddenException } from '@nestjs/common';
-import { UseGuards } from '@nestjs/common';
-import { JwtGuard } from '../auth/guards/jwt.guard';
+
 @Injectable()
-@UseGuards(JwtGuard)
 export class LeaderboardService {
   constructor(private readonly prisma: PrismaService) {}
   private async findEventOrThrow(eventId: string) {
@@ -31,8 +29,18 @@ export class LeaderboardService {
 
     return event;
   }
-  async getEventLeaderboard(eventId: string) {
+
+  private async assertEventMember(eventId: string, userId: string) {
+    const member = await this.prisma.eventMember.findUnique({
+      where: { userId_eventId: { userId, eventId } },
+    });
+    if (!member)
+      throw new ForbiddenException('You are not a member of this event');
+    return member;
+  }
+  async getEventLeaderboard(eventId: string, userId: string) {
     await this.findEventOrThrow(eventId);
+    await this.assertEventMember(eventId, userId);
 
     const teams = await this.prisma.team.findMany({
       where: { eventId },

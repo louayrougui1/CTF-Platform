@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateEventDto } from './dto/eventCreate.dto';
-import { NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  NotFoundException,
+  ForbiddenException,
+  ConflictException,
+} from '@nestjs/common';
 import { UpdateEventDto } from './dto/updateEvent.dto';
 
 const EVENT_SELECT = {
@@ -51,6 +55,7 @@ export class EventService {
 
     return this.prisma.event.findMany({
       where: {
+        isPublic: true,
         OR: [{ endDate: { gt: now } }, { endDate: null }],
       },
       orderBy: { startDate: 'asc' },
@@ -66,15 +71,30 @@ export class EventService {
     });
   }
 
-  async getEvent(id: string) {
+  async getEvent(user: any, id: string) {
+    const membership = await this.prisma.eventMember.findUnique({
+      where: { userId_eventId: { userId: user.id, eventId: id } },
+    });
+
+    if (!membership) {
+      // Don't leak whether the event exists to non-members
+      throw new NotFoundException('Event not found');
+    }
+
     return this.prisma.event.findUniqueOrThrow({
       where: { id },
       select: EVENT_SELECT,
     });
   }
 
-  async getEventStats(eventId: string) {
-    await this.findEventOrThrow(eventId);
+  async getEventStats(user: any, eventId: string) {
+    const membership = await this.prisma.eventMember.findUnique({
+      where: { userId_eventId: { userId: user.id, eventId } },
+    });
+
+    if (!membership) {
+      throw new NotFoundException('Event not found');
+    }
 
     const [memberCount, teamCount, challengeCount, solveCount] =
       await Promise.all([
@@ -88,7 +108,6 @@ export class EventService {
 
     return { memberCount, teamCount, challengeCount, solveCount };
   }
-
   // ─── MUTATIONS ──────────────────────────────────────────────────────────────
 
   async createEvent(user: any, dto: CreateEventDto) {
@@ -100,13 +119,20 @@ export class EventService {
       select: EVENT_SELECT,
     });
 
-    await this.prisma.eventMember.create({
-      data: {
-        userId: user.id,
-        eventId: event.id,
-        role: 'OWNER',
-      },
-    });
+    try {
+      await this.prisma.eventMember.create({
+        data: {
+          userId: user.id,
+          eventId: event.id,
+          role: 'OWNER',
+        },
+      });
+    } catch (err: any) {
+      if (err.code === 'P2002') {
+        throw new ConflictException('User is already a member of this event');
+      }
+      throw err;
+    }
 
     return event;
   }

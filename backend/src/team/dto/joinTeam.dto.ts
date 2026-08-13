@@ -1,11 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, MaxLength, MinLength } from 'class-validator';
+import { IsString, IsNotEmpty, Length } from 'class-validator';
 
 export class JoinTeamDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  @MaxLength(100)
-  @MinLength(5)
+  @Length(4, 100)
   password: string;
 }

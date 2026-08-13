@@ -39,8 +39,8 @@ export class TeamController {
 
   @Get()
   @ApiOkResponse({ type: TeamListResponseDto, isArray: true })
-  getEventTeams(@Param('eventId') eventId: string) {
-    return this.teamService.getEventTeams(eventId);
+  getEventTeams(@Param('eventId') eventId: string, @Req() req: Request) {
+    return this.teamService.getEventTeams(req.user, eventId);
   }
 
   @Get('me')

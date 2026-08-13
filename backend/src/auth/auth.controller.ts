@@ -69,7 +69,7 @@ export class AuthController {
   @Post('refresh')
   @ApiCreatedResponse({ type: AuthResponseDto })
   refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const refreshToken = req.cookies['refresh_token'];
+    const refreshToken = req.cookies?.['refresh_token'];
     if (!refreshToken) throw new UnauthorizedException('No refresh token');
     return this.authService.refresh(refreshToken, res);
   }
@@ -78,7 +78,8 @@ export class AuthController {
   @Post('logout')
   @ApiCreatedResponse({ type: AuthMessageResponseDto })
   logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const refreshToken = req.cookies['refresh_token'];
+    const refreshToken = req.cookies?.['refresh_token'];
+    console.log('Refresh token from cookie:', refreshToken);
     if (!refreshToken) throw new UnauthorizedException('No refresh token');
     this.authService.logout(res);
     return { message: 'Logged out' };
@@ -129,7 +130,8 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const resetToken = req.cookies['reset_token'];
+    const resetToken = req.cookies?.['reset_token'];
+    if (!resetToken) throw new UnauthorizedException('No reset token');
     return this.authService.resetPassword(dto, resetToken, res);
   }
 }
