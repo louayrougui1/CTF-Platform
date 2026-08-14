@@ -76,6 +76,9 @@ export class AuthService {
         'Please verify your email before logging in.',
       );
     }
+    if (!user.password) {
+      return null;
+    }
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
@@ -407,7 +410,9 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new BadRequestException('User not found');
+      throw new BadRequestException(
+        'If an account exists for that email, a reset code has been sent.',
+      );
     }
 
     if (user.emailVerified) {

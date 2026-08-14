@@ -31,8 +31,8 @@ export class EventMemberController {
 
   @Get(':eventId/members')
   @ApiOkResponse({ type: EventMemberResponseDto, isArray: true })
-  getEventMembers(@Param('eventId') eventId: string) {
-    return this.eventMemberService.getEventMembers(eventId);
+  getEventMembers(@Param('eventId') eventId: string, @Req() req: Request) {
+    return this.eventMemberService.getEventMembers(req.user, eventId);
   }
 
   @Post(':eventId/join')

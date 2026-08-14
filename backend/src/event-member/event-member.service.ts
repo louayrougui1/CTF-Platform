@@ -36,8 +36,21 @@ export class EventMemberService {
     return event;
   }
 
-  async getEventMembers(eventId: string) {
+  // Ensures the caller is either the event owner or a member of the event.
+  // Use this to gate actions that should be limited to people already
+  // associated with the event, rather than anyone who knows the eventId.
+  private async assertEventMember(eventId: string, userId: string) {
+    const member = await this.prisma.eventMember.findUnique({
+      where: { userId_eventId: { userId, eventId } },
+    });
+    if (!member)
+      throw new ForbiddenException('You are not a member of this event');
+    return member;
+  }
+
+  async getEventMembers(user: any, eventId: string) {
     await this.findEventOrThrow(eventId);
+    await this.assertEventMember(eventId, user.id);
 
     return this.prisma.eventMember.findMany({
       where: { eventId },
