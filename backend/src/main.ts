@@ -39,6 +39,24 @@ async function bootstrap() {
       },
       'refresh_token', // This is the name you'll reference in @ApiCookieAuth()
     )
+    .addCookieAuth(
+      'reset_token',
+      {
+        type: 'apiKey',
+        in: 'cookie',
+        name: 'reset_token',
+      },
+      'reset_token',
+    )
+    .addCookieAuth(
+      'google_link_token',
+      {
+        type: 'apiKey',
+        in: 'cookie',
+        name: 'google_link_token',
+      },
+      'google_link_token',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

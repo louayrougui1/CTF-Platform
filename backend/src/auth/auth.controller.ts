@@ -16,15 +16,20 @@ import type { Response, Request } from 'express';
 import { GoogleAuthGuard } from './guards/google.guard';
 import { ResendOtpDto } from './dto/resendOtp.dto';
 import { AuthPayloadDto } from './dto/auth.dto';
+import { GoogleLoginResponseDto } from './dto/GoogleLoginResponse.dto';
 import {
   ApiCookieAuth,
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiOperation,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { AuthMessageResponseDto } from './dto/auth-message-response.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { SetPasswordDto } from './dto/set-password.dto';
+import { JwtGuard } from './guards/jwt.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -65,6 +70,14 @@ export class AuthController {
     return this.authService.register(dto, res);
   }
 
+  @Post('set-password')
+  @UseGuards(JwtGuard)
+  @ApiBearerAuth()
+  @ApiCreatedResponse({ type: AuthResponseDto })
+  setPassword(@Body() dto: SetPasswordDto, @Req() req: Request) {
+    return this.authService.setPassword(req.user, dto);
+  }
+
   @ApiCookieAuth('refresh_token')
   @Post('refresh')
   @ApiCreatedResponse({ type: AuthResponseDto })
@@ -79,7 +92,6 @@ export class AuthController {
   @ApiCreatedResponse({ type: AuthMessageResponseDto })
   logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const refreshToken = req.cookies?.['refresh_token'];
-    console.log('Refresh token from cookie:', refreshToken);
     if (!refreshToken) throw new UnauthorizedException('No refresh token');
     this.authService.logout(res);
     return { message: 'Logged out' };
@@ -93,20 +105,42 @@ export class AuthController {
   @UseGuards(GoogleAuthGuard)
   @ApiOperation({
     summary: 'Google OAuth callback',
-    description: 'Redirects to frontend with token in URL query parameter',
+    description:
+      'If login succeeds, redirect to the frontend with the access token in the URL.If the account requires Google linking confirmation, redirect to the frontend link-confirmation page and set the google_link_token cookie. The frontend must send this cookie when calling POST /auth/google/link.',
   })
   async googleCallback(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    console.log('Google callback route hit...');
     const result = await this.authService.googleLogin(req.user, res);
 
-    // Redirect to frontend with the access token in the query string
-    // (or POST it via a form — depends on your frontend flow)
     const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:5173';
-    res.redirect(`${frontendUrl}/?token=${result.access_token}`);
+
+    // Existing account — ask frontend for confirmation
+    if (result.requiresLinkConfirmation) {
+      return res.redirect(`${frontendUrl}/google/link-confirmation`);
+    }
+
+    // Normal Google login
+    return res.redirect(
+      `${frontendUrl}/?token=${encodeURIComponent(result.access_token!)}`,
+    );
   }
+
+  @ApiCookieAuth('google_link_token')
+  @Post('google/link')
+  @ApiOperation({
+    summary: 'Confirm and link Google account',
+  })
+  async linkGoogleAccount(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const linkToken = req.cookies?.['google_link_token'];
+
+    return this.authService.linkGoogleAccount(linkToken, res);
+  }
+
   @Post('forgot-password')
   @ApiCreatedResponse({ type: AuthMessageResponseDto })
   forgotPassword(@Body() dto: ForgotPasswordDto) {

@@ -139,6 +139,42 @@
         ]
       }
     },
+    "/auth/set-password": {
+      "post": {
+        "operationId": "AuthController_setPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
     "/auth/refresh": {
       "post": {
         "operationId": "AuthController_refresh",
@@ -207,7 +243,7 @@
     },
     "/auth/google/callback": {
       "get": {
-        "description": "Redirects to frontend with token in URL query parameter",
+        "description": "If login succeeds, redirect to the frontend with the access token in the URL.If the account requires Google linking confirmation, redirect to the frontend link-confirmation page and set the google_link_token cookie. The frontend must send this cookie when calling POST /auth/google/link.",
         "operationId": "AuthController_googleCallback",
         "parameters": [],
         "responses": {
@@ -216,6 +252,26 @@
           }
         },
         "summary": "Google OAuth callback",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/google/link": {
+      "post": {
+        "operationId": "AuthController_linkGoogleAccount",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "google_link_token": []
+          }
+        ],
+        "summary": "Confirm and link Google account",
         "tags": [
           "Auth"
         ]
@@ -1562,6 +1618,16 @@
         "type": "apiKey",
         "in": "cookie",
         "name": "refresh_token"
+      },
+      "reset_token": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "reset_token"
+      },
+      "google_link_token": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "google_link_token"
       }
     },
     "schemas": {
@@ -1691,6 +1757,17 @@
           "email",
           "username",
           "password"
+        ]
+      },
+      "SetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "newPassword": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "newPassword"
         ]
       },
       "ForgotPasswordDto": {
@@ -2319,15 +2396,11 @@
       "ChallengeStatsResponseDto": {
         "type": "object",
         "properties": {
-          "submissionCount": {
-            "type": "number"
-          },
           "solveCount": {
             "type": "number"
           }
         },
         "required": [
-          "submissionCount",
           "solveCount"
         ]
       },
