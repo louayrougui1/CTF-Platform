@@ -1,5 +1,6 @@
 import {
   IsDate,
+  IsBoolean,
   IsOptional,
   IsString,
   Length,
@@ -67,4 +68,9 @@ export class UpdateEventDto {
   @MinDurationFromStart(30)
   @IsOptional()
   endDate?: Date;
+
+  @ApiPropertyOptional()
+  @IsBoolean()
+  @IsOptional()
+  isPublic?: boolean;
 }

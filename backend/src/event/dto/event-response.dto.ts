@@ -16,6 +16,9 @@ export class EventResponseDto {
   @ApiProperty({ type: String, format: 'date-time', nullable: true })
   endDate: Date | null;
 
+  @ApiProperty({ type: Boolean })
+  isPublic: boolean;
+
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt: Date;
 

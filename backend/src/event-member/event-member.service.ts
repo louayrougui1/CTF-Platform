@@ -136,6 +136,10 @@ export class EventMemberService {
   async joinEvent(user: any, eventId: string) {
     const event = await this.findEventOrThrow(eventId);
 
+    if (!event.isPublic) {
+      throw new ForbiddenException('This event is private');
+    }
+
     if (event.endDate && event.endDate < new Date()) {
       throw new BadRequestException(
         'Cannot join an event that has already ended',

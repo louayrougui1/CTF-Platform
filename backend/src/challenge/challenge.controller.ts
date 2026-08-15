@@ -148,6 +148,7 @@ export class ChallengeController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: ChallengeResponseDto })
   deleteChallenge(@Param('id') id: string, @Req() req: Request) {
     return this.challengeService.deleteChallenge(req.user, id);
   }

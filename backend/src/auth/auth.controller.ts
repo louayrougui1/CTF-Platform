@@ -129,6 +129,7 @@ export class AuthController {
 
   @ApiCookieAuth('google_link_token')
   @Post('google/link')
+  @ApiCreatedResponse({ type: AuthResponseDto })
   @ApiOperation({
     summary: 'Confirm and link Google account',
   })

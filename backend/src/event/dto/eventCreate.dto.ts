@@ -1,5 +1,6 @@
 import {
   IsDate,
+  IsBoolean,
   IsOptional,
   IsString,
   Length,
@@ -9,7 +10,7 @@ import {
   ValidationArguments,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /**
  * Custom decorator enforcing a minimum gap (in minutes) between
@@ -63,4 +64,9 @@ export class CreateEventDto {
   @IsDate()
   @MinDurationFromStart(30)
   endDate: Date;
+
+  @ApiPropertyOptional({ default: true })
+  @IsBoolean()
+  @IsOptional()
+  isPublic?: boolean;
 }

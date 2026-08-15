@@ -227,7 +227,12 @@ export class AuthService {
     });
 
     const { password, ...safeUser } = updated;
-    return { user: safeUser };
+    const accessToken = this.generateAccessToken(safeUser);
+
+    return {
+      access_token: accessToken,
+      user: safeUser,
+    };
   }
 
   async refresh(refreshToken: string, res: Response) {

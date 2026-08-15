@@ -5,6 +5,7 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { CreateChallengeDto } from './dto/challengeCreate.dto';
 import { UpdateChallengeDto } from './dto/updateChallenge.dto';
 import { SubmitFlagDto } from './dto/submitFlag.dto';
@@ -16,6 +17,8 @@ const CHALLENGE_SELECT = {
   title: true,
   description: true,
   points: true,
+  category: true,
+  difficulty: true,
   eventId: true,
   createdAt: true,
   updatedAt: true,
@@ -110,7 +113,7 @@ export class ChallengeService {
     await this.assertEventMember(eventId, user.id);
 
     if (!(await this.hasEventStarted(eventId))) {
-      return { message: NOT_STARTED_MESSAGE };
+      throw new BadRequestException(NOT_STARTED_MESSAGE);
     }
 
     const challenges = await this.prisma.challenge.findMany({
@@ -134,7 +137,7 @@ export class ChallengeService {
     await this.assertEventMember(challenge.eventId, user.id);
 
     if (!(await this.hasEventStarted(challenge.eventId))) {
-      return { message: NOT_STARTED_MESSAGE };
+      throw new BadRequestException(NOT_STARTED_MESSAGE);
     }
 
     const { flag, ...challengeData } = challenge;
@@ -154,7 +157,7 @@ export class ChallengeService {
     await this.assertEventMember(challenge.eventId, user.id);
 
     if (!(await this.hasEventStarted(challenge.eventId))) {
-      return { message: NOT_STARTED_MESSAGE };
+      throw new BadRequestException(NOT_STARTED_MESSAGE);
     }
 
     const solveCount = await this.prisma.submission.count({
@@ -198,19 +201,22 @@ export class ChallengeService {
 
     await this.assertEventOwnerOrAdmin(challenge.eventId, user.id);
 
-    let fileUrl: string | undefined;
+    const data: Prisma.ChallengeUpdateInput = { ...dto };
+
     if (file) {
       const { path } = await this.storageService.upload(file);
-      fileUrl = path; // storing the storage PATH, not a signed URL — see note below
+      data.hasFile = true;
+      data.fileUrl = path;
+
+      // Replace the previously stored file, if any, to avoid orphaned objects
+      if (challenge.hasFile && challenge.fileUrl) {
+        await this.storageService.delete(challenge.fileUrl);
+      }
     }
 
     return this.prisma.challenge.update({
       where: { id },
-      data: {
-        ...dto,
-        hasFile: !!file,
-        fileUrl,
-      },
+      data,
       select: CHALLENGE_SELECT,
     });
   }

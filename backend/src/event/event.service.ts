@@ -14,6 +14,7 @@ const EVENT_SELECT = {
   description: true,
   startDate: true,
   endDate: true,
+  isPublic: true,
   createdAt: true,
   updatedAt: true,
 } as const;

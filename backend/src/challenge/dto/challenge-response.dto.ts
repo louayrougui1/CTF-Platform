@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ChallengeCategory, ChallengeDifficulty } from '@prisma/client';
 
 export class ChallengeResponseDto {
   @ApiProperty()
@@ -12,6 +13,12 @@ export class ChallengeResponseDto {
 
   @ApiProperty()
   points: number;
+
+  @ApiProperty({ enum: ChallengeCategory })
+  category: ChallengeCategory;
+
+  @ApiProperty({ enum: ChallengeDifficulty })
+  difficulty: ChallengeDifficulty;
 
   @ApiProperty()
   eventId: string;

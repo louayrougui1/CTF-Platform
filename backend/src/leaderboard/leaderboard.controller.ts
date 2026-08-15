@@ -12,7 +12,7 @@ export class LeaderboardController {
   @Get()
   @ApiOkResponse({ type: LeaderboardResponseDto, isArray: true })
   getEventLeaderboard(@Param('eventId') id: string, @Req() req: any) {
-    const userId = (req.user as any).id;
+    const userId = req.user.id;
     return this.leaderBoardService.getEventLeaderboard(id, userId);
   }
 }
