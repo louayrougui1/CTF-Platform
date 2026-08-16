@@ -42,10 +42,16 @@ export class EventController {
     return this.eventsService.getActiveEvents();
   }
 
-  @Get('mine')
+  @Get('owned')
   @ApiOkResponse({ type: EventResponseDto, isArray: true })
   getMyEvents(@Req() req: Request) {
     return this.eventsService.getMyEvents(req.user);
+  }
+
+  @Get('joined')
+  @ApiOkResponse({ type: EventResponseDto, isArray: true })
+  getJoinedEvents(@Req() req: Request) {
+    return this.eventsService.getJoinedEvents(req.user);
   }
 
   @Get(':id')

@@ -15,7 +15,7 @@ npm run test:e2e       # jest --config ./test/jest-e2e.json
 npm run build          # nest build -> dist/
 ```
 
-Verify order: `npm run lint` -> `npm run build` -> `npm run test`.
+Reliable verification: `npm run build` is the gate. `npm run lint` and `npm run test` are **red pre-existing** (see Known gotchas) — run them only to check you didn't add new errors, never expect green.
 
 ## DB / Prisma
 
@@ -38,6 +38,8 @@ Everything is behind environment variables; nothing is mocked. No `.env` = boot 
 
 - Monolithic Nest app; all modules registered in `src/app.module.ts`. Feature folders: `auth`, `user`, `event`, `team`, `event-member`, `challenge`, `leaderboard`, plus `prisma`, `supabase`, `storage`.
 - Routes (no global prefix): `auth`, `user`, `events`, `events/:eventId/teams`, `events/:eventId/challenges`, `events/:eventId/leaderboard`, `event-member`. Most are `@ApiBearerAuth('bearer')`-protected except auth.
+- Challenge access rules (don't regress): `GET events/:eventId/challenges?teamId=` requires a `teamId` the caller belongs to, UNLESS the caller is the event owner/admin (they skip the "event not started" gate and get `solved: false` everywhere). `GET events/:eventId/challenges/:id` is owner/admin-only. Non-admin callers without a team get 403.
+- Every challenge and team route validates the URL `eventId` against the resource's actual event (404 `Challenge not found` / 400 `Team does not belong to this event`) — keep this check on any new nested route.
 - Endpoints requiring an event+team context have the caller resolved from the JWT; there is no entity-level ownership guard layer — permissions are enforced inline in services (e.g. owner/admin checks on `EventMember`/`TeamMember`).
 - Response shaping: each module returns DTOs from `dto/` (hand-wired, no `@nestjs/mapped-types`). Keep new endpoints returning the matching `*-response.dto.ts` style.
 - Global `ValidationPipe` (whitelist + transform) forces class-validator DTOs on all bodies; validation errors will fail requests if a DTO lacks validation decorators.
@@ -46,6 +48,14 @@ Everything is behind environment variables; nothing is mocked. No `.env` = boot 
 
 ## Conventions
 
-- Pairs of `controller.spec.ts` / `service.spec.ts` exist per feature and use `@nestjs/testing` mocks — extend them when changing controllers/services.
+- Specs live alongside source (`controller.spec.ts` / `service.spec.ts`) and use `@nestjs/testing` mocks — but see the Known gotchas: most existing specs are broken stubs.
 - Auth flow: OTP email verification on register (users can't log in until `emailVerified`), JWT bearer access token (30 min) + httpOnly `refresh_token` cookie (7 days). Registering with an email that belongs to a Google-only account throws `ConflictException` (no silent password link — passwords are added only via the authenticated `setPassword` flow).
 - Import Prisma enums/types from `@prisma/client`, not `prisma/`.
+
+## Known gotchas
+
+- **`npm run lint` is red pre-existing** (~310 errors). ESLint uses `recommendedTypeChecked`, and the codebase passes `user: any` around everywhere, so `no-unsafe-*` fires on most files; spec files add more. When you run it, only treat NEW findings in the files you touched as actionable (especially `prettier/prettier`).
+- **`npm run test` fails pre-existing**: most `*.spec.ts` are minimal stubs that don't provide their service dependencies (e.g. `PrismaService`), so DI resolution fails at compile. Only `app.controller.spec.ts` and `challenge.service.spec.ts` (which mocks `PrismaService`/`StorageService`) pass. For focused verification use `npx jest src/<path>/<file>.spec.ts --silent`, not the whole suite.
+- **`@nestjs/schedule` is installed but `ScheduleModule.forRoot()` is never imported** — `otp-cleanup.service.ts`'s `@Cron` never fires and the service isn't registered anywhere. Don't debug it as a runtime bug.
+- **Don't `@nestjs/mapped-types`**: response DTOs are hand-wired with `@ApiProperty`; keep new endpoints returning `*-response.dto.ts` style objects.
+- **Auth cookies are `sameSite: 'none'`** (`secure` only when `NODE_ENV=production`) in `auth.service.ts` so a hosted, different-origin frontend can send them. Do not change back to `'strict'` — that breaks cross-domain `/auth/refresh`, Google account linking, and password reset.

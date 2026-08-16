@@ -263,7 +263,14 @@
         "parameters": [],
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -536,6 +543,35 @@
     "/events/mine": {
       "get": {
         "operationId": "EventController_getMyEvents",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Event"
+        ]
+      }
+    },
+    "/events/joined": {
+      "get": {
+        "operationId": "EventController_getJoinedEvents",
         "parameters": [],
         "responses": {
           "200": {
@@ -835,6 +871,14 @@
         "operationId": "TeamController_updateTeam",
         "parameters": [
           {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "teamId",
             "required": true,
             "in": "path",
@@ -877,6 +921,14 @@
       "delete": {
         "operationId": "TeamController_deleteTeam",
         "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "teamId",
             "required": true,
@@ -966,6 +1018,14 @@
         "operationId": "TeamController_leaveTeam",
         "parameters": [
           {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "teamId",
             "required": true,
             "in": "path",
@@ -1000,6 +1060,14 @@
       "delete": {
         "operationId": "TeamController_kickMember",
         "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "teamId",
             "required": true,
@@ -1266,6 +1334,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "teamId",
+            "required": false,
+            "in": "query",
+            "description": "Team id; required for non-admin callers, returns each challenge with a solved flag",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1380,6 +1457,14 @@
         "operationId": "ChallengeController_getChallenge",
         "parameters": [
           {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "id",
             "required": true,
             "in": "path",
@@ -1414,6 +1499,14 @@
         "parameters": [
           {
             "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "eventId",
             "required": true,
             "in": "path",
             "schema": {
@@ -1495,6 +1588,14 @@
         "operationId": "ChallengeController_deleteChallenge",
         "parameters": [
           {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "id",
             "required": true,
             "in": "path",
@@ -1505,7 +1606,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChallengeResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1520,7 +1628,7 @@
     },
     "/events/{eventId}/challenges/{id}/stats": {
       "get": {
-        "operationId": "ChallengeController_getChallengeStats",
+        "operationId": "ChallengeController_getChallengeSolveCount",
         "parameters": [
           {
             "name": "id",
@@ -1557,6 +1665,14 @@
       "post": {
         "operationId": "ChallengeController_submitFlag",
         "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "id",
             "required": true,
@@ -1903,6 +2019,9 @@
             "format": "date-time",
             "nullable": true
           },
+          "isPublic": {
+            "type": "boolean"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -1918,6 +2037,7 @@
           "description",
           "startDate",
           "endDate",
+          "isPublic",
           "createdAt",
           "updatedAt"
         ]
@@ -1938,6 +2058,10 @@
           "endDate": {
             "format": "date-time",
             "type": "string"
+          },
+          "isPublic": {
+            "type": "boolean",
+            "default": true
           }
         },
         "required": [
@@ -1963,6 +2087,9 @@
           "endDate": {
             "format": "date-time",
             "type": "string"
+          },
+          "isPublic": {
+            "type": "boolean"
           }
         }
       },
@@ -2362,8 +2489,32 @@
           "points": {
             "type": "number"
           },
+          "category": {
+            "type": "string",
+            "enum": [
+              "WEB",
+              "CRYPTO",
+              "PWN",
+              "REVERSE",
+              "FORENSICS",
+              "OSINT",
+              "MISC"
+            ]
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "EASY",
+              "MEDIUM",
+              "HARD",
+              "EXPERT"
+            ]
+          },
           "eventId": {
             "type": "string"
+          },
+          "solved": {
+            "type": "boolean"
           },
           "hasFile": {
             "type": "boolean"
@@ -2386,7 +2537,10 @@
           "title",
           "description",
           "points",
+          "category",
+          "difficulty",
           "eventId",
+          "solved",
           "hasFile",
           "fileUrl",
           "createdAt",
@@ -2418,9 +2572,6 @@
       "SubmissionResponseDto": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string"
-          },
           "status": {
             "type": "string"
           },
@@ -2430,7 +2581,6 @@
           }
         },
         "required": [
-          "id",
           "status",
           "createdAt"
         ]

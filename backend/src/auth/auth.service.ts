@@ -57,7 +57,7 @@ export class AuthService {
     res.cookie('google_link_token', linkToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'none',
       maxAge: 5 * 60 * 1000, // 5 minutes
     });
   }
@@ -78,7 +78,7 @@ export class AuthService {
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
     });
   }
@@ -266,7 +266,7 @@ export class AuthService {
     res.clearCookie('refresh_token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'none',
     });
   }
 
@@ -396,7 +396,7 @@ export class AuthService {
     res.clearCookie('google_link_token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'none',
     });
 
     const { password, ...safeUser } = updatedUser;
@@ -456,7 +456,7 @@ export class AuthService {
     res.cookie('reset_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'none',
       maxAge: 5 * 60 * 1000, // 5 minutes
     });
   }
@@ -465,7 +465,7 @@ export class AuthService {
     res.clearCookie('reset_token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'none',
     });
   }
 

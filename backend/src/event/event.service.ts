@@ -72,6 +72,14 @@ export class EventService {
     });
   }
 
+  async getJoinedEvents(user: any) {
+    return this.prisma.event.findMany({
+      where: { members: { some: { userId: user.id } } },
+      select: EVENT_SELECT,
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async getEvent(user: any, id: string) {
     const membership = await this.prisma.eventMember.findUnique({
       where: { userId_eventId: { userId: user.id, eventId: id } },

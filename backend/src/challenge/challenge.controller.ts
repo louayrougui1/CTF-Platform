@@ -27,6 +27,7 @@ import {
   ApiConsumes,
   ApiOkResponse,
   ApiCreatedResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { ChallengeResponseDto } from './dto/challenge-response.dto';
 import { ChallengeStatsResponseDto } from './dto/challenge-stats-response.dto';
@@ -42,6 +43,13 @@ export class ChallengeController {
 
   @Get()
   @ApiOkResponse({ type: ChallengeResponseDto, isArray: true })
+  @ApiQuery({
+    name: 'teamId',
+    required: false,
+    type: String,
+    description:
+      'Team id; required for non-admin callers, returns each challenge with a solved flag',
+  })
   getChallengesByEvent(
     @Param('eventId') eventId: string,
     @Query('teamId') teamId: string | undefined,
