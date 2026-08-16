@@ -103,7 +103,7 @@ export class EventService {
         this.prisma.team.count({ where: { eventId } }),
         this.prisma.challenge.count({ where: { eventId } }),
         this.prisma.submission.count({
-          where: { challenge: { eventId }, status: 'CORRECT' },
+          where: { challenge: { eventId } },
         }),
       ]);
 

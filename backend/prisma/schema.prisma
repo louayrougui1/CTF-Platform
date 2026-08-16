@@ -19,11 +19,6 @@ enum TeamRole {
   MEMBER
 }
 
-enum SubmissionStatus {
-  CORRECT
-  WRONG
-}
-
 enum OtpPurpose {
   EMAIL_VERIFICATION
   LOGIN_2FA
@@ -110,6 +105,7 @@ model Team {
 
   event   Event        @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   members TeamMember[]
+  submissions Submission[]
 
   @@unique([eventId, name])
   @@index([eventId])
@@ -190,17 +186,19 @@ model Challenge {
 }
 
 model Submission {
-  id          String           @id @default(uuid())
-  flag        String
-  status      SubmissionStatus
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   userId      String
   challengeId String
+  teamId      String
 
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  team      Team      @relation(fields: [teamId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
+  @@unique([challengeId, teamId])
   @@index([userId])
   @@index([challengeId])
+  @@index([teamId])
 }

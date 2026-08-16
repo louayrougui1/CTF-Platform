@@ -161,7 +161,7 @@ export class ChallengeService {
     }
 
     const solveCount = await this.prisma.submission.count({
-      where: { challengeId, status: 'CORRECT' },
+      where: { challengeId },
     });
     return { solveCount };
   }
@@ -226,6 +226,10 @@ export class ChallengeService {
 
     await this.assertEventOwnerOrAdmin(challenge.eventId, user.id);
 
+    if (challenge.hasFile && challenge.fileUrl) {
+      await this.storageService.delete(challenge.fileUrl);
+    }
+
     return this.prisma.challenge.delete({
       where: { id },
       select: CHALLENGE_SELECT,
@@ -241,35 +245,60 @@ export class ChallengeService {
       throw new BadRequestException(NOT_STARTED_MESSAGE);
     }
 
-    // If the user already solved this challenge, don't let them re-submit for points.
+    const membership = await this.prisma.teamMember.findFirst({
+      where: { userId: user.id, eventId: challenge.eventId },
+      select: { teamId: true },
+    });
+
+    if (!membership) {
+      throw new BadRequestException(
+        'You must be on a team to solve challenges',
+      );
+    }
+
     const alreadySolved = await this.prisma.submission.findFirst({
-      where: {
-        userId: user.id,
-        challengeId,
-        status: 'CORRECT',
-      },
+      where: { challengeId, teamId: membership.teamId },
+      select: { id: true },
     });
 
     if (alreadySolved) {
-      throw new BadRequestException('You have already solved this challenge');
+      throw new BadRequestException(
+        'You and your team have already solved this challenge',
+      );
     }
 
     const isCorrect = dto.flag.trim() === challenge.flag.trim();
 
-    const submission = await this.prisma.submission.create({
-      data: {
-        flag: dto.flag,
-        status: isCorrect ? 'CORRECT' : 'WRONG',
-        userId: user.id,
-        challengeId,
-      },
-      select: {
-        id: true,
-        status: true,
-        createdAt: true,
-      },
-    });
+    if (!isCorrect) {
+      return {
+        status: 'WRONG',
+        createdAt: new Date(),
+      };
+    }
 
-    return submission;
+    try {
+      const submission = await this.prisma.submission.create({
+        data: {
+          userId: user.id,
+          challengeId,
+          teamId: membership.teamId,
+        },
+        select: {
+          createdAt: true,
+        },
+      });
+
+      return {
+        status: 'CORRECT',
+        createdAt: submission.createdAt,
+      };
+    } catch (err: any) {
+      if (err.code === 'P2002') {
+        throw new BadRequestException(
+          'You and your team have already solved this challenge',
+        );
+      }
+      throw err;
+    }
   }
 }

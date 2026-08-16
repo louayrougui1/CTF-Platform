@@ -47,22 +47,13 @@ export class LeaderboardService {
       select: {
         id: true,
         name: true,
-        members: {
+        submissions: {
+          where: {
+            challenge: { eventId },
+          },
           select: {
-            user: {
-              select: {
-                submissions: {
-                  where: {
-                    status: 'CORRECT',
-                    challenge: { eventId },
-                  },
-                  select: {
-                    createdAt: true,
-                    challenge: { select: { points: true } },
-                  },
-                },
-              },
-            },
+            createdAt: true,
+            challenge: { select: { points: true } },
           },
         },
       },
@@ -70,16 +61,14 @@ export class LeaderboardService {
 
     return teams
       .map((team) => {
-        const allSubmissions = team.members.flatMap((m) => m.user.submissions);
-
-        const score = allSubmissions.reduce(
+        const score = team.submissions.reduce(
           (sum, s) => sum + s.challenge.points,
           0,
         );
 
         const earliestCorrect =
-          allSubmissions.length > 0
-            ? Math.min(...allSubmissions.map((s) => s.createdAt.getTime()))
+          team.submissions.length > 0
+            ? Math.min(...team.submissions.map((s) => s.createdAt.getTime()))
             : Infinity;
 
         return { teamId: team.id, teamName: team.name, score, earliestCorrect };

@@ -14,7 +14,7 @@ import { OtpService } from './otp/otp.service';
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '300m' },
+      signOptions: { expiresIn: '30m' },
     }),
     ConfigModule.forFeature(googleOAuthConfig),
   ],
