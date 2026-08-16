@@ -178,6 +178,7 @@ model Challenge {
 
   hasFile Boolean @default(false)
   fileUrl String?
+  fileName String?
 
   event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   submissions Submission[]

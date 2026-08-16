@@ -540,7 +540,7 @@
         ]
       }
     },
-    "/events/mine": {
+    "/events/owned": {
       "get": {
         "operationId": "EventController_getMyEvents",
         "parameters": [],
@@ -2523,6 +2523,10 @@
             "type": "object",
             "nullable": true
           },
+          "fileName": {
+            "type": "object",
+            "nullable": true
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -2543,6 +2547,7 @@
           "solved",
           "hasFile",
           "fileUrl",
+          "fileName",
           "createdAt",
           "updatedAt"
         ]

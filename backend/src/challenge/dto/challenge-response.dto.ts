@@ -32,6 +32,9 @@ export class ChallengeResponseDto {
   @ApiProperty({ nullable: true })
   fileUrl: string | null;
 
+  @ApiProperty({ nullable: true })
+  fileName: string | null;
+
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt: Date;
 

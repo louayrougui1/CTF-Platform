@@ -24,6 +24,7 @@ const CHALLENGE_SELECT = {
   updatedAt: true,
   hasFile: true,
   fileUrl: true,
+  fileName: true,
 } as const;
 
 const NOT_STARTED_MESSAGE =
@@ -222,6 +223,7 @@ export class ChallengeService {
         eventId,
         hasFile: !!file,
         fileUrl,
+        fileName: file?.originalname,
       },
       select: CHALLENGE_SELECT,
     });
@@ -246,6 +248,7 @@ export class ChallengeService {
       const { path } = await this.storageService.upload(file);
       data.hasFile = true;
       data.fileUrl = path;
+      data.fileName = file.originalname;
 
       // Replace the previously stored file, if any, to avoid orphaned objects
       if (challenge.hasFile && challenge.fileUrl) {

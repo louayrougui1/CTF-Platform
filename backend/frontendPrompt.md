@@ -95,6 +95,16 @@ Owner/admin challenge-list calls omit `teamId`; everyone else must pass their ow
 
 ---
 
+## Challenge UX
+
+- The **Challenges list page** shows a card/row per challenge with only: `title`, `difficulty`, `points`, `category` (plus the solved state). Do **not** auto-download or render challenge files on this page.
+- Clicking a challenge opens a **modal** populated from the already-loaded list response — no extra API call:
+  - Full `description`
+  - A flag input field + **Submit** button calling `POST /events/{eventId}/challenges/{id}/submit`; show the API result (`status: 'WRONG'` → "Wrong flag", `status: 'CORRECT'` → "Solved!")
+  - If `hasFile` is true, show `fileName` as a blue, clickable link — the file downloads from `fileUrl` **only** when the user clicks it.
+
+---
+
 ## Supabase
 
 Supabase PostgreSQL stores structured application data through Prisma.
@@ -138,7 +148,7 @@ Keep the page structure focused and practical.
 - Teams
 - Team Details
 - Challenges
-- Challenge Details
+- Challenge modal (opened from the list — no separate detail page for participants)
 - Leaderboard
 - User Profile
 - My Events (owned, with a Manage entry per event)
