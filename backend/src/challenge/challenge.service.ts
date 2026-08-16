@@ -109,11 +109,44 @@ export class ChallengeService {
 
   // ─── QUERIES ────────────────────────────────────────────────────────────────
 
-  async getChallengesByEvent(user: any, eventId: string) {
-    await this.assertEventMember(eventId, user.id);
+  async getChallengesByEvent(user: any, eventId: string, teamId?: string) {
+    let isOwnerOrAdmin = false;
+    try {
+      await this.assertEventOwnerOrAdmin(eventId, user.id);
+      isOwnerOrAdmin = true;
+    } catch {
+      isOwnerOrAdmin = false;
+    }
 
-    if (!(await this.hasEventStarted(eventId))) {
-      throw new BadRequestException(NOT_STARTED_MESSAGE);
+    let solvedIds = new Set<string>();
+
+    if (!isOwnerOrAdmin) {
+      await this.assertEventMember(eventId, user.id);
+
+      if (!teamId) {
+        throw new ForbiddenException(
+          'You must be a team member to view challenges',
+        );
+      }
+
+      const membership = await this.prisma.teamMember.findFirst({
+        where: { userId: user.id, teamId, eventId },
+        select: { id: true },
+      });
+
+      if (!membership) {
+        throw new ForbiddenException('You are not a member of this team');
+      }
+
+      if (!(await this.hasEventStarted(eventId))) {
+        throw new BadRequestException(NOT_STARTED_MESSAGE);
+      }
+
+      const submissions = await this.prisma.submission.findMany({
+        where: { teamId },
+        select: { challengeId: true },
+      });
+      solvedIds = new Set(submissions.map((s) => s.challengeId));
     }
 
     const challenges = await this.prisma.challenge.findMany({
@@ -123,22 +156,25 @@ export class ChallengeService {
 
     return Promise.all(
       challenges.map(async (c) => {
-        if (c.hasFile && c.fileUrl) {
-          c.fileUrl = await this.storageService.getSignedUrl(c.fileUrl);
+        const challenge = { ...c, solved: solvedIds.has(c.id) };
+        if (challenge.hasFile && challenge.fileUrl) {
+          challenge.fileUrl = await this.storageService.getSignedUrl(
+            challenge.fileUrl,
+          );
         }
-        return c;
+        return challenge;
       }),
     );
   }
 
-  async getChallenge(user: any, id: string) {
+  async getChallenge(user: any, eventId: string, id: string) {
     const challenge = await this.findChallengeOrThrow(id);
 
-    await this.assertEventMember(challenge.eventId, user.id);
-
-    if (!(await this.hasEventStarted(challenge.eventId))) {
-      throw new BadRequestException(NOT_STARTED_MESSAGE);
+    if (challenge.eventId !== eventId) {
+      throw new NotFoundException('Challenge not found');
     }
+
+    await this.assertEventOwnerOrAdmin(challenge.eventId, user.id);
 
     const { flag, ...challengeData } = challenge;
     if (challengeData.hasFile && challengeData.fileUrl) {
@@ -151,7 +187,7 @@ export class ChallengeService {
     return challengeData;
   }
 
-  async getChallengeStats(user: any, challengeId: string) {
+  async getChallengeSolveCount(user: any, challengeId: string) {
     const challenge = await this.findChallengeOrThrow(challengeId);
 
     await this.assertEventMember(challenge.eventId, user.id);
@@ -194,11 +230,14 @@ export class ChallengeService {
   async updateChallenge(
     user: any,
     id: string,
+    eventId: string,
     dto: UpdateChallengeDto,
     file?: Express.Multer.File,
   ) {
     const challenge = await this.findChallengeOrThrow(id);
-
+    if (challenge.eventId !== eventId) {
+      throw new NotFoundException('Challenge not found');
+    }
     await this.assertEventOwnerOrAdmin(challenge.eventId, user.id);
 
     const data: Prisma.ChallengeUpdateInput = { ...dto };

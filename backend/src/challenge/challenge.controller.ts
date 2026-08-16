@@ -8,6 +8,7 @@ import {
   Param,
   Body,
   UseGuards,
+  Query,
   HttpCode,
   HttpStatus,
   UseInterceptors,
@@ -41,20 +42,32 @@ export class ChallengeController {
 
   @Get()
   @ApiOkResponse({ type: ChallengeResponseDto, isArray: true })
-  getChallengesByEvent(@Param('eventId') eventId: string, @Req() req: Request) {
-    return this.challengeService.getChallengesByEvent(req.user, eventId);
+  getChallengesByEvent(
+    @Param('eventId') eventId: string,
+    @Query('teamId') teamId: string | undefined,
+    @Req() req: Request,
+  ) {
+    return this.challengeService.getChallengesByEvent(
+      req.user,
+      eventId,
+      teamId,
+    );
   }
 
   @Get(':id')
   @ApiOkResponse({ type: ChallengeResponseDto })
-  getChallenge(@Param('id') id: string, @Req() req: Request) {
-    return this.challengeService.getChallenge(req.user, id);
+  getChallenge(
+    @Param('eventId') eventId: string,
+    @Param('id') id: string,
+    @Req() req: Request,
+  ) {
+    return this.challengeService.getChallenge(req.user, eventId, id);
   }
 
   @Get(':id/stats')
   @ApiOkResponse({ type: ChallengeStatsResponseDto })
-  getChallengeStats(@Param('id') id: string, @Req() req: Request) {
-    return this.challengeService.getChallengeStats(req.user, id);
+  getChallengeSolveCount(@Param('id') id: string, @Req() req: Request) {
+    return this.challengeService.getChallengeSolveCount(req.user, id);
   }
 
   // ─── MUTATIONS ──────────────────────────────────────────────────────────────
@@ -139,11 +152,18 @@ export class ChallengeController {
   @ApiOkResponse({ type: ChallengeResponseDto })
   updateChallenge(
     @Param('id') id: string,
+    @Param('eventId') eventId: string,
     @Req() req: Request,
     @Body() dto: UpdateChallengeDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.challengeService.updateChallenge(req.user, id, dto, file);
+    return this.challengeService.updateChallenge(
+      req.user,
+      id,
+      eventId,
+      dto,
+      file,
+    );
   }
 
   @Delete(':id')

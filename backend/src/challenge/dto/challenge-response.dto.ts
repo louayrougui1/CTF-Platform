@@ -24,6 +24,9 @@ export class ChallengeResponseDto {
   eventId: string;
 
   @ApiProperty({ type: Boolean })
+  solved: boolean;
+
+  @ApiProperty({ type: Boolean })
   hasFile: boolean;
 
   @ApiProperty({ nullable: true })
