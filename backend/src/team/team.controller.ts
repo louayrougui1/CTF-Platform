@@ -89,38 +89,53 @@ export class TeamController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: TeamUpdateResponseDto })
   updateTeam(
+    @Param('eventId') eventId: string,
     @Param('teamId') teamId: string,
     @Body() dto: UpdateTeamDto,
     @Req() req: Request,
   ) {
     const captainId = (req.user as any).id;
-    return this.teamService.updateTeam(teamId, captainId, dto);
+    return this.teamService.updateTeam(eventId, teamId, captainId, dto);
   }
   @Delete(':teamId/leave')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: TeamMessageResponseDto })
-  leaveTeam(@Param('teamId') teamId: string, @Req() req: Request) {
+  leaveTeam(
+    @Param('eventId') eventId: string,
+    @Param('teamId') teamId: string,
+    @Req() req: Request,
+  ) {
     const captainId = (req.user as any).id;
-    return this.teamService.leaveTeam(teamId, captainId);
+    return this.teamService.leaveTeam(eventId, teamId, captainId);
   }
 
   @Delete(':teamId')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: TeamMessageResponseDto })
-  deleteTeam(@Param('teamId') teamId: string, @Req() req: Request) {
+  deleteTeam(
+    @Param('eventId') eventId: string,
+    @Param('teamId') teamId: string,
+    @Req() req: Request,
+  ) {
     const captainId = (req.user as any).id;
-    return this.teamService.deleteTeam(teamId, captainId);
+    return this.teamService.deleteTeam(eventId, teamId, captainId);
   }
 
   @Delete(':teamId/members/:userId')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: TeamMessageResponseDto })
   kickMember(
+    @Param('eventId') eventId: string,
     @Param('teamId') teamId: string,
     @Param('userId') targetUserId: string,
     @Req() req: Request,
   ) {
     const captainId = (req.user as any).id;
-    return this.teamService.kickMember(teamId, captainId, targetUserId);
+    return this.teamService.kickMember(
+      eventId,
+      teamId,
+      captainId,
+      targetUserId,
+    );
   }
 }

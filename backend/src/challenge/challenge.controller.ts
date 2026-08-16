@@ -169,8 +169,12 @@ export class ChallengeController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: ChallengeResponseDto })
-  deleteChallenge(@Param('id') id: string, @Req() req: Request) {
-    return this.challengeService.deleteChallenge(req.user, id);
+  deleteChallenge(
+    @Param('eventId') eventId: string,
+    @Param('id') id: string,
+    @Req() req: Request,
+  ) {
+    return this.challengeService.deleteChallenge(req.user, eventId, id);
   }
 
   // sumbission of flag
@@ -178,10 +182,11 @@ export class ChallengeController {
   @Post(':id/submit')
   @ApiCreatedResponse({ type: SubmissionResponseDto })
   submitFlag(
+    @Param('eventId') eventId: string,
     @Param('id') id: string,
     @Req() req: Request,
     @Body() dto: SubmitFlagDto,
   ) {
-    return this.challengeService.submitFlag(req.user, id, dto);
+    return this.challengeService.submitFlag(req.user, eventId, id, dto);
   }
 }

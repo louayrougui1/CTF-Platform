@@ -58,7 +58,7 @@ describe('ChallengeService', () => {
       });
       prisma.challenge.delete.mockResolvedValue({ id: 'challenge-1' });
 
-      await service.deleteChallenge({ id: 'user-1' }, 'challenge-1');
+      await service.deleteChallenge({ id: 'user-1' }, 'event-1', 'challenge-1');
 
       expect(storage.delete).toHaveBeenCalledWith('challenges/abc.txt');
       expect(prisma.challenge.delete).toHaveBeenCalled();
@@ -73,7 +73,7 @@ describe('ChallengeService', () => {
       });
       prisma.challenge.delete.mockResolvedValue({ id: 'challenge-1' });
 
-      await service.deleteChallenge({ id: 'user-1' }, 'challenge-1');
+      await service.deleteChallenge({ id: 'user-1' }, 'event-1', 'challenge-1');
 
       expect(storage.delete).not.toHaveBeenCalled();
       expect(prisma.challenge.delete).toHaveBeenCalled();

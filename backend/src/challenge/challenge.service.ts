@@ -260,8 +260,12 @@ export class ChallengeService {
     });
   }
 
-  async deleteChallenge(user: any, id: string) {
+  async deleteChallenge(user: any, eventId: string, id: string) {
     const challenge = await this.findChallengeOrThrow(id);
+
+    if (challenge.eventId !== eventId) {
+      throw new NotFoundException('Challenge not found');
+    }
 
     await this.assertEventOwnerOrAdmin(challenge.eventId, user.id);
 
@@ -275,8 +279,17 @@ export class ChallengeService {
     });
   }
 
-  async submitFlag(user: any, challengeId: string, dto: SubmitFlagDto) {
+  async submitFlag(
+    user: any,
+    eventId: string,
+    challengeId: string,
+    dto: SubmitFlagDto,
+  ) {
     const challenge = await this.findChallengeOrThrow(challengeId);
+
+    if (challenge.eventId !== eventId) {
+      throw new NotFoundException('Challenge not found');
+    }
 
     await this.assertEventMember(challenge.eventId, user.id);
 

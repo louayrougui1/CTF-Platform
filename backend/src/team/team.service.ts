@@ -213,8 +213,11 @@ export class TeamService {
     }
   }
 
-  async leaveTeam(teamId: string, userId: string) {
+  async leaveTeam(eventId: string, teamId: string, userId: string) {
     const team = await this.findTeamOrThrow(teamId, true);
+
+    if (team.eventId !== eventId)
+      throw new BadRequestException('Team does not belong to this event');
 
     const membership = (team as any).members.find(
       (m: any) => m.userId === userId,
@@ -234,8 +237,11 @@ export class TeamService {
     return { message: 'Left the team successfully' };
   }
 
-  async deleteTeam(teamId: string, userId: string) {
+  async deleteTeam(eventId: string, teamId: string, userId: string) {
     const team = await this.findTeamOrThrow(teamId, true);
+
+    if (team.eventId !== eventId)
+      throw new BadRequestException('Team does not belong to this event');
 
     const membership = (team as any).members.find(
       (m: any) => m.userId === userId,
@@ -286,8 +292,16 @@ export class TeamService {
       })),
     };
   }
-  async updateTeam(teamId: string, userId: string, { name }: UpdateTeamDto) {
+  async updateTeam(
+    eventId: string,
+    teamId: string,
+    userId: string,
+    { name }: UpdateTeamDto,
+  ) {
     const team = await this.assertTeamCaptain(teamId, userId);
+
+    if (team.eventId !== eventId)
+      throw new BadRequestException('Team does not belong to this event');
 
     if (name && name !== team.name) {
       const nameConflict = await this.prisma.team.findFirst({
@@ -322,8 +336,16 @@ export class TeamService {
     }
   }
 
-  async kickMember(teamId: string, captainId: string, targetUserId: string) {
+  async kickMember(
+    eventId: string,
+    teamId: string,
+    captainId: string,
+    targetUserId: string,
+  ) {
     const team = await this.assertTeamCaptain(teamId, captainId);
+
+    if (team.eventId !== eventId)
+      throw new BadRequestException('Team does not belong to this event');
 
     if (targetUserId === captainId)
       throw new BadRequestException(
