@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { AddAdminDto } from './dto/addAdmin.dto';
 import { RemoveAdminDto } from './dto/removeAdmin.dto';
+import { JoinEventDto } from './dto/joinEvent.dto';
 
 @Injectable()
 export class EventMemberService {
@@ -133,11 +134,17 @@ export class EventMemberService {
 
   // ─── MEMBERSHIP ─────────────────────────────────────────────────────────────
 
-  async joinEvent(user: any, eventId: string) {
+  async joinEvent(user: any, eventId: string, dto?: JoinEventDto) {
     const event = await this.findEventOrThrow(eventId);
 
-    if (!event.isPublic) {
-      throw new ForbiddenException('This event is private');
+    if (dto?.inviteCode) {
+      if (event.inviteCode !== dto.inviteCode.trim()) {
+        throw new ForbiddenException('Invalid invite code');
+      }
+    } else if (!event.isPublic) {
+      throw new ForbiddenException(
+        'This event is private , an invite code is required to join',
+      );
     }
 
     if (event.endDate && event.endDate < new Date()) {

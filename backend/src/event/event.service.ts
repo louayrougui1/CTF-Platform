@@ -19,6 +19,14 @@ const EVENT_SELECT = {
   updatedAt: true,
 } as const;
 
+// Member/owner contexts may need the invite code to share it; the public
+// browse list (getActiveEvents) intentionally keeps using EVENT_SELECT so
+// codes are never exposed there.
+const EVENT_SELECT_WITH_CODE = {
+  ...EVENT_SELECT,
+  inviteCode: true,
+} as const;
+
 @Injectable()
 export class EventService {
   constructor(private readonly prisma: PrismaService) {}
@@ -51,6 +59,15 @@ export class EventService {
 
   // ─── QUERIES ────────────────────────────────────────────────────────────────
 
+  private generateInviteCode(): string {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 8; i++) {
+      code += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return code;
+  }
+
   async getActiveEvents() {
     const now = new Date();
 
@@ -67,7 +84,7 @@ export class EventService {
   async getMyEvents(user: any) {
     return this.prisma.event.findMany({
       where: { ownerId: user.id },
-      select: EVENT_SELECT,
+      select: EVENT_SELECT_WITH_CODE,
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -75,7 +92,7 @@ export class EventService {
   async getJoinedEvents(user: any) {
     return this.prisma.event.findMany({
       where: { members: { some: { userId: user.id } } },
-      select: EVENT_SELECT,
+      select: EVENT_SELECT_WITH_CODE,
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -92,7 +109,7 @@ export class EventService {
 
     return this.prisma.event.findUniqueOrThrow({
       where: { id },
-      select: EVENT_SELECT,
+      select: EVENT_SELECT_WITH_CODE,
     });
   }
 
@@ -120,13 +137,31 @@ export class EventService {
   // ─── MUTATIONS ──────────────────────────────────────────────────────────────
 
   async createEvent(user: any, dto: CreateEventDto) {
-    const event = await this.prisma.event.create({
-      data: {
-        ...dto,
-        ownerId: user.id,
-      },
-      select: EVENT_SELECT,
-    });
+    let event;
+    try {
+      event = await this.prisma.event.create({
+        data: {
+          ...dto,
+          ownerId: user.id,
+          inviteCode: this.generateInviteCode(),
+        },
+        select: EVENT_SELECT_WITH_CODE,
+      });
+    } catch (err: any) {
+      if (err.code === 'P2002') {
+        // inviteCode collision — retry once with a fresh code
+        event = await this.prisma.event.create({
+          data: {
+            ...dto,
+            ownerId: user.id,
+            inviteCode: this.generateInviteCode(),
+          },
+          select: EVENT_SELECT_WITH_CODE,
+        });
+      } else {
+        throw err;
+      }
+    }
 
     try {
       await this.prisma.eventMember.create({
@@ -144,6 +179,16 @@ export class EventService {
     }
 
     return event;
+  }
+
+  async regenerateInviteCode(user: any, id: string) {
+    await this.assertEventOwner(id, user.id);
+
+    return this.prisma.event.update({
+      where: { id },
+      data: { inviteCode: this.generateInviteCode() },
+      select: EVENT_SELECT_WITH_CODE,
+    });
   }
 
   async updateEvent(user: any, id: string, dto: UpdateEventDto) {
@@ -174,7 +219,7 @@ export class EventService {
     return this.prisma.event.update({
       where: { id },
       data: dto,
-      select: EVENT_SELECT,
+      select: EVENT_SELECT_WITH_CODE,
     });
   }
 

@@ -19,6 +19,9 @@ export class EventResponseDto {
   @ApiProperty({ type: Boolean })
   isPublic: boolean;
 
+  @ApiProperty({ nullable: true })
+  inviteCode: string | null;
+
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt: Date;
 

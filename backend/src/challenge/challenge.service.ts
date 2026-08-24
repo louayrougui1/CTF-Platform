@@ -1,15 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
 import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
-} from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { CreateChallengeDto } from './dto/challengeCreate.dto';
-import { UpdateChallengeDto } from './dto/updateChallenge.dto';
-import { SubmitFlagDto } from './dto/submitFlag.dto';
-import { StorageService } from '../storage/storage.service';
+} from "@nestjs/common";
+import { Prisma } from "@prisma/client";
+import { CreateChallengeDto } from "./dto/challengeCreate.dto";
+import { UpdateChallengeDto } from "./dto/updateChallenge.dto";
+import { SubmitFlagDto } from "./dto/submitFlag.dto";
+import { StorageService } from "../storage/storage.service";
 
 // Public-facing select — never expose the `flag` field here.
 const CHALLENGE_SELECT = {
@@ -28,7 +28,7 @@ const CHALLENGE_SELECT = {
 } as const;
 
 const NOT_STARTED_MESSAGE =
-  'Challenges will be available when the event starts.';
+  "Challenges will be available when the event starts.";
 
 @Injectable()
 export class ChallengeService {
@@ -45,7 +45,7 @@ export class ChallengeService {
     });
 
     if (!challenge) {
-      throw new NotFoundException('Challenge not found');
+      throw new NotFoundException("Challenge not found");
     }
 
     return challenge;
@@ -57,24 +57,24 @@ export class ChallengeService {
       select: {
         ownerId: true,
         members: {
-          where: { role: { in: ['OWNER', 'ADMIN'] } },
+          where: { role: { in: ["OWNER", "ADMIN"] } },
           select: { userId: true, role: true },
         },
       },
     });
 
     if (!event) {
-      throw new NotFoundException('Event not found');
+      throw new NotFoundException("Event not found");
     }
 
     const isOwner = event.ownerId === userId;
     const isAdmin = event.members.some(
-      (m) => m.userId === userId && m.role === 'ADMIN',
+      (m) => m.userId === userId && m.role === "ADMIN",
     );
 
     if (!isOwner && !isAdmin) {
       throw new ForbiddenException(
-        'You are not allowed to manage challenges for this event',
+        "You are not allowed to manage challenges for this event",
       );
     }
 
@@ -92,7 +92,7 @@ export class ChallengeService {
     });
 
     if (!membership) {
-      throw new NotFoundException('Event not found');
+      throw new NotFoundException("Event not found");
     }
 
     return membership;
@@ -126,7 +126,7 @@ export class ChallengeService {
 
       if (!teamId) {
         throw new ForbiddenException(
-          'You must be a team member to view challenges',
+          "You must be a team member to view challenges",
         );
       }
 
@@ -136,7 +136,7 @@ export class ChallengeService {
       });
 
       if (!membership) {
-        throw new ForbiddenException('You are not a member of this team');
+        throw new ForbiddenException("You are not a member of this team");
       }
 
       if (!(await this.hasEventStarted(eventId))) {
@@ -172,7 +172,7 @@ export class ChallengeService {
     const challenge = await this.findChallengeOrThrow(id);
 
     if (challenge.eventId !== eventId) {
-      throw new NotFoundException('Challenge not found');
+      throw new NotFoundException("Challenge not found");
     }
 
     await this.assertEventOwnerOrAdmin(challenge.eventId, user.id);
@@ -238,7 +238,7 @@ export class ChallengeService {
   ) {
     const challenge = await this.findChallengeOrThrow(id);
     if (challenge.eventId !== eventId) {
-      throw new NotFoundException('Challenge not found');
+      throw new NotFoundException("Challenge not found");
     }
     await this.assertEventOwnerOrAdmin(challenge.eventId, user.id);
 
@@ -267,7 +267,7 @@ export class ChallengeService {
     const challenge = await this.findChallengeOrThrow(id);
 
     if (challenge.eventId !== eventId) {
-      throw new NotFoundException('Challenge not found');
+      throw new NotFoundException("Challenge not found");
     }
 
     await this.assertEventOwnerOrAdmin(challenge.eventId, user.id);
@@ -291,7 +291,7 @@ export class ChallengeService {
     const challenge = await this.findChallengeOrThrow(challengeId);
 
     if (challenge.eventId !== eventId) {
-      throw new NotFoundException('Challenge not found');
+      throw new NotFoundException("Challenge not found");
     }
 
     await this.assertEventMember(challenge.eventId, user.id);
@@ -307,7 +307,7 @@ export class ChallengeService {
 
     if (!membership) {
       throw new BadRequestException(
-        'You must be on a team to solve challenges',
+        "You must be on a team to solve challenges",
       );
     }
 
@@ -318,7 +318,7 @@ export class ChallengeService {
 
     if (alreadySolved) {
       throw new BadRequestException(
-        'You and your team have already solved this challenge',
+        "You and your team have already solved this challenge",
       );
     }
 
@@ -326,7 +326,7 @@ export class ChallengeService {
 
     if (!isCorrect) {
       return {
-        status: 'WRONG',
+        status: "WRONG",
         createdAt: new Date(),
       };
     }
@@ -344,13 +344,13 @@ export class ChallengeService {
       });
 
       return {
-        status: 'CORRECT',
+        status: "CORRECT",
         createdAt: submission.createdAt,
       };
     } catch (err: any) {
-      if (err.code === 'P2002') {
+      if (err.code === "P2002") {
         throw new BadRequestException(
-          'You and your team have already solved this challenge',
+          "You and your team have already solved this challenge",
         );
       }
       throw err;

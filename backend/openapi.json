@@ -709,6 +709,41 @@
         ]
       }
     },
+    "/events/{id}/invite-code": {
+      "post": {
+        "operationId": "EventController_regenerateInviteCode",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Event"
+        ]
+      }
+    },
     "/events/{eventId}/teams": {
       "get": {
         "operationId": "TeamController_getEventTeams",
@@ -1196,6 +1231,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinEventDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
             "description": "",
@@ -2022,6 +2067,10 @@
           "isPublic": {
             "type": "boolean"
           },
+          "inviteCode": {
+            "type": "object",
+            "nullable": true
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -2038,6 +2087,7 @@
           "startDate",
           "endDate",
           "isPublic",
+          "inviteCode",
           "createdAt",
           "updatedAt"
         ]
@@ -2410,6 +2460,15 @@
           "createdAt",
           "user"
         ]
+      },
+      "JoinEventDto": {
+        "type": "object",
+        "properties": {
+          "inviteCode": {
+            "type": "string",
+            "description": "Invite code, required to join a private event"
+          }
+        }
       },
       "EventMemberScalarResponseDto": {
         "type": "object",

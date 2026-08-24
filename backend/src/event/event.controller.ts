@@ -78,6 +78,12 @@ export class EventController {
     return this.eventsService.updateEvent(req.user, id, dto);
   }
 
+  @Post(':id/invite-code')
+  @ApiOkResponse({ type: EventResponseDto })
+  regenerateInviteCode(@Param('id') id: string, @Req() req: Request) {
+    return this.eventsService.regenerateInviteCode(req.user, id);
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: EventResponseDto })

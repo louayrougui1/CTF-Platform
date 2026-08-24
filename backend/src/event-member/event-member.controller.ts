@@ -13,6 +13,7 @@ import {
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { AddAdminDto } from '../event-member/dto/addAdmin.dto';
 import { RemoveAdminDto } from '../event-member/dto/removeAdmin.dto';
+import { JoinEventDto } from './dto/joinEvent.dto';
 import type { Request } from 'express';
 import { EventMemberService } from './event-member.service';
 import {
@@ -38,8 +39,12 @@ export class EventMemberController {
   @Post(':eventId/join')
   @HttpCode(HttpStatus.OK)
   @ApiCreatedResponse({ type: EventMemberScalarResponseDto })
-  joinEvent(@Param('eventId') eventId: string, @Req() req: Request) {
-    return this.eventMemberService.joinEvent(req.user, eventId);
+  joinEvent(
+    @Param('eventId') eventId: string,
+    @Req() req: Request,
+    @Body() dto: JoinEventDto,
+  ) {
+    return this.eventMemberService.joinEvent(req.user, eventId, dto);
   }
 
   @Delete(':eventId/leave')

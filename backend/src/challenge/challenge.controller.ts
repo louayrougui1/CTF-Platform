@@ -13,14 +13,14 @@ import {
   HttpStatus,
   UseInterceptors,
   UploadedFile,
-} from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { ChallengeService } from './challenge.service';
-import { JwtGuard } from '../auth/guards/jwt.guard';
-import { CreateChallengeDto } from './dto/challengeCreate.dto';
-import { UpdateChallengeDto } from './dto/updateChallenge.dto';
-import { SubmitFlagDto } from './dto/submitFlag.dto';
-import type { Request } from 'express';
+} from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { ChallengeService } from "./challenge.service";
+import { JwtGuard } from "../auth/guards/jwt.guard";
+import { CreateChallengeDto } from "./dto/challengeCreate.dto";
+import { UpdateChallengeDto } from "./dto/updateChallenge.dto";
+import { SubmitFlagDto } from "./dto/submitFlag.dto";
+import type { Request } from "express";
 import {
   ApiBearerAuth,
   ApiBody,
@@ -28,12 +28,12 @@ import {
   ApiOkResponse,
   ApiCreatedResponse,
   ApiQuery,
-} from '@nestjs/swagger';
-import { ChallengeResponseDto } from './dto/challenge-response.dto';
-import { ChallengeStatsResponseDto } from './dto/challenge-stats-response.dto';
-import { SubmissionResponseDto } from './dto/submission-response.dto';
+} from "@nestjs/swagger";
+import { ChallengeResponseDto } from "./dto/challenge-response.dto";
+import { ChallengeStatsResponseDto } from "./dto/challenge-stats-response.dto";
+import { SubmissionResponseDto } from "./dto/submission-response.dto";
 
-@Controller('events/:eventId/challenges')
+@Controller("events/:eventId/challenges")
 @UseGuards(JwtGuard)
 @ApiBearerAuth()
 export class ChallengeController {
@@ -44,15 +44,15 @@ export class ChallengeController {
   @Get()
   @ApiOkResponse({ type: ChallengeResponseDto, isArray: true })
   @ApiQuery({
-    name: 'teamId',
+    name: "teamId",
     required: false,
     type: String,
     description:
-      'Team id; required for non-admin callers, returns each challenge with a solved flag',
+      "Team id; required for non-admin callers, returns each challenge with a solved flag",
   })
   getChallengesByEvent(
-    @Param('eventId') eventId: string,
-    @Query('teamId') teamId: string | undefined,
+    @Param("eventId") eventId: string,
+    @Query("teamId") teamId: string | undefined,
     @Req() req: Request,
   ) {
     return this.challengeService.getChallengesByEvent(
@@ -62,60 +62,60 @@ export class ChallengeController {
     );
   }
 
-  @Get(':id')
+  @Get(":id")
   @ApiOkResponse({ type: ChallengeResponseDto })
   getChallenge(
-    @Param('eventId') eventId: string,
-    @Param('id') id: string,
+    @Param("eventId") eventId: string,
+    @Param("id") id: string,
     @Req() req: Request,
   ) {
     return this.challengeService.getChallenge(req.user, eventId, id);
   }
 
-  @Get(':id/stats')
+  @Get(":id/stats")
   @ApiOkResponse({ type: ChallengeStatsResponseDto })
-  getChallengeSolveCount(@Param('id') id: string, @Req() req: Request) {
+  getChallengeSolveCount(@Param("id") id: string, @Req() req: Request) {
     return this.challengeService.getChallengeSolveCount(req.user, id);
   }
 
   // ─── MUTATIONS ──────────────────────────────────────────────────────────────
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor("file"))
   @Post()
-  @ApiConsumes('multipart/form-data')
+  @ApiConsumes("multipart/form-data")
   @ApiBody({
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        title: { type: 'string' },
-        description: { type: 'string' },
-        flag: { type: 'string' },
+        title: { type: "string" },
+        description: { type: "string" },
+        flag: { type: "string" },
         category: {
-          type: 'string',
+          type: "string",
           enum: [
-            'WEB',
-            'CRYPTO',
-            'PWN',
-            'REVERSE',
-            'FORENSICS',
-            'OSINT',
-            'MISC',
+            "WEB",
+            "CRYPTO",
+            "PWN",
+            "REVERSE",
+            "FORENSICS",
+            "OSINT",
+            "MISC",
           ],
         },
         difficulty: {
-          type: 'string',
-          enum: ['EASY', 'MEDIUM', 'HARD', 'EXPERT'],
+          type: "string",
+          enum: ["EASY", "MEDIUM", "HARD", "EXPERT"],
         },
-        points: { type: 'number' },
+        points: { type: "number" },
         file: {
-          type: 'string',
-          format: 'binary',
+          type: "string",
+          format: "binary",
         },
       },
     },
   })
   @ApiCreatedResponse({ type: ChallengeResponseDto })
   createChallenge(
-    @Param('eventId') eventId: string,
+    @Param("eventId") eventId: string,
     @Req() req: Request,
     @Body() dto: CreateChallengeDto,
     @UploadedFile() file: Express.Multer.File,
@@ -123,44 +123,44 @@ export class ChallengeController {
     return this.challengeService.createChallenge(req.user, eventId, dto, file);
   }
 
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file'))
-  @Patch(':id')
+  @ApiConsumes("multipart/form-data")
+  @UseInterceptors(FileInterceptor("file"))
+  @Patch(":id")
   @ApiBody({
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        title: { type: 'string' },
-        description: { type: 'string' },
-        flag: { type: 'string' },
+        title: { type: "string" },
+        description: { type: "string" },
+        flag: { type: "string" },
         category: {
-          type: 'string',
+          type: "string",
           enum: [
-            'WEB',
-            'CRYPTO',
-            'PWN',
-            'REVERSE',
-            'FORENSICS',
-            'OSINT',
-            'MISC',
+            "WEB",
+            "CRYPTO",
+            "PWN",
+            "REVERSE",
+            "FORENSICS",
+            "OSINT",
+            "MISC",
           ],
         },
         difficulty: {
-          type: 'string',
-          enum: ['EASY', 'MEDIUM', 'HARD', 'EXPERT'],
+          type: "string",
+          enum: ["EASY", "MEDIUM", "HARD", "EXPERT"],
         },
-        points: { type: 'number' },
+        points: { type: "number" },
         file: {
-          type: 'string',
-          format: 'binary',
+          type: "string",
+          format: "binary",
         },
       },
     },
   })
   @ApiOkResponse({ type: ChallengeResponseDto })
   updateChallenge(
-    @Param('id') id: string,
-    @Param('eventId') eventId: string,
+    @Param("id") id: string,
+    @Param("eventId") eventId: string,
     @Req() req: Request,
     @Body() dto: UpdateChallengeDto,
     @UploadedFile() file: Express.Multer.File,
@@ -174,12 +174,12 @@ export class ChallengeController {
     );
   }
 
-  @Delete(':id')
+  @Delete(":id")
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: ChallengeResponseDto })
   deleteChallenge(
-    @Param('eventId') eventId: string,
-    @Param('id') id: string,
+    @Param("eventId") eventId: string,
+    @Param("id") id: string,
     @Req() req: Request,
   ) {
     return this.challengeService.deleteChallenge(req.user, eventId, id);
@@ -187,11 +187,11 @@ export class ChallengeController {
 
   // sumbission of flag
 
-  @Post(':id/submit')
+  @Post(":id/submit")
   @ApiCreatedResponse({ type: SubmissionResponseDto })
   submitFlag(
-    @Param('eventId') eventId: string,
-    @Param('id') id: string,
+    @Param("eventId") eventId: string,
+    @Param("id") id: string,
     @Req() req: Request,
     @Body() dto: SubmitFlagDto,
   ) {

@@ -69,6 +69,8 @@ The Event Details page should make the Event ID easy to find and include a **Cop
 
 Do not invent a new API endpoint for this. Use the existing event-membership endpoint defined in `openapi.json`.
 
+Events are either **public** (shown in the browse list and joinable directly) or **private** (hidden from the browse list — they can only be joined with the event's **invite code**). Joining a private event sends the code as `{ inviteCode }` in the join request body (`POST /event-member/{eventId}/join`). The Event Details / Event Management page shows the event's invite code with a **Copy** button; owners can **regenerate** it via `POST /events/{id}/invite-code`.
+
 ---
 
 ## Roles & Permissions
@@ -80,14 +82,14 @@ Two role systems drive what a user can see and do:
 
 ### Participant flow
 
-- Browse events (`GET /events`) → join (`POST /event-member/{eventId}/join`).
+- Browse events (`GET /events`, public events only) → join (`POST /event-member/{eventId}/join`). Public events join directly; private events require their invite code as `{ inviteCode }` in the join body.
 - In an event: create or join a team, browse challenges (`GET /events/{eventId}/challenges?teamId={yourTeamId}`), open a challenge (render it from the list response — the single-challenge endpoint is owner/admin-only), download its file, and submit flags (`POST /events/{eventId}/challenges/{id}/submit`).
 
 ### Owner / Admin flow
 
 `GET /events/mine` returns events the user **owns**; `GET /events/joined` returns every event the user belongs to (any role — owned or joined). For each owned event provide a **Manage** entry that opens a management screen:
 
-- **Event** (owner + admin): edit the event (`PATCH /events/{id}`), view members (`GET /event-member/{eventId}/members`). Owner-only: delete the event (`DELETE /events/{id}`), promote/remove admins (`POST /event-member/admins`, `DELETE /event-member/admins`).
+- **Event** (owner + admin): edit the event (`PATCH /events/{id}`), view members (`GET /event-member/{eventId}/members`). Owner-only: delete the event (`DELETE /events/{id}`), promote/remove admins (`POST /event-member/admins`, `DELETE /event-member/admins`). The event's **invite code** is shown here with a **Copy** button; owners can regenerate it (`POST /events/{id}/invite-code`).
 - **Challenges** (owner + admin): buttons to **create** (`POST /events/{eventId}/challenges`), **edit** (`PATCH /events/{eventId}/challenges/{id}`), **delete** (`DELETE /events/{eventId}/challenges/{id}`), and view **stats** (`GET /events/{eventId}/challenges/{id}/stats`). These are `multipart/form-data` requests (title, description, flag, category, difficulty, points, and an optional file). Editing must not force a file re-upload.
 - **Teams** (captain): edit the team (`PATCH /events/{eventId}/teams/{teamId}`), delete it (`DELETE /events/{eventId}/teams/{teamId}`), kick members (`DELETE /events/{eventId}/teams/{teamId}/members/{userId}`). Any member can leave (`DELETE /events/{eventId}/teams/{teamId}/leave`).
 
@@ -274,6 +276,7 @@ The backend base URL comes from an env var (e.g. `VITE_API_URL`) — do not hard
 - **Error handling**: wrap API calls in `try/catch`. The backend always responds with a status code and an error `message` — display that backend message to the user directly instead of inventing your own error text.
 - **Response semantics**:
   - Submitting a wrong flag returns `201` with `{ status: 'WRONG' }` — that is a success response, not an error.
+  - `GET /events` (browse) returns public events only; private events are joined via `POST /event-member/{eventId}/join` with their invite code in the request body.
   - `GET /events/mine` returns events the user *owns*, not every event they joined.
   - `GET /events/joined` returns every event the user belongs to (owned or joined, any role).
   - `GET /events/{eventId}/challenges` requires `?teamId=` for non-admin users (each challenge includes `solved: true/false`); event owners/admins may omit it.
