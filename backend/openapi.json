@@ -598,12 +598,12 @@
         ]
       }
     },
-    "/events/{id}": {
+    "/events/{eventId}": {
       "get": {
         "operationId": "EventController_getEvent",
         "parameters": [
           {
-            "name": "id",
+            "name": "eventId",
             "required": true,
             "in": "path",
             "schema": {
@@ -636,7 +636,7 @@
         "operationId": "EventController_updateEvent",
         "parameters": [
           {
-            "name": "id",
+            "name": "eventId",
             "required": true,
             "in": "path",
             "schema": {
@@ -679,7 +679,7 @@
         "operationId": "EventController_deleteEvent",
         "parameters": [
           {
-            "name": "id",
+            "name": "eventId",
             "required": true,
             "in": "path",
             "schema": {
@@ -709,12 +709,12 @@
         ]
       }
     },
-    "/events/{id}/invite-code": {
+    "/events/{eventId}/invite-code": {
       "post": {
         "operationId": "EventController_regenerateInviteCode",
         "parameters": [
           {
-            "name": "id",
+            "name": "eventId",
             "required": true,
             "in": "path",
             "schema": {
@@ -1497,7 +1497,7 @@
         ]
       }
     },
-    "/events/{eventId}/challenges/{id}": {
+    "/events/{eventId}/challenges/{challengeId}": {
       "get": {
         "operationId": "ChallengeController_getChallenge",
         "parameters": [
@@ -1510,7 +1510,7 @@
             }
           },
           {
-            "name": "id",
+            "name": "challengeId",
             "required": true,
             "in": "path",
             "schema": {
@@ -1543,7 +1543,7 @@
         "operationId": "ChallengeController_updateChallenge",
         "parameters": [
           {
-            "name": "id",
+            "name": "challengeId",
             "required": true,
             "in": "path",
             "schema": {
@@ -1641,7 +1641,7 @@
             }
           },
           {
-            "name": "id",
+            "name": "challengeId",
             "required": true,
             "in": "path",
             "schema": {
@@ -1671,12 +1671,12 @@
         ]
       }
     },
-    "/events/{eventId}/challenges/{id}/stats": {
+    "/events/{eventId}/challenges/{challengeId}/stats": {
       "get": {
         "operationId": "ChallengeController_getChallengeSolveCount",
         "parameters": [
           {
-            "name": "id",
+            "name": "challengeId",
             "required": true,
             "in": "path",
             "schema": {
@@ -1706,7 +1706,7 @@
         ]
       }
     },
-    "/events/{eventId}/challenges/{id}/submit": {
+    "/events/{eventId}/challenges/{challengeId}/submit": {
       "post": {
         "operationId": "ChallengeController_submitFlag",
         "parameters": [
@@ -1719,7 +1719,7 @@
             }
           },
           {
-            "name": "id",
+            "name": "challengeId",
             "required": true,
             "in": "path",
             "schema": {

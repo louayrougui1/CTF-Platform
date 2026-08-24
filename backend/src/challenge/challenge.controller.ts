@@ -62,20 +62,23 @@ export class ChallengeController {
     );
   }
 
-  @Get(":id")
+  @Get(":challengeId")
   @ApiOkResponse({ type: ChallengeResponseDto })
   getChallenge(
     @Param("eventId") eventId: string,
-    @Param("id") id: string,
+    @Param("challengeId") challengeId: string,
     @Req() req: Request,
   ) {
-    return this.challengeService.getChallenge(req.user, eventId, id);
+    return this.challengeService.getChallenge(req.user, eventId, challengeId);
   }
 
-  @Get(":id/stats")
+  @Get(":challengeId/stats")
   @ApiOkResponse({ type: ChallengeStatsResponseDto })
-  getChallengeSolveCount(@Param("id") id: string, @Req() req: Request) {
-    return this.challengeService.getChallengeSolveCount(req.user, id);
+  getChallengeSolveCount(
+    @Param("challengeId") challengeId: string,
+    @Req() req: Request,
+  ) {
+    return this.challengeService.getChallengeSolveCount(req.user, challengeId);
   }
 
   // ─── MUTATIONS ──────────────────────────────────────────────────────────────
@@ -125,7 +128,7 @@ export class ChallengeController {
 
   @ApiConsumes("multipart/form-data")
   @UseInterceptors(FileInterceptor("file"))
-  @Patch(":id")
+  @Patch(":challengeId")
   @ApiBody({
     schema: {
       type: "object",
@@ -159,7 +162,7 @@ export class ChallengeController {
   })
   @ApiOkResponse({ type: ChallengeResponseDto })
   updateChallenge(
-    @Param("id") id: string,
+    @Param("challengeId") challengeId: string,
     @Param("eventId") eventId: string,
     @Req() req: Request,
     @Body() dto: UpdateChallengeDto,
@@ -167,34 +170,34 @@ export class ChallengeController {
   ) {
     return this.challengeService.updateChallenge(
       req.user,
-      id,
+      challengeId,
       eventId,
       dto,
       file,
     );
   }
 
-  @Delete(":id")
+  @Delete(":challengeId")
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: ChallengeResponseDto })
   deleteChallenge(
     @Param("eventId") eventId: string,
-    @Param("id") id: string,
+    @Param("challengeId") challengeId: string,
     @Req() req: Request,
   ) {
-    return this.challengeService.deleteChallenge(req.user, eventId, id);
+    return this.challengeService.deleteChallenge(req.user, eventId, challengeId);
   }
 
   // sumbission of flag
 
-  @Post(":id/submit")
+  @Post(":challengeId/submit")
   @ApiCreatedResponse({ type: SubmissionResponseDto })
   submitFlag(
     @Param("eventId") eventId: string,
-    @Param("id") id: string,
+    @Param("challengeId") challengeId: string,
     @Req() req: Request,
     @Body() dto: SubmitFlagDto,
   ) {
-    return this.challengeService.submitFlag(req.user, eventId, id, dto);
+    return this.challengeService.submitFlag(req.user, eventId, challengeId, dto);
   }
 }

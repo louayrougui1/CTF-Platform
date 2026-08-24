@@ -11,8 +11,8 @@ export class LeaderboardController {
   constructor(private readonly leaderBoardService: LeaderboardService) {}
   @Get()
   @ApiOkResponse({ type: LeaderboardResponseDto, isArray: true })
-  getEventLeaderboard(@Param('eventId') id: string, @Req() req: any) {
+  getEventLeaderboard(@Param('eventId') eventId: string, @Req() req: any) {
     const userId = req.user.id;
-    return this.leaderBoardService.getEventLeaderboard(id, userId);
+    return this.leaderBoardService.getEventLeaderboard(eventId, userId);
   }
 }

@@ -10,10 +10,10 @@ The project should feel like a **real, professional CTF platform**, not a generi
 
 ### Frontend
 
-- React
+Next
+
 - TypeScript
 - Vite
-- React Router
 - Zustand
 - TanStack Query
 - Axios
@@ -69,7 +69,7 @@ The Event Details page should make the Event ID easy to find and include a **Cop
 
 Do not invent a new API endpoint for this. Use the existing event-membership endpoint defined in `openapi.json`.
 
-Events are either **public** (shown in the browse list and joinable directly) or **private** (hidden from the browse list — they can only be joined with the event's **invite code**). Joining a private event sends the code as `{ inviteCode }` in the join request body (`POST /event-member/{eventId}/join`). The Event Details / Event Management page shows the event's invite code with a **Copy** button; owners can **regenerate** it via `POST /events/{id}/invite-code`.
+Events are either **public** (shown in the browse list and joinable directly) or **private** (hidden from the browse list — they can only be joined with the event's **invite code**). Joining a private event sends the code as `{ inviteCode }` in the join request body (`POST /event-member/{eventId}/join`). The Event Details / Event Management page shows the event's invite code with a **Copy** button; owners can **regenerate** it via `POST /events/{eventId}/invite-code`.
 
 ---
 
@@ -83,14 +83,14 @@ Two role systems drive what a user can see and do:
 ### Participant flow
 
 - Browse events (`GET /events`, public events only) → join (`POST /event-member/{eventId}/join`). Public events join directly; private events require their invite code as `{ inviteCode }` in the join body.
-- In an event: create or join a team, browse challenges (`GET /events/{eventId}/challenges?teamId={yourTeamId}`), open a challenge (render it from the list response — the single-challenge endpoint is owner/admin-only), download its file, and submit flags (`POST /events/{eventId}/challenges/{id}/submit`).
+- In an event: create or join a team, browse challenges (`GET /events/{eventId}/challenges?teamId={yourTeamId}`), open a challenge (render it from the list response — the single-challenge endpoint is owner/admin-only), download its file, and submit flags (`POST /events/{eventId}/challenges/{challengeId}/submit`).
 
 ### Owner / Admin flow
 
 `GET /events/owned` returns events the user **owns**; `GET /events/joined` returns every event the user belongs to (any role — owned or joined). For each owned event provide a **Manage** entry that opens a management screen:
 
-- **Event** (owner + admin): edit the event (`PATCH /events/{id}`), view members (`GET /event-member/{eventId}/members`). Owner-only: delete the event (`DELETE /events/{id}`), promote/remove admins (`POST /event-member/admins`, `DELETE /event-member/admins`). The event's **invite code** is shown here with a **Copy** button; owners can regenerate it (`POST /events/{id}/invite-code`).
-- **Challenges** (owner + admin): buttons to **create** (`POST /events/{eventId}/challenges`), **edit** (`PATCH /events/{eventId}/challenges/{id}`), **delete** (`DELETE /events/{eventId}/challenges/{id}`), and view **stats** (`GET /events/{eventId}/challenges/{id}/stats`). These are `multipart/form-data` requests (title, description, flag, category, difficulty, points, and an optional file). Editing must not force a file re-upload.
+- **Event** (owner + admin): edit the event (`PATCH /events/{eventId}`), view members (`GET /event-member/{eventId}/members`). Owner-only: delete the event (`DELETE /events/{eventId}`), promote/remove admins (`POST /event-member/admins`, `DELETE /event-member/admins`). The event's **invite code** is shown here with a **Copy** button; owners can regenerate it (`POST /events/{eventId}/invite-code`).
+- **Challenges** (owner + admin): buttons to **create** (`POST /events/{eventId}/challenges`), **edit** (`PATCH /events/{eventId}/challenges/{challengeId}`), **delete** (`DELETE /events/{eventId}/challenges/{challengeId}`), and view **stats** (`GET /events/{eventId}/challenges/{challengeId}/stats`). These are `multipart/form-data` requests (title, description, flag, category, difficulty, points, and an optional file). Editing must not force a file re-upload.
 - **Teams** (captain): edit the team (`PATCH /events/{eventId}/teams/{teamId}`), delete it (`DELETE /events/{eventId}/teams/{teamId}`), kick members (`DELETE /events/{eventId}/teams/{teamId}/members/{userId}`). Any member can leave (`DELETE /events/{eventId}/teams/{teamId}/leave`).
 
 Owner/admin challenge-list calls omit `teamId`; everyone else must pass their own `teamId`.
@@ -102,7 +102,7 @@ Owner/admin challenge-list calls omit `teamId`; everyone else must pass their ow
 - The **Challenges list page** shows a card/row per challenge with only: `title`, `difficulty`, `points`, `category` (plus the solved state). Do **not** auto-download or render challenge files on this page.
 - Clicking a challenge opens a **modal** populated from the already-loaded list response — no extra API call:
   - Full `description`
-  - A flag input field + **Submit** button calling `POST /events/{eventId}/challenges/{id}/submit`; show the API result (`status: 'WRONG'` → "Wrong flag", `status: 'CORRECT'` → "Solved!")
+  - A flag input field + **Submit** button calling `POST /events/{eventId}/challenges/{challengeId}/submit`; show the API result (`status: 'WRONG'` → "Wrong flag", `status: 'CORRECT'` → "Solved!")
   - If `hasFile` is true, show `fileName` as a blue, clickable link — the file downloads from `fileUrl` **only** when the user clicks it.
 
 ---
@@ -232,7 +232,6 @@ Use:
 
 - **TanStack Query** for API/server state
 - **Zustand** for client-side state such as authentication/session state
-- **React Router** for navigation
 - Reusable components and API services
 - Responsive design for desktop, tablet, and mobile
 
@@ -277,10 +276,10 @@ The backend base URL comes from an env var (e.g. `VITE_API_URL`) — do not hard
 - **Response semantics**:
   - Submitting a wrong flag returns `201` with `{ status: 'WRONG' }` — that is a success response, not an error.
   - `GET /events` (browse) returns public events only; private events are joined via `POST /event-member/{eventId}/join` with their invite code in the request body.
-  - `GET /events/owned` returns events the user *owns*, not every event they joined.
+  - `GET /events/owned` returns events the user _owns_, not every event they joined.
   - `GET /events/joined` returns every event the user belongs to (owned or joined, any role).
   - `GET /events/{eventId}/challenges` requires `?teamId=` for non-admin users (each challenge includes `solved: true/false`); event owners/admins may omit it.
-  - `GET /events/{eventId}/challenges/{id}` is owner/admin-only — participants should render challenge details from the list response.
+  - `GET /events/{eventId}/challenges/{challengeId}` is owner/admin-only — participants should render challenge details from the list response.
   - Only 200/201 success schemas are documented in `openapi.json`; error responses are not enumerated there.
 
 ## Important

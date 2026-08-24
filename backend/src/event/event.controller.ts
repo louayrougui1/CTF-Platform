@@ -54,10 +54,10 @@ export class EventController {
     return this.eventsService.getJoinedEvents(req.user);
   }
 
-  @Get(':id')
+  @Get(':eventId')
   @ApiOkResponse({ type: EventResponseDto })
-  getEvent(@Param('id') id: string, @Req() req: Request) {
-    return this.eventsService.getEvent(req.user, id);
+  getEvent(@Param('eventId') eventId: string, @Req() req: Request) {
+    return this.eventsService.getEvent(req.user, eventId);
   }
 
   // ─── MUTATIONS ────────────────────────────────────────────────────────────
@@ -68,27 +68,27 @@ export class EventController {
     return this.eventsService.createEvent(req.user, dto);
   }
 
-  @Patch(':id')
+  @Patch(':eventId')
   @ApiOkResponse({ type: EventResponseDto })
   updateEvent(
-    @Param('id') id: string,
+    @Param('eventId') eventId: string,
     @Req() req: Request,
     @Body() dto: UpdateEventDto,
   ) {
-    return this.eventsService.updateEvent(req.user, id, dto);
+    return this.eventsService.updateEvent(req.user, eventId, dto);
   }
 
-  @Post(':id/invite-code')
+  @Post(':eventId/invite-code')
   @ApiOkResponse({ type: EventResponseDto })
-  regenerateInviteCode(@Param('id') id: string, @Req() req: Request) {
-    return this.eventsService.regenerateInviteCode(req.user, id);
+  regenerateInviteCode(@Param('eventId') eventId: string, @Req() req: Request) {
+    return this.eventsService.regenerateInviteCode(req.user, eventId);
   }
 
-  @Delete(':id')
+  @Delete(':eventId')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: EventResponseDto })
-  deleteEvent(@Param('id') id: string, @Req() req: Request) {
-    return this.eventsService.deleteEvent(req.user, id);
+  deleteEvent(@Param('eventId') eventId: string, @Req() req: Request) {
+    return this.eventsService.deleteEvent(req.user, eventId);
   }
 
   // ─── MEMBERSHIP ───────────────────────────────────────────────────────────
