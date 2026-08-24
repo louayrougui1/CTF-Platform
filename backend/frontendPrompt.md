@@ -87,7 +87,7 @@ Two role systems drive what a user can see and do:
 
 ### Owner / Admin flow
 
-`GET /events/mine` returns events the user **owns**; `GET /events/joined` returns every event the user belongs to (any role — owned or joined). For each owned event provide a **Manage** entry that opens a management screen:
+`GET /events/owned` returns events the user **owns**; `GET /events/joined` returns every event the user belongs to (any role — owned or joined). For each owned event provide a **Manage** entry that opens a management screen:
 
 - **Event** (owner + admin): edit the event (`PATCH /events/{id}`), view members (`GET /event-member/{eventId}/members`). Owner-only: delete the event (`DELETE /events/{id}`), promote/remove admins (`POST /event-member/admins`, `DELETE /event-member/admins`). The event's **invite code** is shown here with a **Copy** button; owners can regenerate it (`POST /events/{id}/invite-code`).
 - **Challenges** (owner + admin): buttons to **create** (`POST /events/{eventId}/challenges`), **edit** (`PATCH /events/{eventId}/challenges/{id}`), **delete** (`DELETE /events/{eventId}/challenges/{id}`), and view **stats** (`GET /events/{eventId}/challenges/{id}/stats`). These are `multipart/form-data` requests (title, description, flag, category, difficulty, points, and an optional file). Editing must not force a file re-upload.
@@ -277,7 +277,7 @@ The backend base URL comes from an env var (e.g. `VITE_API_URL`) — do not hard
 - **Response semantics**:
   - Submitting a wrong flag returns `201` with `{ status: 'WRONG' }` — that is a success response, not an error.
   - `GET /events` (browse) returns public events only; private events are joined via `POST /event-member/{eventId}/join` with their invite code in the request body.
-  - `GET /events/mine` returns events the user *owns*, not every event they joined.
+  - `GET /events/owned` returns events the user *owns*, not every event they joined.
   - `GET /events/joined` returns every event the user belongs to (owned or joined, any role).
   - `GET /events/{eventId}/challenges` requires `?teamId=` for non-admin users (each challenge includes `solved: true/false`); event owners/admins may omit it.
   - `GET /events/{eventId}/challenges/{id}` is owner/admin-only — participants should render challenge details from the list response.

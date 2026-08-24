@@ -90,10 +90,10 @@ export class AuthController {
   @ApiCookieAuth('refresh_token')
   @Post('logout')
   @ApiCreatedResponse({ type: AuthMessageResponseDto })
-  logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const refreshToken = req.cookies?.['refresh_token'];
     if (!refreshToken) throw new UnauthorizedException('No refresh token');
-    this.authService.logout(res);
+    await this.authService.logout(refreshToken, res);
     return { message: 'Logged out' };
   }
 

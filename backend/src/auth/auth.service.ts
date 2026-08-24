@@ -4,23 +4,23 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
   ConflictException,
-} from '@nestjs/common';
-import { AuthPayloadDto } from './dto/auth.dto';
-import { VerifyOtpDto } from './dto/verifyOtp.dto';
-import { PrismaService } from '../prisma/prisma.service';
-import { MailerService } from './otp/sendEmail';
-import { OtpService } from './otp/otp.service';
-import { OtpPurpose } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
-import { JwtService } from '@nestjs/jwt';
-import { RegisterDto } from './dto/register.dto';
-import { Response } from 'express';
-import { ResendOtpDto } from './dto/resendOtp.dto';
-import { SetPasswordDto } from './dto/set-password.dto';
-import * as crypto from 'crypto';
+} from "@nestjs/common";
+import { AuthPayloadDto } from "./dto/auth.dto";
+import { VerifyOtpDto } from "./dto/verifyOtp.dto";
+import { PrismaService } from "../prisma/prisma.service";
+import { MailerService } from "./otp/sendEmail";
+import { OtpService } from "./otp/otp.service";
+import { OtpPurpose } from "@prisma/client";
+import * as bcrypt from "bcrypt";
+import { JwtService } from "@nestjs/jwt";
+import { RegisterDto } from "./dto/register.dto";
+import { Response } from "express";
+import { ResendOtpDto } from "./dto/resendOtp.dto";
+import { SetPasswordDto } from "./dto/set-password.dto";
+import * as crypto from "crypto";
 // ...existing imports
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ForgotPasswordDto } from "./dto/forgot-password.dto";
+import { ResetPasswordDto } from "./dto/reset-password.dto";
 
 @Injectable()
 export class AuthService {
@@ -37,7 +37,7 @@ export class AuthService {
         email: user.email,
       },
       {
-        expiresIn: '30m',
+        expiresIn: "30m",
       },
     );
   }
@@ -49,37 +49,49 @@ export class AuthService {
       },
       {
         secret: process.env.JWT_LINK_SECRET,
-        expiresIn: '5m',
+        expiresIn: "5m",
       },
     );
   }
   private setLinkTokenCookie(res: Response, linkToken: string) {
-    res.cookie('google_link_token', linkToken, {
+    res.cookie("google_link_token", linkToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
       maxAge: 5 * 60 * 1000, // 5 minutes
     });
   }
 
   private generateRefreshToken(user: any) {
     if (!process.env.JWT_REFRESH_SECRET) {
-      throw new Error('JWT_REFRESH_SECRET is not defined');
+      throw new Error("JWT_REFRESH_SECRET is not defined");
     }
     return this.jwtService.sign(
       { sub: user.id },
       {
         secret: process.env.JWT_REFRESH_SECRET,
-        expiresIn: '7d',
+        expiresIn: "7d",
       },
     );
   }
   setRefreshTokenCookie(res: Response, refreshToken: string) {
-    res.cookie('refresh_token', refreshToken, {
+    res.cookie("refresh_token", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
+    });
+  }
+
+  private hashToken(token: string): string {
+    return crypto.createHash("sha256").update(token).digest("hex");
+  }
+
+  private async saveRefreshTokenForUser(userId: string, refreshToken: string) {
+    const hash = this.hashToken(refreshToken);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshTokenHash: hash },
     });
   }
 
@@ -94,7 +106,7 @@ export class AuthService {
 
     if (!user.emailVerified) {
       throw new UnauthorizedException(
-        'Please verify your email before logging in.',
+        "Please verify your email before logging in.",
       );
     }
     if (!user.password) {
@@ -115,6 +127,7 @@ export class AuthService {
     const accessToken = this.generateAccessToken(safeUser);
     const refreshToken = this.generateRefreshToken(safeUser);
     this.setRefreshTokenCookie(res, refreshToken);
+    await this.saveRefreshTokenForUser(user.id, refreshToken);
 
     return {
       access_token: accessToken,
@@ -132,7 +145,7 @@ export class AuthService {
       if (existing) {
         if (existing.password !== null) {
           // Has a password already — genuine duplicate
-          throw new BadRequestException('Email already in use');
+          throw new BadRequestException("Email already in use");
         }
 
         // FIX (Issue 1): An account with no password but a linked Google
@@ -145,14 +158,14 @@ export class AuthService {
         // the authenticated setPassword() flow to add a password.
         if (existing.googleId) {
           throw new ConflictException(
-            'An account already exists with this email. Please sign in with Google first.',
+            "An account already exists with this email. Please sign in with Google first.",
           );
         }
 
         // No password and no googleId is not an expected state for
         // /register to encounter — treat it the same as "email in use"
         // rather than silently repairing it.
-        throw new BadRequestException('Email already in use');
+        throw new BadRequestException("Email already in use");
       } else {
         // Fresh registration
         try {
@@ -160,8 +173,8 @@ export class AuthService {
             data: { email, username, password: hashedPassword },
           });
         } catch (err: any) {
-          if (err.code === 'P2002') {
-            throw new ConflictException('Email already in use');
+          if (err.code === "P2002") {
+            throw new ConflictException("Email already in use");
           }
           throw err;
         }
@@ -175,11 +188,11 @@ export class AuthService {
       await this.mailService.sendOtpEmail(
         user.email,
         otp,
-        'Email Verification',
+        "Email Verification",
       );
 
       return {
-        message: 'Verification code sent.',
+        message: "Verification code sent.",
       };
       // const { password, ...safeUser } = user;
 
@@ -197,7 +210,7 @@ export class AuthService {
         error instanceof ConflictException
       )
         throw error;
-      throw new InternalServerErrorException('Failed to create user');
+      throw new InternalServerErrorException("Failed to create user");
     }
   }
 
@@ -214,10 +227,10 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
 
     if (!user) {
-      throw new BadRequestException('User not found');
+      throw new BadRequestException("User not found");
     }
     if (user.password) {
-      throw new BadRequestException('Password already set for this account.');
+      throw new BadRequestException("Password already set for this account.");
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -242,7 +255,7 @@ export class AuthService {
         secret: process.env.JWT_REFRESH_SECRET,
       });
     } catch (error) {
-      throw new UnauthorizedException('Invalid or Expired refresh token');
+      throw new UnauthorizedException("Invalid or Expired refresh token");
     }
 
     const user = await this.prisma.user.findUnique({
@@ -250,11 +263,21 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException("User not found");
+    }
+
+    // Ensure the presented refresh token matches the stored hash
+    const presentedHash = this.hashToken(refreshToken);
+    if (!user.refreshTokenHash || user.refreshTokenHash !== presentedHash) {
+      throw new UnauthorizedException("Invalid refresh token");
     }
 
     const { password, ...safeUser } = user;
     const newRefreshToken = this.generateRefreshToken(safeUser);
+
+    // Persist hash of the newly issued refresh token
+    await this.saveRefreshTokenForUser(user.id, newRefreshToken);
+
     this.setRefreshTokenCookie(res, newRefreshToken);
 
     return {
@@ -262,11 +285,26 @@ export class AuthService {
       user: safeUser,
     };
   }
-  logout(res: Response) {
-    res.clearCookie('refresh_token', {
+  async logout(refreshToken: string, res: Response) {
+    // Try to clear the stored refresh token hash for the user if possible
+    try {
+      const payload: any = this.jwtService.verify(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET,
+      });
+      if (payload?.sub) {
+        await this.prisma.user.update({
+          where: { id: payload.sub },
+          data: { refreshTokenHash: null },
+        });
+      }
+    } catch (e) {
+      // ignore verification errors; still clear cookie client-side
+    }
+
+    res.clearCookie("refresh_token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
     });
   }
 
@@ -296,7 +334,7 @@ export class AuthService {
         return {
           requiresLinkConfirmation: true,
           message:
-            'An account already exists with this email. Would you like to link your Google account to it?',
+            "An account already exists with this email. Would you like to link your Google account to it?",
         };
       }
 
@@ -305,15 +343,15 @@ export class AuthService {
         user = await this.prisma.user.create({
           data: {
             email: profile.email,
-            username: profile.firstName + ' ' + profile.lastName,
+            username: profile.firstName + " " + profile.lastName,
             password: null,
             googleId: profile.googleId,
             emailVerified: true,
           },
         });
       } catch (err: any) {
-        if (err.code === 'P2002') {
-          throw new ConflictException('Email or Google ID already in use');
+        if (err.code === "P2002") {
+          throw new ConflictException("Email or Google ID already in use");
         }
 
         throw err;
@@ -327,6 +365,7 @@ export class AuthService {
     const refreshToken = this.generateRefreshToken(safeUser);
 
     this.setRefreshTokenCookie(res, refreshToken);
+    await this.saveRefreshTokenForUser(user.id, refreshToken);
 
     return {
       access_token: accessToken,
@@ -337,7 +376,7 @@ export class AuthService {
   async linkGoogleAccount(linkToken: string, res: Response) {
     if (!linkToken) {
       throw new UnauthorizedException(
-        'Google link session expired or not found.',
+        "Google link session expired or not found.",
       );
     }
 
@@ -353,7 +392,7 @@ export class AuthService {
       });
     } catch {
       throw new UnauthorizedException(
-        'Google link session expired or invalid.',
+        "Google link session expired or invalid.",
       );
     }
 
@@ -366,7 +405,7 @@ export class AuthService {
 
     if (googleUser && googleUser.id !== userId) {
       throw new ConflictException(
-        'This Google account is already linked to another user.',
+        "This Google account is already linked to another user.",
       );
     }
 
@@ -376,12 +415,12 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new BadRequestException('User not found');
+      throw new BadRequestException("User not found");
     }
 
     if (user.googleId) {
       throw new BadRequestException(
-        'A Google account is already linked to this user.',
+        "A Google account is already linked to this user.",
       );
     }
 
@@ -393,10 +432,10 @@ export class AuthService {
       },
     });
 
-    res.clearCookie('google_link_token', {
+    res.clearCookie("google_link_token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
     });
 
     const { password, ...safeUser } = updatedUser;
@@ -406,6 +445,7 @@ export class AuthService {
     const refreshToken = this.generateRefreshToken(safeUser);
 
     this.setRefreshTokenCookie(res, refreshToken);
+    await this.saveRefreshTokenForUser(updatedUser.id, refreshToken);
 
     return {
       access_token: accessToken,
@@ -418,7 +458,7 @@ export class AuthService {
       where: { email: dto.email },
     });
 
-    if (!user) throw new BadRequestException('User not found');
+    if (!user) throw new BadRequestException("User not found");
 
     await this.otpService.verifyOtp(
       user.id,
@@ -439,6 +479,7 @@ export class AuthService {
     const refreshToken = this.generateRefreshToken(safeUser);
 
     this.setRefreshTokenCookie(res, refreshToken);
+    await this.saveRefreshTokenForUser(updatedUser.id, refreshToken);
 
     return {
       access_token: accessToken,
@@ -448,31 +489,27 @@ export class AuthService {
 
   // inside AuthService
 
-  private hashToken(token: string): string {
-    return crypto.createHash('sha256').update(token).digest('hex');
-  }
-
   private setResetTokenCookie(res: Response, token: string) {
-    res.cookie('reset_token', token, {
+    res.cookie("reset_token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
       maxAge: 5 * 60 * 1000, // 5 minutes
     });
   }
 
   private clearResetTokenCookie(res: Response) {
-    res.clearCookie('reset_token', {
+    res.clearCookie("reset_token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
     });
   }
 
   async forgotPassword({ email }: ForgotPasswordDto) {
     const genericResponse = {
       message:
-        'If an account exists for that email, a reset code has been sent.',
+        "If an account exists for that email, a reset code has been sent.",
     };
 
     const user = await this.prisma.user.findUnique({ where: { email } });
@@ -484,7 +521,7 @@ export class AuthService {
       user.id,
       OtpPurpose.PASSWORD_RESET,
     );
-    await this.mailService.sendOtpEmail(user.email, otp, 'Password Reset');
+    await this.mailService.sendOtpEmail(user.email, otp, "Password Reset");
 
     return genericResponse;
   }
@@ -495,7 +532,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new BadRequestException('Invalid code');
+      throw new BadRequestException("Invalid code");
     }
 
     await this.otpService.verifyOtp(
@@ -509,7 +546,7 @@ export class AuthService {
       where: { userId: user.id, usedAt: null },
     });
 
-    const rawToken = crypto.randomBytes(32).toString('hex');
+    const rawToken = crypto.randomBytes(32).toString("hex");
     const tokenHash = this.hashToken(rawToken);
 
     await this.prisma.passwordResetToken.create({
@@ -522,12 +559,12 @@ export class AuthService {
 
     this.setResetTokenCookie(res, rawToken);
 
-    return { message: 'Code verified. You may now reset your password.' };
+    return { message: "Code verified. You may now reset your password." };
   }
 
   async resetPassword(dto: ResetPasswordDto, rawToken: string, res: Response) {
     if (!rawToken) {
-      throw new UnauthorizedException('Missing reset token');
+      throw new UnauthorizedException("Missing reset token");
     }
 
     const tokenHash = this.hashToken(rawToken);
@@ -537,7 +574,7 @@ export class AuthService {
     });
 
     if (!resetToken || resetToken.usedAt || resetToken.expiresAt < new Date()) {
-      throw new UnauthorizedException('Invalid or expired reset token');
+      throw new UnauthorizedException("Invalid or expired reset token");
     }
 
     const hashedPassword = await bcrypt.hash(dto.newPassword, 10);
@@ -555,7 +592,7 @@ export class AuthService {
 
     this.clearResetTokenCookie(res);
 
-    return { message: 'Password has been reset successfully.' };
+    return { message: "Password has been reset successfully." };
   }
   async resendOtp({ email }: ResendOtpDto) {
     const user = await this.prisma.user.findUnique({
@@ -564,12 +601,12 @@ export class AuthService {
 
     if (!user) {
       throw new BadRequestException(
-        'If an account exists for that email, a reset code has been sent.',
+        "If an account exists for that email, a reset code has been sent.",
       );
     }
 
     if (user.emailVerified) {
-      throw new BadRequestException('Email is already verified');
+      throw new BadRequestException("Email is already verified");
     }
 
     const otp = await this.otpService.createOtp(
@@ -584,7 +621,7 @@ export class AuthService {
     );
 
     return {
-      message: 'A new verification code has been sent.',
+      message: "A new verification code has been sent.",
     };
   }
 }
