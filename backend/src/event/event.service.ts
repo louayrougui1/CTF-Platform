@@ -1,12 +1,12 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateEventDto } from './dto/eventCreate.dto';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import { CreateEventDto } from "./dto/eventCreate.dto";
 import {
   NotFoundException,
   ForbiddenException,
   ConflictException,
-} from '@nestjs/common';
-import { UpdateEventDto } from './dto/updateEvent.dto';
+} from "@nestjs/common";
+import { UpdateEventDto } from "./dto/updateEvent.dto";
 
 const EVENT_SELECT = {
   id: true,
@@ -39,7 +39,7 @@ export class EventService {
     });
 
     if (!event) {
-      throw new NotFoundException('Event not found');
+      throw new NotFoundException("Event not found");
     }
 
     return event;
@@ -50,7 +50,7 @@ export class EventService {
 
     if (event.ownerId !== userId) {
       throw new ForbiddenException(
-        'Only the event owner can perform this action',
+        "Only the event owner can perform this action",
       );
     }
 
@@ -59,10 +59,10 @@ export class EventService {
 
   // ─── QUERIES ────────────────────────────────────────────────────────────────
 
-  private generateInviteCode(): string {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let code = '';
-    for (let i = 0; i < 8; i++) {
+  private generateInviteCode(length = 8): string {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let code = "";
+    for (let i = 0; i < length; i++) {
       code += chars[Math.floor(Math.random() * chars.length)];
     }
     return code;
@@ -76,7 +76,7 @@ export class EventService {
         isPublic: true,
         OR: [{ endDate: { gt: now } }, { endDate: null }],
       },
-      orderBy: { startDate: 'asc' },
+      orderBy: { startDate: "asc" },
       select: EVENT_SELECT,
     });
   }
@@ -85,7 +85,7 @@ export class EventService {
     return this.prisma.event.findMany({
       where: { ownerId: user.id },
       select: EVENT_SELECT_WITH_CODE,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
   }
 
@@ -93,7 +93,7 @@ export class EventService {
     return this.prisma.event.findMany({
       where: { members: { some: { userId: user.id } } },
       select: EVENT_SELECT_WITH_CODE,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
   }
 
@@ -104,7 +104,7 @@ export class EventService {
 
     if (!membership) {
       // Don't leak whether the event exists to non-members
-      throw new NotFoundException('Event not found');
+      throw new NotFoundException("Event not found");
     }
 
     return this.prisma.event.findUniqueOrThrow({
@@ -119,7 +119,7 @@ export class EventService {
     });
 
     if (!membership) {
-      throw new NotFoundException('Event not found');
+      throw new NotFoundException("Event not found");
     }
 
     const [memberCount, teamCount, challengeCount, solveCount] =
@@ -136,44 +136,49 @@ export class EventService {
   }
   // ─── MUTATIONS ──────────────────────────────────────────────────────────────
 
-  async createEvent(user: any, dto: CreateEventDto) {
-    let event;
-    try {
-      event = await this.prisma.event.create({
-        data: {
-          ...dto,
-          ownerId: user.id,
-          inviteCode: this.generateInviteCode(),
-        },
-        select: EVENT_SELECT_WITH_CODE,
-      });
-    } catch (err: any) {
-      if (err.code === 'P2002') {
-        // inviteCode collision — retry once with a fresh code
-        event = await this.prisma.event.create({
+  private async createEventWithUniqueCode(user: any, dto: CreateEventDto) {
+    const MAX_ATTEMPTS = 5;
+
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      // Widen the code space a bit on later attempts, purely as a safety net
+      const codeLength = attempt <= 3 ? 8 : 10;
+
+      try {
+        return await this.prisma.event.create({
           data: {
             ...dto,
             ownerId: user.id,
-            inviteCode: this.generateInviteCode(),
+            inviteCode: this.generateInviteCode(codeLength),
           },
           select: EVENT_SELECT_WITH_CODE,
         });
-      } else {
+      } catch (err: any) {
+        const isLastAttempt = attempt === MAX_ATTEMPTS;
+        if (err.code === "P2002" && !isLastAttempt) {
+          continue; // invite code collision, try again with a fresh code
+        }
         throw err;
       }
     }
+
+    // Unreachable, but keeps TS happy
+    throw new ConflictException("Could not generate a unique invite code");
+  }
+
+  async createEvent(user: any, dto: CreateEventDto) {
+    const event = await this.createEventWithUniqueCode(user, dto);
 
     try {
       await this.prisma.eventMember.create({
         data: {
           userId: user.id,
           eventId: event.id,
-          role: 'OWNER',
+          role: "OWNER",
         },
       });
     } catch (err: any) {
-      if (err.code === 'P2002') {
-        throw new ConflictException('User is already a member of this event');
+      if (err.code === "P2002") {
+        throw new ConflictException("User is already a member of this event");
       }
       throw err;
     }
@@ -183,12 +188,20 @@ export class EventService {
 
   async regenerateInviteCode(user: any, id: string) {
     await this.assertEventOwner(id, user.id);
-
-    return this.prisma.event.update({
-      where: { id },
-      data: { inviteCode: this.generateInviteCode() },
-      select: EVENT_SELECT_WITH_CODE,
-    });
+    let event;
+    try {
+      event = await this.prisma.event.update({
+        where: { id },
+        data: { inviteCode: this.generateInviteCode() },
+        select: EVENT_SELECT_WITH_CODE,
+      });
+    } catch (err: any) {
+      if (err.code === "P2002") {
+        throw new ConflictException("Invite code collision");
+      }
+      throw err;
+    }
+    return event;
   }
 
   async updateEvent(user: any, id: string, dto: UpdateEventDto) {
@@ -197,23 +210,23 @@ export class EventService {
       select: {
         ownerId: true,
         members: {
-          where: { role: { in: ['OWNER', 'ADMIN'] } },
+          where: { role: { in: ["OWNER", "ADMIN"] } },
           select: { userId: true, role: true },
         },
       },
     });
 
     if (!event) {
-      throw new NotFoundException('Event not found');
+      throw new NotFoundException("Event not found");
     }
 
     const isOwner = event.ownerId === user.id;
     const isAdmin = event.members.some(
-      (m) => m.userId === user.id && m.role === 'ADMIN',
+      (m) => m.userId === user.id && m.role === "ADMIN",
     );
 
     if (!isOwner && !isAdmin) {
-      throw new ForbiddenException('You are not allowed to update this event');
+      throw new ForbiddenException("You are not allowed to update this event");
     }
 
     return this.prisma.event.update({

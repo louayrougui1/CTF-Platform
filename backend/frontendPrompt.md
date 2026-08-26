@@ -10,10 +10,10 @@ The project should feel like a **real, professional CTF platform**, not a generi
 
 ### Frontend
 
-Next
-
+- React
 - TypeScript
 - Vite
+- React Router
 - Zustand
 - TanStack Query
 - Axios
@@ -49,7 +49,7 @@ Users can:
 - Create and join teams
 - Have team roles such as `CAPTAIN` and `MEMBER`
 - Browse challenges
-- View challenge details
+- View challenge details (from the list — single-challenge endpoint is owner/admin-only)
 - Download challenge files
 - Submit flags
 - Solve challenges
@@ -59,17 +59,17 @@ Users can:
 
 ### Joining Events
 
-Users should be able to join an event in two ways:
+Users can join an event from two places:
 
-1. **Browse Events page** — users can browse available events and click a Join button.
+1. **Browse Events page** — click **Join** on a public event card to join directly.
+2. **Event Details page** — the same **Join** button appears here too.
 
-2. **Join by Event ID** — provide a clear option to enter/paste an Event ID and join directly.
+The join endpoint is always `POST /event-member/{eventId}/join`.
 
-The Event Details page should make the Event ID easy to find and include a **Copy ID** button so the event creator or participants can easily share the event ID with others.
+- **Public events**: no request body needed — the call succeeds immediately.
+- **Private events**: the body must include `{ "inviteCode": "..." }`. The invite code is shown on the Event Details / Event Management page with a **Copy** button. Owners can regenerate it via `POST /events/{eventId}/invite-code`.
 
 Do not invent a new API endpoint for this. Use the existing event-membership endpoint defined in `openapi.json`.
-
-Events are either **public** (shown in the browse list and joinable directly) or **private** (hidden from the browse list — they can only be joined with the event's **invite code**). Joining a private event sends the code as `{ inviteCode }` in the join request body (`POST /event-member/{eventId}/join`). The Event Details / Event Management page shows the event's invite code with a **Copy** button; owners can **regenerate** it via `POST /events/{eventId}/invite-code`.
 
 ---
 
@@ -83,15 +83,15 @@ Two role systems drive what a user can see and do:
 ### Participant flow
 
 - Browse events (`GET /events`, public events only) → join (`POST /event-member/{eventId}/join`). Public events join directly; private events require their invite code as `{ inviteCode }` in the join body.
-- In an event: create or join a team, browse challenges (`GET /events/{eventId}/challenges?teamId={yourTeamId}`), open a challenge (render it from the list response — the single-challenge endpoint is owner/admin-only), download its file, and submit flags (`POST /events/{eventId}/challenges/{challengeId}/submit`).
+- In an event: create a team (`POST /events/{eventId}/teams` with `{ name, teamPassword }`) or join an existing one (`POST /events/{eventId}/teams/{teamId}/join` with `{ password }`), browse challenges (`GET /events/{eventId}/challenges?teamId={yourTeamId}`), open a challenge (render it from the list response — the single-challenge endpoint is owner/admin-only), download its file, and submit flags (`POST /events/{eventId}/challenges/{challengeId}/submit`).
 
 ### Owner / Admin flow
 
 `GET /events/owned` returns events the user **owns**; `GET /events/joined` returns every event the user belongs to (any role — owned or joined). For each owned event provide a **Manage** entry that opens a management screen:
 
-- **Event** (owner + admin): edit the event (`PATCH /events/{eventId}`), view members (`GET /event-member/{eventId}/members`). Owner-only: delete the event (`DELETE /events/{eventId}`), promote/remove admins (`POST /event-member/admins`, `DELETE /event-member/admins`). The event's **invite code** is shown here with a **Copy** button; owners can regenerate it (`POST /events/{eventId}/invite-code`).
+- **Event** (owner + admin): edit the event (`PATCH /events/{eventId}` — note: `endDate` must be at least 30 minutes after `startDate`), view members (`GET /event-member/{eventId}/members`). Any event member: view stats (`GET /events/stats/{eventId}` returning `{ memberCount, teamCount, challengeCount, solveCount }`). Owner-only: delete the event (`DELETE /events/{eventId}`), promote/remove admins (`POST /event-member/admins`, `DELETE /event-member/admins`). The event's **invite code** is shown here with a **Copy** button; owners can regenerate it (`POST /events/{eventId}/invite-code`).
 - **Challenges** (owner + admin): buttons to **create** (`POST /events/{eventId}/challenges`), **edit** (`PATCH /events/{eventId}/challenges/{challengeId}`), **delete** (`DELETE /events/{eventId}/challenges/{challengeId}`), and view **stats** (`GET /events/{eventId}/challenges/{challengeId}/stats`). These are `multipart/form-data` requests (title, description, flag, category, difficulty, points, and an optional file). Editing must not force a file re-upload.
-- **Teams** (captain): edit the team (`PATCH /events/{eventId}/teams/{teamId}`), delete it (`DELETE /events/{eventId}/teams/{teamId}`), kick members (`DELETE /events/{eventId}/teams/{teamId}/members/{userId}`). Any member can leave (`DELETE /events/{eventId}/teams/{teamId}/leave`).
+- **Teams**: join an existing team (`POST /events/{eventId}/teams/{teamId}/join` with `{ password }`), create a team (`POST /events/{eventId}/teams` with `{ name, teamPassword }`). The current user's team for an event can be fetched via `GET /events/{eventId}/teams/me`. Captain: edit the team (`PATCH /events/{eventId}/teams/{teamId}`), delete it (`DELETE /events/{eventId}/teams/{teamId}`), kick members (`DELETE /events/{eventId}/teams/{teamId}/members/{userId}`). Any member can leave (`DELETE /events/{eventId}/teams/{teamId}/leave`).
 
 Owner/admin challenge-list calls omit `teamId`; everyone else must pass their own `teamId`.
 
@@ -139,12 +139,12 @@ Keep the page structure focused and practical.
 - Landing / Home
 - Login
 - Register
-- Browse Events
 - Event Details
 
 ### Authenticated
 
 - Dashboard
+- Browse Events
 - Events
 - Event Details
 - Teams
@@ -232,6 +232,7 @@ Use:
 
 - **TanStack Query** for API/server state
 - **Zustand** for client-side state such as authentication/session state
+- **React Router** for navigation
 - Reusable components and API services
 - Responsive design for desktop, tablet, and mobile
 
@@ -280,6 +281,7 @@ The backend base URL comes from an env var (e.g. `VITE_API_URL`) — do not hard
   - `GET /events/joined` returns every event the user belongs to (owned or joined, any role).
   - `GET /events/{eventId}/challenges` requires `?teamId=` for non-admin users (each challenge includes `solved: true/false`); event owners/admins may omit it.
   - `GET /events/{eventId}/challenges/{challengeId}` is owner/admin-only — participants should render challenge details from the list response.
+  - `GET /user/profile` returns `{ id, email, username, googleId, hasPassword }`. `PATCH /user/profile` returns `{ id, email, username, googleId, updatedAt }` (no `hasPassword`).
   - Only 200/201 success schemas are documented in `openapi.json`; error responses are not enumerated there.
 
 ## Important

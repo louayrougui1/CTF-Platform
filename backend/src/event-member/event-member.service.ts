@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
 import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
   ConflictException,
-} from '@nestjs/common';
-import { AddAdminDto } from './dto/addAdmin.dto';
-import { RemoveAdminDto } from './dto/removeAdmin.dto';
-import { JoinEventDto } from './dto/joinEvent.dto';
+} from "@nestjs/common";
+import { AddAdminDto } from "./dto/addAdmin.dto";
+import { RemoveAdminDto } from "./dto/removeAdmin.dto";
+import { JoinEventDto } from "./dto/joinEvent.dto";
 
 @Injectable()
 export class EventMemberService {
@@ -19,7 +19,7 @@ export class EventMemberService {
     });
 
     if (!event) {
-      throw new NotFoundException('Event not found');
+      throw new NotFoundException("Event not found");
     }
 
     return event;
@@ -30,7 +30,7 @@ export class EventMemberService {
 
     if (event.ownerId !== userId) {
       throw new ForbiddenException(
-        'Only the event owner can perform this action',
+        "Only the event owner can perform this action",
       );
     }
 
@@ -45,7 +45,7 @@ export class EventMemberService {
       where: { userId_eventId: { userId, eventId } },
     });
     if (!member)
-      throw new ForbiddenException('You are not a member of this event');
+      throw new ForbiddenException("You are not a member of this event");
     return member;
   }
 
@@ -66,7 +66,7 @@ export class EventMemberService {
           },
         },
       },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: "asc" },
     });
   }
 
@@ -74,7 +74,7 @@ export class EventMemberService {
     await this.assertEventOwner(dto.eventId, user.id);
 
     if (dto.userIdToPromote === user.id) {
-      throw new BadRequestException('Event owner cannot be assigned as admin');
+      throw new BadRequestException("Event owner cannot be assigned as admin");
     }
 
     const member = await this.prisma.eventMember.findUnique({
@@ -87,7 +87,7 @@ export class EventMemberService {
     });
 
     if (!member) {
-      throw new NotFoundException('User is not an event member');
+      throw new NotFoundException("User is not an event member");
     }
 
     return this.prisma.eventMember.update({
@@ -97,7 +97,7 @@ export class EventMemberService {
           eventId: dto.eventId,
         },
       },
-      data: { role: 'ADMIN' },
+      data: { role: "ADMIN" },
     });
   }
 
@@ -114,11 +114,11 @@ export class EventMemberService {
     });
 
     if (!member) {
-      throw new NotFoundException('User is not an event member');
+      throw new NotFoundException("User is not an event member");
     }
 
-    if (member.role !== 'ADMIN') {
-      throw new BadRequestException('User is not an admin of this event');
+    if (member.role !== "ADMIN") {
+      throw new BadRequestException("User is not an admin of this event");
     }
 
     return this.prisma.eventMember.update({
@@ -128,7 +128,7 @@ export class EventMemberService {
           eventId: dto.eventId,
         },
       },
-      data: { role: 'MEMBER' },
+      data: { role: "MEMBER" },
     });
   }
 
@@ -139,17 +139,17 @@ export class EventMemberService {
 
     if (dto?.inviteCode) {
       if (event.inviteCode !== dto.inviteCode.trim()) {
-        throw new ForbiddenException('Invalid invite code');
+        throw new ForbiddenException("Invalid invite code");
       }
     } else if (!event.isPublic) {
       throw new ForbiddenException(
-        'This event is private , an invite code is required to join',
+        "This event is private , an invite code is required to join",
       );
     }
 
     if (event.endDate && event.endDate < new Date()) {
       throw new BadRequestException(
-        'Cannot join an event that has already ended',
+        "Cannot join an event that has already ended",
       );
     }
 
@@ -160,7 +160,7 @@ export class EventMemberService {
     });
 
     if (member) {
-      throw new BadRequestException('User is already a member of this event');
+      throw new BadRequestException("User is already a member of this event");
     }
 
     try {
@@ -168,12 +168,12 @@ export class EventMemberService {
         data: {
           userId: user.id,
           eventId,
-          role: 'MEMBER',
+          role: "MEMBER",
         },
       });
     } catch (err: any) {
-      if (err.code === 'P2002') {
-        throw new ConflictException('User is already a member of this event');
+      if (err.code === "P2002") {
+        throw new ConflictException("User is already a member of this event");
       }
       throw err;
     }
@@ -183,7 +183,7 @@ export class EventMemberService {
     const event = await this.findEventOrThrow(eventId);
 
     if (event.ownerId === user.id) {
-      throw new BadRequestException('Event owner cannot leave the event');
+      throw new BadRequestException("Event owner cannot leave the event");
     }
 
     const member = await this.prisma.eventMember.findUnique({
@@ -193,7 +193,7 @@ export class EventMemberService {
     });
 
     if (!member) {
-      throw new BadRequestException('User is not a member of this event');
+      throw new BadRequestException("User is not a member of this event");
     }
 
     return this.prisma.eventMember.delete({
