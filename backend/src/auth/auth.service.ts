@@ -14,7 +14,7 @@ import { OtpPurpose } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
 import { RegisterDto } from "./dto/register.dto";
-import { Response } from "express";
+import { CookieOptions, Response } from "express";
 import { ResendOtpDto } from "./dto/resendOtp.dto";
 import { SetPasswordDto } from "./dto/set-password.dto";
 import * as crypto from "crypto";
@@ -55,9 +55,7 @@ export class AuthService {
   }
   private setLinkTokenCookie(res: Response, linkToken: string) {
     res.cookie("google_link_token", linkToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
+      ...this.baseCookieOptions(),
       maxAge: 5 * 60 * 1000, // 5 minutes
     });
   }
@@ -74,11 +72,24 @@ export class AuthService {
       },
     );
   }
+
+  /**
+   * Shared cookie flags for auth cookies.
+   * Dev runs same-site (frontend + API both on localhost), so SameSite="lax"
+   * is valid there. Production needs SameSite=None + Secure to support a
+   * cross-domain hosted frontend. Never use "strict" here.
+   */
+  private baseCookieOptions(): CookieOptions {
+    const production = process.env.NODE_ENV === "production";
+    return {
+      httpOnly: true,
+      secure: production,
+      sameSite: production ? "none" : "lax",
+    };
+  }
   setRefreshTokenCookie(res: Response, refreshToken: string) {
     res.cookie("refresh_token", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
+      ...this.baseCookieOptions(),
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
     });
   }
@@ -301,11 +312,7 @@ export class AuthService {
       // ignore verification errors; still clear cookie client-side
     }
 
-    res.clearCookie("refresh_token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
-    });
+    res.clearCookie("refresh_token", this.baseCookieOptions());
   }
 
   async googleLogin(profile: any, res: Response) {
@@ -432,11 +439,7 @@ export class AuthService {
       },
     });
 
-    res.clearCookie("google_link_token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
-    });
+    res.clearCookie("google_link_token", this.baseCookieOptions());
 
     const { password, ...safeUser } = updatedUser;
 
@@ -491,19 +494,13 @@ export class AuthService {
 
   private setResetTokenCookie(res: Response, token: string) {
     res.cookie("reset_token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
+      ...this.baseCookieOptions(),
       maxAge: 5 * 60 * 1000, // 5 minutes
     });
   }
 
   private clearResetTokenCookie(res: Response) {
-    res.clearCookie("reset_token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
-    });
+    res.clearCookie("reset_token", this.baseCookieOptions());
   }
 
   async forgotPassword({ email }: ForgotPasswordDto) {

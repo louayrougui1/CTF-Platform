@@ -59,17 +59,12 @@ Users can:
 
 ### Joining Events
 
-Users can join an event from two places:
+Users can join an event through two endpoints:
 
-1. **Browse Events page** — click **Join** on a public event card to join directly.
-2. **Event Details page** — the same **Join** button appears here too.
+1. **`POST /event-member/{eventId}/join`** — join by event id only: public events join directly; private events are rejected with `400` ("Cannot join a private event without an invite code"). Returns the membership with the `eventId`.
+2. **`POST /event-member/join-by-code`** — join with body `{ "inviteCode": "..." }`. Resolves the event from its unique invite code, handles both public and private events, and returns the membership whose `eventId` can be used to navigate to the event page. `404` if the code is unknown, `409` if already a member, `400` if the event ended.
 
-The join endpoint is always `POST /event-member/{eventId}/join`.
-
-- **Public events**: no request body needed — the call succeeds immediately.
-- **Private events**: the body must include `{ "inviteCode": "..." }`. The invite code is shown on the Event Details / Event Management page with a **Copy** button. Owners can regenerate it via `POST /events/{eventId}/invite-code`.
-
-Do not invent a new API endpoint for this. Use the existing event-membership endpoint defined in `openapi.json`.
+The invite code is shown on the Event Details / Event Management page with a **Copy** button. Owners can regenerate it via `POST /events/{eventId}/invite-code`.
 
 ---
 
@@ -82,7 +77,7 @@ Two role systems drive what a user can see and do:
 
 ### Participant flow
 
-- Browse events (`GET /events`, public events only) → join (`POST /event-member/{eventId}/join`). Public events join directly; private events require their invite code as `{ inviteCode }` in the join body.
+- Browse events (`GET /events`, public events only) → join (`POST /event-member/{eventId}/join`). Private events are joined with an invite code via `POST /event-member/join-by-code` with `{ inviteCode }` — the browse list and the event detail page are not reachable for non-members of private events, so offer a standalone "Join with code" entry point.
 - In an event: create a team (`POST /events/{eventId}/teams` with `{ name, teamPassword }`) or join an existing one (`POST /events/{eventId}/teams/{teamId}/join` with `{ password }`), browse challenges (`GET /events/{eventId}/challenges?teamId={yourTeamId}`), open a challenge (render it from the list response — the single-challenge endpoint is owner/admin-only), download its file, and submit flags (`POST /events/{eventId}/challenges/{challengeId}/submit`).
 
 ### Owner / Admin flow
@@ -276,7 +271,7 @@ The backend base URL comes from an env var (e.g. `VITE_API_URL`) — do not hard
 - **Error handling**: wrap API calls in `try/catch`. The backend always responds with a status code and an error `message` — display that backend message to the user directly instead of inventing your own error text.
 - **Response semantics**:
   - Submitting a wrong flag returns `201` with `{ status: 'WRONG' }` — that is a success response, not an error.
-  - `GET /events` (browse) returns public events only; private events are joined via `POST /event-member/{eventId}/join` with their invite code in the request body.
+  - `GET /events` (browse) returns public events only; private events are joined by invite code via `POST /event-member/join-by-code`.
   - `GET /events/owned` returns events the user _owns_, not every event they joined.
   - `GET /events/joined` returns every event the user belongs to (owned or joined, any role).
   - `GET /events/{eventId}/challenges` requires `?teamId=` for non-admin users (each challenge includes `solved: true/false`); event owners/admins may omit it.

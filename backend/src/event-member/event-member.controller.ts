@@ -36,15 +36,18 @@ export class EventMemberController {
     return this.eventMemberService.getEventMembers(req.user, eventId);
   }
 
+  @Post('join-by-code')
+  @HttpCode(HttpStatus.OK)
+  @ApiCreatedResponse({ type: EventMemberScalarResponseDto })
+  joinEventByCode(@Req() req: Request, @Body() dto: JoinEventDto) {
+    return this.eventMemberService.joinEventByCode(req.user, dto);
+  }
+
   @Post(':eventId/join')
   @HttpCode(HttpStatus.OK)
   @ApiCreatedResponse({ type: EventMemberScalarResponseDto })
-  joinEvent(
-    @Param('eventId') eventId: string,
-    @Req() req: Request,
-    @Body() dto: JoinEventDto,
-  ) {
-    return this.eventMemberService.joinEvent(req.user, eventId, dto);
+  joinEvent(@Param('eventId') eventId: string, @Req() req: Request) {
+    return this.eventMemberService.joinEvent(req.user, eventId);
   }
 
   @Delete(':eventId/leave')

@@ -134,17 +134,13 @@ export class EventMemberService {
 
   // ─── MEMBERSHIP ─────────────────────────────────────────────────────────────
 
-  async joinEvent(user: any, eventId: string, dto?: JoinEventDto) {
-    const event = await this.findEventOrThrow(eventId);
+  async joinEventByCode(user: any, dto: JoinEventDto) {
+    const event = await this.prisma.event.findUnique({
+      where: { inviteCode: dto?.inviteCode?.trim() },
+    });
 
-    if (dto?.inviteCode) {
-      if (event.inviteCode !== dto.inviteCode.trim()) {
-        throw new ForbiddenException("Invalid invite code");
-      }
-    } else if (!event.isPublic) {
-      throw new ForbiddenException(
-        "This event is private , an invite code is required to join",
-      );
+    if (!event) {
+      throw new NotFoundException("Invalid invite code");
     }
 
     if (event.endDate && event.endDate < new Date()) {
@@ -153,14 +149,35 @@ export class EventMemberService {
       );
     }
 
-    const member = await this.prisma.eventMember.findUnique({
-      where: {
-        userId_eventId: { userId: user.id, eventId },
-      },
-    });
+    try {
+      return await this.prisma.eventMember.create({
+        data: {
+          userId: user.id,
+          eventId: event.id,
+          role: "MEMBER",
+        },
+      });
+    } catch (err: any) {
+      if (err.code === "P2002") {
+        throw new ConflictException("User is already a member of this event");
+      }
+      throw err;
+    }
+  }
 
-    if (member) {
-      throw new BadRequestException("User is already a member of this event");
+  async joinEvent(user: any, eventId: string) {
+    const event = await this.findEventOrThrow(eventId);
+
+    if (!event.isPublic) {
+      throw new BadRequestException(
+        "Cannot join a private event without an invite code",
+      );
+    }
+
+    if (event.endDate && event.endDate < new Date()) {
+      throw new BadRequestException(
+        "Cannot join an event that has already ended",
+      );
     }
 
     try {

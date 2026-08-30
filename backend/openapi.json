@@ -1218,6 +1218,42 @@
         ]
       }
     },
+    "/event-member/join-by-code": {
+      "post": {
+        "operationId": "EventMemberController_joinEventByCode",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinEventDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventMemberScalarResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "EventMember"
+        ]
+      }
+    },
     "/event-member/{eventId}/join": {
       "post": {
         "operationId": "EventMemberController_joinEvent",
@@ -1231,16 +1267,6 @@
             }
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/JoinEventDto"
-              }
-            }
-          }
-        },
         "responses": {
           "201": {
             "description": "",
