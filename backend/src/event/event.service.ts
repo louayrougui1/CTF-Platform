@@ -231,6 +231,15 @@ export class EventService {
       throw new ForbiddenException("You are not allowed to update this event");
     }
 
+    if (
+      !isOwner &&
+      (dto.startDate !== undefined || dto.endDate !== undefined)
+    ) {
+      throw new ForbiddenException(
+        "Admins cannot change the event start or end date",
+      );
+    }
+
     return this.prisma.event.update({
       where: { id },
       data: dto,
