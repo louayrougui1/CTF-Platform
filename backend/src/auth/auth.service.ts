@@ -199,7 +199,7 @@ export class AuthService {
       await this.mailService.sendOtpEmail(
         user.email,
         otp,
-        "Email Verification",
+        OtpPurpose.EMAIL_VERIFICATION,
       );
 
       return {

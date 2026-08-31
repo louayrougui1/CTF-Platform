@@ -1,13 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
 import {
   NotFoundException,
   ForbiddenException,
   ConflictException,
   BadRequestException,
-} from '@nestjs/common';
-import { CreateTeamDto } from './dto/createTeam.dto';
-import { UpdateTeamDto } from './dto/updateTeam.dto';
+} from "@nestjs/common";
+import { CreateTeamDto } from "./dto/createTeam.dto";
+import { UpdateTeamDto } from "./dto/updateTeam.dto";
 
 @Injectable()
 export class TeamService {
@@ -19,7 +19,7 @@ export class TeamService {
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },
     });
-    if (!event) throw new NotFoundException('Event not found');
+    if (!event) throw new NotFoundException("Event not found");
     return event;
   }
 
@@ -27,7 +27,7 @@ export class TeamService {
     const event = await this.findEventOrThrow(eventId);
     if (event.ownerId !== userId)
       throw new ForbiddenException(
-        'Only the event owner can perform this action',
+        "Only the event owner can perform this action",
       );
     return event;
   }
@@ -38,7 +38,23 @@ export class TeamService {
       where: { id: teamId },
       include: { members: includeMembers },
     });
-    if (!team) throw new NotFoundException('Team not found');
+    if (!team) throw new NotFoundException("Team not found");
+    return team;
+  }
+
+  private async findTeamWithName(
+    teamName: string,
+    eventId: string,
+    includeMembers = false,
+  ) {
+    const team = await this.prisma.team.findFirst({
+      where: {
+        name: teamName,
+        eventId: eventId,
+      },
+      include: { members: includeMembers },
+    });
+    if (!team) throw new NotFoundException("Team not found");
     return team;
   }
 
@@ -48,7 +64,7 @@ export class TeamService {
       where: { userId_eventId: { userId, eventId } },
     });
     if (!member)
-      throw new ForbiddenException('You are not a member of this event');
+      throw new ForbiddenException("You are not a member of this event");
     return member;
   }
 
@@ -59,14 +75,30 @@ export class TeamService {
       (m: any) => m.userId === userId,
     );
     if (!membership)
-      throw new ForbiddenException('You are not a member of this team');
+      throw new ForbiddenException("You are not a member of this team");
 
-    if (membership.role !== 'CAPTAIN')
+    if (membership.role !== "CAPTAIN")
       throw new ForbiddenException(
-        'Only the team captain can perform this action',
+        "Only the team captain can perform this action",
       );
 
     return team;
+  }
+  private async hasEventStarted(eventId: string): Promise<boolean> {
+    const event = await this.prisma.event.findUniqueOrThrow({
+      where: { id: eventId },
+      select: { startDate: true },
+    });
+
+    return !event.startDate || event.startDate <= new Date();
+  }
+  private async hasEventEnded(eventId: string): Promise<boolean> {
+    const event = await this.prisma.event.findUniqueOrThrow({
+      where: { id: eventId },
+      select: { endDate: true },
+    });
+
+    return !event.endDate || event.endDate <= new Date();
   }
 
   // ─── Existing Methods ──────────────────────────────────────────────────────
@@ -111,13 +143,16 @@ export class TeamService {
     await this.findEventOrThrow(eventId);
     await this.assertEventMember(eventId, userId);
 
+    if (await this.hasEventEnded(eventId))
+      throw new BadRequestException("Event has already ended");
+
     // Block if user is already on any team in this event
     const existingMembership = await this.prisma.teamMember.findFirst({
       where: { userId, team: { eventId } },
     });
     if (existingMembership)
       throw new ConflictException(
-        'You are already a member of a team in this event',
+        "You are already a member of a team in this event",
       );
 
     // Enforce unique team name per event
@@ -135,7 +170,7 @@ export class TeamService {
           teamPassword,
           eventId,
           members: {
-            create: { userId, role: 'CAPTAIN', eventId },
+            create: { userId, role: "CAPTAIN", eventId },
           },
         },
         select: {
@@ -149,7 +184,7 @@ export class TeamService {
         },
       });
     } catch (err: any) {
-      if (err.code === 'P2002') {
+      if (err.code === "P2002") {
         throw new ConflictException(
           `A team named with the same name already exists in this event`,
         );
@@ -160,17 +195,16 @@ export class TeamService {
 
   async joinTeam(
     eventId: string,
-    teamId: string,
     password: string,
+    teamName: string,
     userId: string,
   ) {
     await this.findEventOrThrow(eventId);
     await this.assertEventMember(eventId, userId);
+    if (await this.hasEventEnded(eventId))
+      throw new BadRequestException("Event has already ended");
 
-    const team = await this.findTeamOrThrow(teamId);
-
-    if (team.eventId !== eventId)
-      throw new BadRequestException('Team does not belong to this event');
+    const team = await this.findTeamWithName(teamName, eventId);
 
     const existingMembership = await this.prisma.teamMember.findFirst({
       where: {
@@ -180,11 +214,11 @@ export class TeamService {
     });
     if (existingMembership)
       throw new ConflictException(
-        'You are already a member of a team in this event',
+        "You are already a member of a team in this event",
       );
 
     if (team.teamPassword !== password)
-      throw new ForbiddenException('Incorrect team password');
+      throw new ForbiddenException("Incorrect team password");
 
     try {
       return await this.prisma.teamMember.create({
@@ -192,7 +226,7 @@ export class TeamService {
           userId,
           teamId: team.id,
           eventId: team.eventId,
-          role: 'MEMBER',
+          role: "MEMBER",
         },
         select: {
           id: true,
@@ -203,9 +237,9 @@ export class TeamService {
         },
       });
     } catch (err: any) {
-      if (err.code === 'P2002') {
+      if (err.code === "P2002") {
         throw new ConflictException(
-          'You are already a member of a team in this event',
+          "You are already a member of a team in this event",
         );
       }
 
@@ -217,45 +251,45 @@ export class TeamService {
     const team = await this.findTeamOrThrow(teamId, true);
 
     if (team.eventId !== eventId)
-      throw new BadRequestException('Team does not belong to this event');
+      throw new BadRequestException("Team does not belong to this event");
 
     const membership = (team as any).members.find(
       (m: any) => m.userId === userId,
     );
     if (!membership)
-      throw new ForbiddenException('You are not a member of this team');
+      throw new ForbiddenException("You are not a member of this team");
 
-    if (membership.role === 'CAPTAIN')
+    if (membership.role === "CAPTAIN")
       throw new ForbiddenException(
-        'Captains cannot leave the team, delete it instead',
+        "Captains cannot leave the team, delete it instead",
       );
 
     await this.prisma.teamMember.delete({
       where: { userId_teamId: { userId, teamId } },
     });
 
-    return { message: 'Left the team successfully' };
+    return { message: "Left the team successfully" };
   }
 
   async deleteTeam(eventId: string, teamId: string, userId: string) {
     const team = await this.findTeamOrThrow(teamId, true);
 
     if (team.eventId !== eventId)
-      throw new BadRequestException('Team does not belong to this event');
+      throw new BadRequestException("Team does not belong to this event");
 
     const membership = (team as any).members.find(
       (m: any) => m.userId === userId,
     );
 
     if (!membership)
-      throw new ForbiddenException('You are not a member of this team');
+      throw new ForbiddenException("You are not a member of this team");
 
-    if (membership.role !== 'CAPTAIN')
-      throw new ForbiddenException('Only the team captain can delete the team');
+    if (membership.role !== "CAPTAIN")
+      throw new ForbiddenException("Only the team captain can delete the team");
 
     await this.prisma.team.delete({ where: { id: teamId } });
 
-    return { message: 'Team deleted successfully' };
+    return { message: "Team deleted successfully" };
   }
 
   async getTeamDetails(eventId: string, userId: string) {
@@ -278,7 +312,7 @@ export class TeamService {
     });
 
     if (!membership)
-      throw new NotFoundException('You are not part of any team in this event');
+      throw new NotFoundException("You are not part of any team in this event");
 
     return {
       id: membership.team.id,
@@ -301,7 +335,7 @@ export class TeamService {
     const team = await this.assertTeamCaptain(teamId, userId);
 
     if (team.eventId !== eventId)
-      throw new BadRequestException('Team does not belong to this event');
+      throw new BadRequestException("Team does not belong to this event");
 
     if (name && name !== team.name) {
       const nameConflict = await this.prisma.team.findFirst({
@@ -327,7 +361,7 @@ export class TeamService {
         },
       });
     } catch (err: any) {
-      if (err.code === 'P2002') {
+      if (err.code === "P2002") {
         throw new ConflictException(
           `A team named with the same name already exists in this event`,
         );
@@ -345,24 +379,24 @@ export class TeamService {
     const team = await this.assertTeamCaptain(teamId, captainId);
 
     if (team.eventId !== eventId)
-      throw new BadRequestException('Team does not belong to this event');
+      throw new BadRequestException("Team does not belong to this event");
 
     if (targetUserId === captainId)
       throw new BadRequestException(
-        'Captains cannot kick themselves; delete the team instead',
+        "Captains cannot kick themselves; delete the team instead",
       );
 
     const targetMembership = (team as any).members.find(
       (m: any) => m.userId === targetUserId,
     );
     if (!targetMembership)
-      throw new NotFoundException('That user is not a member of this team');
+      throw new NotFoundException("That user is not a member of this team");
 
     await this.prisma.teamMember.delete({
       where: { userId_teamId: { userId: targetUserId, teamId } },
     });
 
-    return { message: 'Member removed from the team successfully' };
+    return { message: "Member removed from the team successfully" };
   }
 
   async getTeamById(eventId: string, teamId: string, userId: string) {
@@ -388,7 +422,7 @@ export class TeamService {
       },
     });
 
-    if (!team) throw new NotFoundException('Team not found in this event');
+    if (!team) throw new NotFoundException("Team not found in this event");
 
     return {
       id: team.id,

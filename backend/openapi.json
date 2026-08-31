@@ -995,20 +995,12 @@
         ]
       }
     },
-    "/events/{eventId}/teams/{teamId}/join": {
+    "/events/{eventId}/teams/join": {
       "post": {
         "operationId": "TeamController_joinTeam",
         "parameters": [
           {
             "name": "eventId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "teamId",
             "required": true,
             "in": "path",
             "schema": {
@@ -2356,10 +2348,14 @@
         "properties": {
           "password": {
             "type": "string"
+          },
+          "teamName": {
+            "type": "string"
           }
         },
         "required": [
-          "password"
+          "password",
+          "teamName"
         ]
       },
       "TeamMembershipResponseDto": {

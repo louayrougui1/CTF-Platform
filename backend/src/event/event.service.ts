@@ -74,7 +74,6 @@ export class EventService {
     return this.prisma.event.findMany({
       where: {
         isPublic: true,
-        OR: [{ endDate: { gt: now } }, { endDate: null }],
       },
       orderBy: { startDate: "asc" },
       select: EVENT_SELECT,
@@ -97,18 +96,21 @@ export class EventService {
     });
   }
 
-  async getEvent(user: any, id: string) {
-    const membership = await this.prisma.eventMember.findUnique({
-      where: { userId_eventId: { userId: user.id, eventId: id } },
-    });
+  async getEvent(user: any, eventId: string) {
+    const event = await this.findEventOrThrow(eventId);
 
-    if (!membership) {
-      // Don't leak whether the event exists to non-members
-      throw new NotFoundException("Event not found");
+    if (!event.isPublic) {
+      // Don't leak whether the event exists to non members if event is private
+      const membership = await this.prisma.eventMember.findUnique({
+        where: { userId_eventId: { userId: user.id, eventId } },
+      });
+
+      if (!membership) {
+        throw new NotFoundException("Event not found");
+      }
     }
-
     return this.prisma.event.findUniqueOrThrow({
-      where: { id },
+      where: { id: eventId },
       select: EVENT_SELECT_WITH_CODE,
     });
   }

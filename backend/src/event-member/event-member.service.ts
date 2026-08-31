@@ -174,12 +174,6 @@ export class EventMemberService {
       );
     }
 
-    if (event.endDate && event.endDate < new Date()) {
-      throw new BadRequestException(
-        "Cannot join an event that has already ended",
-      );
-    }
-
     try {
       return await this.prisma.eventMember.create({
         data: {

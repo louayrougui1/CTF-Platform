@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, Length } from 'class-validator';
+import { ApiProperty } from "@nestjs/swagger";
+import { IsString, IsNotEmpty, Length } from "class-validator";
 
 export class JoinTeamDto {
   @ApiProperty()
@@ -7,4 +7,10 @@ export class JoinTeamDto {
   @IsNotEmpty()
   @Length(4, 100)
   password: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  @Length(2, 100)
+  teamName: string;
 }

@@ -30,6 +30,9 @@ const CHALLENGE_SELECT = {
 const NOT_STARTED_MESSAGE =
   "Challenges will be available when the event starts.";
 
+const ENDED_MESSAGE =
+  "Event has ended. Challenge submissions are no longer accepted.";
+
 @Injectable()
 export class ChallengeService {
   constructor(
@@ -106,6 +109,14 @@ export class ChallengeService {
     });
 
     return !event.startDate || event.startDate <= new Date();
+  }
+  private async hasEventEnded(eventId: string): Promise<boolean> {
+    const event = await this.prisma.event.findUniqueOrThrow({
+      where: { id: eventId },
+      select: { endDate: true },
+    });
+
+    return !event.endDate || event.endDate <= new Date();
   }
 
   // ─── QUERIES ────────────────────────────────────────────────────────────────
@@ -298,6 +309,10 @@ export class ChallengeService {
 
     if (!(await this.hasEventStarted(challenge.eventId))) {
       throw new BadRequestException(NOT_STARTED_MESSAGE);
+    }
+
+    if (await this.hasEventEnded(challenge.eventId)) {
+      throw new BadRequestException(ENDED_MESSAGE);
     }
 
     const membership = await this.prisma.teamMember.findFirst({
