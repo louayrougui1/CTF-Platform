@@ -10,12 +10,6 @@ import { AddAdminDto } from "./dto/addAdmin.dto";
 import { RemoveAdminDto } from "./dto/removeAdmin.dto";
 import { JoinEventDto } from "./dto/joinEvent.dto";
 
-const NOT_STARTED_MESSAGE =
-  "Challenges will be available when the event startsssssss.";
-
-const ENDED_MESSAGE =
-  "Event has ended. Challenge submissions are no longer accepted.";
-
 @Injectable()
 export class EventMemberService {
   constructor(private readonly prisma: PrismaService) {}
@@ -57,7 +51,12 @@ export class EventMemberService {
 
   async getEventMembers(user: any, eventId: string) {
     await this.findEventOrThrow(eventId);
-    await this.assertEventMember(eventId, user.id);
+    const membership = await this.assertEventMember(eventId, user.id);
+    if (membership.role === "MEMBER") {
+      throw new ForbiddenException(
+        "Only event admins can view the list of members",
+      );
+    }
 
     return this.prisma.eventMember.findMany({
       where: { eventId },
@@ -147,12 +146,6 @@ export class EventMemberService {
 
     if (!event) {
       throw new NotFoundException("Invalid invite code");
-    }
-
-    if (event.endDate && event.endDate < new Date()) {
-      throw new BadRequestException(
-        "Cannot join an event that has already ended",
-      );
     }
 
     try {

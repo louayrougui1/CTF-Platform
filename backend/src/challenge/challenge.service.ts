@@ -30,8 +30,7 @@ const CHALLENGE_SELECT = {
 const NOT_STARTED_MESSAGE =
   "Challenges will be available when the event startsssssss.";
 
-const ENDED_MESSAGE =
-  "Event has ended. Challenge submissions are no longer accepted.";
+const ENDED_MESSAGE = "Event has ended.";
 
 @Injectable()
 export class ChallengeService {

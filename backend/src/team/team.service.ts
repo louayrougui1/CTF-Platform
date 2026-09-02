@@ -12,8 +12,7 @@ import { UpdateTeamDto } from "./dto/updateTeam.dto";
 const NOT_STARTED_MESSAGE =
   "Challenges will be available when the event startsssssss.";
 
-const ENDED_MESSAGE =
-  "Event has ended. Challenge submissions are no longer accepted.";
+const ENDED_MESSAGE = "Event has ended.";
 
 @Injectable()
 export class TeamService {
@@ -127,7 +126,12 @@ export class TeamService {
 
   async getEventTeams(user: any, eventId: string) {
     await this.findEventOrThrow(eventId);
-    await this.assertEventMember(eventId, user.id);
+    const membership = await this.assertEventMember(eventId, user.id);
+    if (membership.role === "MEMBER") {
+      throw new ForbiddenException(
+        "Only event admins can view the list of teams",
+      );
+    }
     return this.prisma.team.findMany({
       where: { eventId },
       select: { id: true, name: true, createdAt: true, updatedAt: true },
