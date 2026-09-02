@@ -134,10 +134,6 @@ export class ChallengeService {
     if (!isOwnerOrAdmin) {
       await this.assertEventMember(eventId, user.id);
 
-      if (await this.hasEventEnded(eventId)) {
-        throw new BadRequestException(ENDED_MESSAGE);
-      }
-
       if (!(await this.hasEventStarted(eventId))) {
         throw new BadRequestException(NOT_STARTED_MESSAGE);
       }
@@ -315,7 +311,9 @@ export class ChallengeService {
     }
 
     if (await this.hasEventEnded(challenge.eventId)) {
-      throw new BadRequestException(ENDED_MESSAGE);
+      throw new BadRequestException(
+        "Event has ended.Challenge submissions are no longer accepted.",
+      );
     }
 
     const membership = await this.prisma.teamMember.findFirst({

@@ -1,73 +1,48 @@
-# React + TypeScript + Vite
+# CTF Nexus
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Build a full CTF (Capture The Flag) platform frontend with React + TypeScript + Vite.
 
-Currently, two official plugins are available:
+I am attaching 3 files — read them carefully before writing any code:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. openapi.json — the backend API spec. This is the source of truth for all endpoints, request/response schemas, and auth requirements. Never invent endpoints not defined there.
 
-## React Compiler
+2. schema.prisma — the database schema for context on data relationships.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+3. frontendPrompt.md — the complete project spec covering features, pages, auth flows, roles/permissions, design direction, and architecture rules. Follow it exactly.
 
-## Expanding the ESLint configuration
+Key requirements summary:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Tech stack: React, TypeScript, Vite, React Router, Zustand (auth state), TanStack Query (server state), Axios (all requests with withCredentials: true, Bearer token from response body). Base URL from VITE_API_URL env var.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Pages: Landing, Login, Register, Dashboard, Browse Events, My Events, Event Details, Event Management, Teams, Team Details, Challenges (with modal for flag submission), Leaderboard, User Profile, Google link confirmation page, Password reset flow.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Auth flow: Register → OTP email verify → login. 401 interceptor auto-refreshes via POST /auth/refresh (httpOnly cookie). Google OAuth via full-page redirect (window.location.href), not fetch.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Event join flow: Public events join directly via POST /event-member/{eventId}/join. Private events require { inviteCode } in the body. Show a "Join with Code" input on Event Details for private events.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Challenge UX: List shows cards with title/difficulty/points/category/solved. Clicking opens a modal (no extra API call — use list data). Modal has description, flag input + submit, and clickable file download link if hasFile is true. Wrong flag returns 201 { status: 'WRONG' } — handle it as user feedback, not an error.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Design: Clean cybersecurity aesthetic. Green accent (#15803D), gray/white surfaces. Dark mode toggle persisted in localStorage. Avoid neon/matrix/glitch effects. Modern cards, spacious layout, clear typography.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Important: Do not mock any API. Every endpoint exists in openapi.json. Follow the exact role-based permission rules from frontendPrompt.md.
+
+This project was built with [Lovable](https://lovable.dev).
+
+## Build with Lovable
+
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/b842a78b-699f-4f7f-9cea-82ded021e4b7).
+
+- **Ship faster**: describe what you want to build and Lovable handles the code.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+
+## Development
+
+Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+
+```sh
+git clone <this-repository-url>
+cd <repository-name>
+npm i
+npm run dev
 ```

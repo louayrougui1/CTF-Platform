@@ -89,6 +89,25 @@ export class TeamService {
 
     return team;
   }
+  /** Ensures the caller is the event owner or an event admin. */
+  private async assertEventOwnerOrAdmin(eventId: string, userId: string) {
+    const event = await this.findEventOrThrow(eventId);
+
+    if (event.ownerId === userId) return event;
+
+    const membership = await this.prisma.eventMember.findUnique({
+      where: { userId_eventId: { userId, eventId } },
+    });
+
+    if (!membership || membership.role === "MEMBER") {
+      throw new ForbiddenException(
+        "Only the event owner or admins can perform this action",
+      );
+    }
+
+    return event;
+  }
+
   private async hasEventStarted(eventId: string): Promise<boolean> {
     const event = await this.prisma.event.findUniqueOrThrow({
       where: { id: eventId },
@@ -125,13 +144,7 @@ export class TeamService {
   // }
 
   async getEventTeams(user: any, eventId: string) {
-    await this.findEventOrThrow(eventId);
-    const membership = await this.assertEventMember(eventId, user.id);
-    if (membership.role === "MEMBER") {
-      throw new ForbiddenException(
-        "Only event admins can view the list of teams",
-      );
-    }
+    await this.assertEventOwnerOrAdmin(eventId, user.id);
     return this.prisma.team.findMany({
       where: { eventId },
       select: { id: true, name: true, createdAt: true, updatedAt: true },
@@ -418,8 +431,23 @@ export class TeamService {
   }
 
   async getTeamById(eventId: string, teamId: string, userId: string) {
-    await this.findEventOrThrow(eventId);
-    await this.assertEventMember(eventId, userId);
+    let isOwnerOrAdmin = false;
+    try {
+      await this.assertEventOwnerOrAdmin(eventId, userId);
+      isOwnerOrAdmin = true;
+    } catch {
+      // not owner/admin; falls through to the team-membership check
+    }
+
+    if (!isOwnerOrAdmin) {
+      const membership = await this.prisma.teamMember.findFirst({
+        where: { userId, teamId, eventId },
+        select: { id: true },
+      });
+      if (!membership) {
+        throw new ForbiddenException("You are not a member of this team");
+      }
+    }
 
     const team = await this.prisma.team.findFirst({
       where: {
