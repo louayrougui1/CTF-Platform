@@ -276,6 +276,9 @@ export class TeamService {
     if (team.eventId !== eventId)
       throw new BadRequestException("Team does not belong to this event");
 
+    if (await this.hasEventEnded(eventId))
+      throw new BadRequestException("Event has already ended");
+
     const membership = (team as any).members.find(
       (m: any) => m.userId === userId,
     );
@@ -299,6 +302,9 @@ export class TeamService {
 
     if (team.eventId !== eventId)
       throw new BadRequestException("Team does not belong to this event");
+
+    if (await this.hasEventEnded(eventId))
+      throw new BadRequestException("Event has already ended");
 
     const membership = (team as any).members.find(
       (m: any) => m.userId === userId,
@@ -368,6 +374,9 @@ export class TeamService {
     if (team.eventId !== eventId)
       throw new BadRequestException("Team does not belong to this event");
 
+    if (await this.hasEventEnded(eventId))
+      throw new BadRequestException("Event has already ended");
+
     if (name && name !== team.name) {
       const nameConflict = await this.prisma.team.findFirst({
         where: { eventId: team.eventId, name, id: { not: teamId } },
@@ -411,6 +420,9 @@ export class TeamService {
 
     if (team.eventId !== eventId)
       throw new BadRequestException("Team does not belong to this event");
+
+    if (await this.hasEventEnded(eventId))
+      throw new BadRequestException("Event has already ended");
 
     if (targetUserId === captainId)
       throw new BadRequestException(
