@@ -9,6 +9,12 @@ import {
 import { CreateTeamDto } from "./dto/createTeam.dto";
 import { UpdateTeamDto } from "./dto/updateTeam.dto";
 
+const NOT_STARTED_MESSAGE =
+  "Challenges will be available when the event startsssssss.";
+
+const ENDED_MESSAGE =
+  "Event has ended. Challenge submissions are no longer accepted.";
+
 @Injectable()
 export class TeamService {
   constructor(private readonly prisma: PrismaService) {}
@@ -294,6 +300,14 @@ export class TeamService {
 
   async getTeamDetails(eventId: string, userId: string) {
     await this.findEventOrThrow(eventId);
+
+    if (await this.hasEventEnded(eventId)) {
+      throw new BadRequestException(ENDED_MESSAGE);
+    }
+
+    if (!(await this.hasEventStarted(eventId))) {
+      throw new BadRequestException(NOT_STARTED_MESSAGE);
+    }
     const membership = await this.prisma.teamMember.findFirst({
       where: { userId, team: { eventId } },
       include: {

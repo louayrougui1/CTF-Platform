@@ -10,6 +10,12 @@ import { AddAdminDto } from "./dto/addAdmin.dto";
 import { RemoveAdminDto } from "./dto/removeAdmin.dto";
 import { JoinEventDto } from "./dto/joinEvent.dto";
 
+const NOT_STARTED_MESSAGE =
+  "Challenges will be available when the event startsssssss.";
+
+const ENDED_MESSAGE =
+  "Event has ended. Challenge submissions are no longer accepted.";
+
 @Injectable()
 export class EventMemberService {
   constructor(private readonly prisma: PrismaService) {}

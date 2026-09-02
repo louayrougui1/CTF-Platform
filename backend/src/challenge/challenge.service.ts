@@ -28,7 +28,7 @@ const CHALLENGE_SELECT = {
 } as const;
 
 const NOT_STARTED_MESSAGE =
-  "Challenges will be available when the event starts.";
+  "Challenges will be available when the event startsssssss.";
 
 const ENDED_MESSAGE =
   "Event has ended. Challenge submissions are no longer accepted.";
@@ -135,6 +135,14 @@ export class ChallengeService {
     if (!isOwnerOrAdmin) {
       await this.assertEventMember(eventId, user.id);
 
+      if (await this.hasEventEnded(eventId)) {
+        throw new BadRequestException(ENDED_MESSAGE);
+      }
+
+      if (!(await this.hasEventStarted(eventId))) {
+        throw new BadRequestException(NOT_STARTED_MESSAGE);
+      }
+
       if (!teamId) {
         throw new ForbiddenException(
           "You must be a team member to view challenges",
@@ -148,10 +156,6 @@ export class ChallengeService {
 
       if (!membership) {
         throw new ForbiddenException("You are not a member of this team");
-      }
-
-      if (!(await this.hasEventStarted(eventId))) {
-        throw new BadRequestException(NOT_STARTED_MESSAGE);
       }
 
       const submissions = await this.prisma.submission.findMany({

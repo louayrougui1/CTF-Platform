@@ -1,12 +1,12 @@
 // google.strategy.ts
-import { Inject, Injectable } from '@nestjs/common';
-import googleOAuthConfig from '../config/google-oauth.config';
-import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, Profile, VerifyCallback } from 'passport-google-oauth20';
-import type { ConfigType } from '@nestjs/config';
+import { Inject, Injectable } from "@nestjs/common";
+import googleOAuthConfig from "../config/google-oauth.config";
+import { PassportStrategy } from "@nestjs/passport";
+import { Strategy, Profile, VerifyCallback } from "passport-google-oauth20";
+import type { ConfigType } from "@nestjs/config";
 
 @Injectable()
-export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
+export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
   constructor(
     @Inject(googleOAuthConfig.KEY)
     private readonly googleConfig: ConfigType<typeof googleOAuthConfig>,
@@ -15,7 +15,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientID: googleConfig.clientId,
       clientSecret: googleConfig.clientSecret,
       callbackURL: googleConfig.callbackURL,
-      scope: ['email', 'profile'],
+      scope: ["email", "profile"],
     });
   }
 
@@ -33,5 +33,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       picture: profile.photos?.[0]?.value,
     };
     done(null, user);
+  }
+
+  authorizationParams(): object {
+    return { prompt: "select_account" };
   }
 }
