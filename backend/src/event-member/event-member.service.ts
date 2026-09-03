@@ -11,7 +11,6 @@ import { RemoveAdminDto } from "./dto/removeAdmin.dto";
 import { JoinEventDto } from "./dto/joinEvent.dto";
 
 export const ADMIN_TEAM_NAME = "_Admins";
-export const ADMIN_TEAM_PASSWORD = "_admin-only";
 
 @Injectable()
 export class EventMemberService {

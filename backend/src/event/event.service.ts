@@ -9,8 +9,6 @@ import {
 import { UpdateEventDto } from "./dto/updateEvent.dto";
 import { ADMIN_TEAM_NAME } from "../event-member/event-member.service";
 
-import { randomBytes } from "crypto";
-
 const EVENT_SELECT = {
   id: true,
   title: true,
@@ -192,7 +190,7 @@ export class EventService {
     await this.prisma.team.create({
       data: {
         name: ADMIN_TEAM_NAME,
-        teamPassword: randomBytes(16).toString("hex"),
+        teamPassword: process.env.ADMIN_TEAM_PASSWORD || "admin",
         eventId: event.id,
         members: {
           create: { userId: user.id, role: "CAPTAIN", eventId: event.id },
