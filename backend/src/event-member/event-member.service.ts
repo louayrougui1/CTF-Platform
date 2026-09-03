@@ -98,6 +98,10 @@ export class EventMemberService {
       throw new NotFoundException("User is not an event member");
     }
 
+    if (member.role === "ADMIN") {
+      throw new BadRequestException("User is already an admin of this event");
+    }
+
     const updated = await this.prisma.eventMember.update({
       where: {
         userId_eventId: {
@@ -187,8 +191,12 @@ export class EventMemberService {
   // ─── MEMBERSHIP ─────────────────────────────────────────────────────────────
 
   async joinEventByCode(user: any, dto: JoinEventDto) {
+    if (!dto.inviteCode?.trim()) {
+      throw new BadRequestException("Invite code is required");
+    }
+
     const event = await this.prisma.event.findUnique({
-      where: { inviteCode: dto?.inviteCode?.trim() },
+      where: { inviteCode: dto.inviteCode.trim() },
     });
 
     if (!event) {
@@ -252,6 +260,10 @@ export class EventMemberService {
     if (!member) {
       throw new BadRequestException("User is not a member of this event");
     }
+
+    await this.prisma.teamMember.deleteMany({
+      where: { userId: user.id, eventId },
+    });
 
     return this.prisma.eventMember.delete({
       where: {

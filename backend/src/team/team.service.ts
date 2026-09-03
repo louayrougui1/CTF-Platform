@@ -317,8 +317,11 @@ export class TeamService {
         "Captains cannot leave the team, delete it instead",
       );
 
-    if (membership.role === "ADMIN")
-      throw new ForbiddenException("Admins cannot leave the team");
+    const eventMember = await this.prisma.eventMember.findUnique({
+      where: { userId_eventId: { userId, eventId } },
+    });
+    if (eventMember?.role === "ADMIN")
+      throw new ForbiddenException("Event admins cannot leave this team");
 
     await this.prisma.teamMember.delete({
       where: { userId_teamId: { userId, teamId } },

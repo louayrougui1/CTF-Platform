@@ -1,11 +1,11 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class JoinEventDto {
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Invite code, required to join a private event',
   })
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
-  inviteCode?: string;
+  inviteCode: string;
 }
