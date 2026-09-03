@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { TeamListMemberResponseDto } from './team-list-member-response.dto';
 
 export class TeamListResponseDto {
   @ApiProperty()
@@ -12,4 +13,7 @@ export class TeamListResponseDto {
 
   @ApiProperty({ type: String, format: 'date-time' })
   updatedAt: Date;
+
+  @ApiProperty({ type: () => TeamListMemberResponseDto, isArray: true })
+  members: TeamListMemberResponseDto[];
 }

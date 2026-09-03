@@ -27,8 +27,7 @@ const CHALLENGE_SELECT = {
   fileName: true,
 } as const;
 
-const NOT_STARTED_MESSAGE =
-  "Challenges will be available when the event startsssssss.";
+const NOT_STARTED_MESSAGE = "Event did not start yet.";
 
 const ENDED_MESSAGE = "Event has ended.";
 
@@ -246,6 +245,7 @@ export class ChallengeService {
     dto: UpdateChallengeDto,
     file?: Express.Multer.File,
   ) {
+    console.log("Updating challenge with DTO:", dto);
     const challenge = await this.findChallengeOrThrow(id);
     if (challenge.eventId !== eventId) {
       throw new NotFoundException("Challenge not found");

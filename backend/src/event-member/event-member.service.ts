@@ -10,6 +10,9 @@ import { AddAdminDto } from "./dto/addAdmin.dto";
 import { RemoveAdminDto } from "./dto/removeAdmin.dto";
 import { JoinEventDto } from "./dto/joinEvent.dto";
 
+export const ADMIN_TEAM_NAME = "_Admins";
+export const ADMIN_TEAM_PASSWORD = "_admin-only";
+
 @Injectable()
 export class EventMemberService {
   constructor(private readonly prisma: PrismaService) {}
@@ -95,7 +98,7 @@ export class EventMemberService {
       throw new NotFoundException("User is not an event member");
     }
 
-    return this.prisma.eventMember.update({
+    const updated = await this.prisma.eventMember.update({
       where: {
         userId_eventId: {
           userId: dto.userIdToPromote,
@@ -104,6 +107,38 @@ export class EventMemberService {
       },
       data: { role: "ADMIN" },
     });
+
+    // Remove from any regular team first (a user can only be on one team per event)
+    const existingMembership = await this.prisma.teamMember.findFirst({
+      where: { userId: dto.userIdToPromote, eventId: dto.eventId },
+    });
+    if (existingMembership) {
+      await this.prisma.teamMember.delete({
+        where: {
+          userId_teamId: {
+            userId: dto.userIdToPromote,
+            teamId: existingMembership.teamId,
+          },
+        },
+      });
+    }
+
+    // Add to the _Admins team
+    const adminTeam = await this.prisma.team.findFirst({
+      where: { eventId: dto.eventId, name: ADMIN_TEAM_NAME },
+    });
+    if (adminTeam) {
+      await this.prisma.teamMember.create({
+        data: {
+          userId: dto.userIdToPromote,
+          teamId: adminTeam.id,
+          eventId: dto.eventId,
+          role: "MEMBER",
+        },
+      });
+    }
+
+    return updated;
   }
 
   async removeEventAdmin(user: any, dto: RemoveAdminDto) {
@@ -126,7 +161,7 @@ export class EventMemberService {
       throw new BadRequestException("User is not an admin of this event");
     }
 
-    return this.prisma.eventMember.update({
+    const updated = await this.prisma.eventMember.update({
       where: {
         userId_eventId: {
           userId: dto.userIdToRemove,
@@ -135,6 +170,18 @@ export class EventMemberService {
       },
       data: { role: "MEMBER" },
     });
+
+    // Remove from the _Admins team
+    const adminTeam = await this.prisma.team.findFirst({
+      where: { eventId: dto.eventId, name: ADMIN_TEAM_NAME },
+    });
+    if (adminTeam) {
+      await this.prisma.teamMember.deleteMany({
+        where: { userId: dto.userIdToRemove, teamId: adminTeam.id },
+      });
+    }
+
+    return updated;
   }
 
   // ─── MEMBERSHIP ─────────────────────────────────────────────────────────────

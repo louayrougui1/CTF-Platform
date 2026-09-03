@@ -2161,6 +2161,49 @@
           }
         }
       },
+      "TeamListUserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "email"
+        ]
+      },
+      "TeamListMemberResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "user": {
+            "$ref": "#/components/schemas/TeamListUserResponseDto"
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "createdAt",
+          "user"
+        ]
+      },
       "TeamListResponseDto": {
         "type": "object",
         "properties": {
@@ -2177,13 +2220,20 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TeamListMemberResponseDto"
+            }
           }
         },
         "required": [
           "id",
           "name",
           "createdAt",
-          "updatedAt"
+          "updatedAt",
+          "members"
         ]
       },
       "TeamDetailMemberResponseDto": {

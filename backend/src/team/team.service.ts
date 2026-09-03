@@ -8,9 +8,9 @@ import {
 } from "@nestjs/common";
 import { CreateTeamDto } from "./dto/createTeam.dto";
 import { UpdateTeamDto } from "./dto/updateTeam.dto";
+import { ADMIN_TEAM_NAME } from "../event-member/event-member.service";
 
-const NOT_STARTED_MESSAGE =
-  "Challenges will be available when the event startsssssss.";
+const NOT_STARTED_MESSAGE = "Event has not started yet.";
 
 const ENDED_MESSAGE = "Event has ended.";
 
@@ -147,7 +147,26 @@ export class TeamService {
     await this.assertEventOwnerOrAdmin(eventId, user.id);
     return this.prisma.team.findMany({
       where: { eventId },
-      select: { id: true, name: true, createdAt: true, updatedAt: true },
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+        updatedAt: true,
+        members: {
+          select: {
+            id: true,
+            role: true,
+            createdAt: true,
+            user: {
+              select: {
+                id: true,
+                username: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
     });
   }
 
@@ -165,6 +184,10 @@ export class TeamService {
   ) {
     await this.findEventOrThrow(eventId);
     await this.assertEventMember(eventId, userId);
+
+    if (name === ADMIN_TEAM_NAME) {
+      throw new ForbiddenException("This team name is reserved");
+    }
 
     if (await this.hasEventEnded(eventId))
       throw new BadRequestException("Event has already ended");
@@ -229,6 +252,10 @@ export class TeamService {
 
     const team = await this.findTeamWithName(teamName, eventId);
 
+    if (team.name === ADMIN_TEAM_NAME) {
+      throw new ForbiddenException("This team is restricted to event admins");
+    }
+
     const existingMembership = await this.prisma.teamMember.findFirst({
       where: {
         userId,
@@ -290,6 +317,9 @@ export class TeamService {
         "Captains cannot leave the team, delete it instead",
       );
 
+    if (membership.role === "ADMIN")
+      throw new ForbiddenException("Admins cannot leave the team");
+
     await this.prisma.teamMember.delete({
       where: { userId_teamId: { userId, teamId } },
     });
@@ -302,6 +332,10 @@ export class TeamService {
 
     if (team.eventId !== eventId)
       throw new BadRequestException("Team does not belong to this event");
+
+    if (team.name === ADMIN_TEAM_NAME) {
+      throw new ForbiddenException("The admin team cannot be deleted");
+    }
 
     if (await this.hasEventEnded(eventId))
       throw new BadRequestException("Event has already ended");
@@ -324,13 +358,6 @@ export class TeamService {
   async getTeamDetails(eventId: string, userId: string) {
     await this.findEventOrThrow(eventId);
 
-    if (await this.hasEventEnded(eventId)) {
-      throw new BadRequestException(ENDED_MESSAGE);
-    }
-
-    if (!(await this.hasEventStarted(eventId))) {
-      throw new BadRequestException(NOT_STARTED_MESSAGE);
-    }
     const membership = await this.prisma.teamMember.findFirst({
       where: { userId, team: { eventId } },
       include: {
@@ -438,6 +465,14 @@ export class TeamService {
     await this.prisma.teamMember.delete({
       where: { userId_teamId: { userId: targetUserId, teamId } },
     });
+
+    // If kicked from the _Admins team, strip the admin role
+    if (team.name === ADMIN_TEAM_NAME) {
+      await this.prisma.eventMember.updateMany({
+        where: { userId: targetUserId, eventId },
+        data: { role: "MEMBER" },
+      });
+    }
 
     return { message: "Member removed from the team successfully" };
   }

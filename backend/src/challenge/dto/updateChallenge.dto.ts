@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import {
   IsString,
   IsInt,
@@ -6,8 +6,9 @@ import {
   IsOptional,
   Length,
   IsEnum,
-} from 'class-validator';
-import { ChallengeCategory, ChallengeDifficulty } from '@prisma/client';
+} from "class-validator";
+import { ChallengeCategory, ChallengeDifficulty } from "@prisma/client";
+import { Type } from "class-transformer";
 
 export class UpdateChallengeDto {
   @ApiPropertyOptional()
@@ -38,6 +39,7 @@ export class UpdateChallengeDto {
   @IsEnum(ChallengeDifficulty)
   difficulty?: ChallengeDifficulty;
 
+  @Type(() => Number)
   @ApiPropertyOptional()
   @IsInt()
   @Min(0)

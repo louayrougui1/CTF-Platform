@@ -7,6 +7,9 @@ import {
   ConflictException,
 } from "@nestjs/common";
 import { UpdateEventDto } from "./dto/updateEvent.dto";
+import { ADMIN_TEAM_NAME } from "../event-member/event-member.service";
+
+import { randomBytes } from "crypto";
 
 const EVENT_SELECT = {
   id: true,
@@ -184,6 +187,18 @@ export class EventService {
       }
       throw err;
     }
+
+    // Auto-create the _Admins team with the owner as captain
+    await this.prisma.team.create({
+      data: {
+        name: ADMIN_TEAM_NAME,
+        teamPassword: randomBytes(16).toString("hex"),
+        eventId: event.id,
+        members: {
+          create: { userId: user.id, role: "CAPTAIN", eventId: event.id },
+        },
+      },
+    });
 
     return event;
   }

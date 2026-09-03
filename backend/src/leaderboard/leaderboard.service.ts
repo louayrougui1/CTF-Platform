@@ -43,7 +43,7 @@ export class LeaderboardService {
     await this.assertEventMember(eventId, userId);
 
     const teams = await this.prisma.team.findMany({
-      where: { eventId },
+      where: { eventId, name: { not: "_Admins" } },
       select: {
         id: true,
         name: true,

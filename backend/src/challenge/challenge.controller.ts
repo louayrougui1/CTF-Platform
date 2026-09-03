@@ -185,7 +185,11 @@ export class ChallengeController {
     @Param("challengeId") challengeId: string,
     @Req() req: Request,
   ) {
-    return this.challengeService.deleteChallenge(req.user, eventId, challengeId);
+    return this.challengeService.deleteChallenge(
+      req.user,
+      eventId,
+      challengeId,
+    );
   }
 
   // sumbission of flag
@@ -198,6 +202,11 @@ export class ChallengeController {
     @Req() req: Request,
     @Body() dto: SubmitFlagDto,
   ) {
-    return this.challengeService.submitFlag(req.user, eventId, challengeId, dto);
+    return this.challengeService.submitFlag(
+      req.user,
+      eventId,
+      challengeId,
+      dto,
+    );
   }
 }
