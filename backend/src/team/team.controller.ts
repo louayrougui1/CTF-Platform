@@ -30,6 +30,7 @@ import { TeamCreateResponseDto } from "./dto/team-create-response.dto";
 import { TeamMembershipResponseDto } from "./dto/team-membership-response.dto";
 import { TeamUpdateResponseDto } from "./dto/team-update-response.dto";
 import { TeamMessageResponseDto } from "./dto/team-message-response.dto";
+import { TransferCaptainDto } from "./dto/transfer-captain.dto";
 
 @UseGuards(JwtGuard)
 @ApiBearerAuth()
@@ -140,6 +141,24 @@ export class TeamController {
       teamId,
       captainId,
       targetUserId,
+    );
+  }
+
+  @Patch(":teamId/captain")
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: TeamMessageResponseDto })
+  transferCaptain(
+    @Param("eventId") eventId: string,
+    @Param("teamId") teamId: string,
+    @Body() dto: TransferCaptainDto,
+    @Req() req: Request,
+  ) {
+    const captainId = (req.user as any).id;
+    return this.teamService.transferCaptain(
+      eventId,
+      teamId,
+      captainId,
+      dto.userIdToPromote,
     );
   }
 }

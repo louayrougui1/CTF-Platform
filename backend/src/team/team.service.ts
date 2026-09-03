@@ -323,6 +323,10 @@ export class TeamService {
     if (eventMember?.role === "ADMIN")
       throw new ForbiddenException("Event admins cannot leave this team");
 
+    await this.prisma.submission.deleteMany({
+      where: { userId, teamId },
+    });
+
     await this.prisma.teamMember.delete({
       where: { userId_teamId: { userId, teamId } },
     });
@@ -478,6 +482,49 @@ export class TeamService {
     }
 
     return { message: "Member removed from the team successfully" };
+  }
+
+  async transferCaptain(
+    eventId: string,
+    teamId: string,
+    captainId: string,
+    targetUserId: string,
+  ) {
+    const team = await this.assertTeamCaptain(teamId, captainId);
+
+    if (team.eventId !== eventId)
+      throw new BadRequestException("Team does not belong to this event");
+
+    if (team.name === ADMIN_TEAM_NAME)
+      throw new ForbiddenException("Cannot transfer captain of the admin team");
+
+    if (await this.hasEventEnded(eventId))
+      throw new BadRequestException("Event has already ended");
+
+    if (targetUserId === captainId)
+      throw new BadRequestException("You are already the captain");
+
+    const targetMembership = (team as any).members.find(
+      (m: any) => m.userId === targetUserId,
+    );
+    if (!targetMembership)
+      throw new NotFoundException("That user is not a member of this team");
+
+    if (targetMembership.role === "CAPTAIN")
+      throw new BadRequestException("That user is already the captain");
+
+    await this.prisma.$transaction([
+      this.prisma.teamMember.update({
+        where: { userId_teamId: { userId: captainId, teamId } },
+        data: { role: "MEMBER" },
+      }),
+      this.prisma.teamMember.update({
+        where: { userId_teamId: { userId: targetUserId, teamId } },
+        data: { role: "CAPTAIN" },
+      }),
+    ]);
+
+    return { message: "Captain transferred successfully" };
   }
 
   async getTeamById(eventId: string, teamId: string, userId: string) {
