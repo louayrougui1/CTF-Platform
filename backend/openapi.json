@@ -1134,6 +1134,59 @@
         ]
       }
     },
+    "/events/{eventId}/teams/{teamId}/captain": {
+      "patch": {
+        "operationId": "TeamController_transferCaptain",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "teamId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferCaptainDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamMessageResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Team"
+        ]
+      }
+    },
     "/events/{eventId}/leaderboard": {
       "get": {
         "operationId": "LeaderboardController_getEventLeaderboard",
@@ -2475,6 +2528,18 @@
           "message"
         ]
       },
+      "TransferCaptainDto": {
+        "type": "object",
+        "properties": {
+          "userIdToPromote": {
+            "type": "string",
+            "description": "User ID of the member to promote to captain"
+          }
+        },
+        "required": [
+          "userIdToPromote"
+        ]
+      },
       "LeaderboardResponseDto": {
         "type": "object",
         "properties": {
@@ -2540,7 +2605,10 @@
             "type": "string",
             "description": "Invite code, required to join a private event"
           }
-        }
+        },
+        "required": [
+          "inviteCode"
+        ]
       },
       "EventMemberScalarResponseDto": {
         "type": "object",

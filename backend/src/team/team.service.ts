@@ -405,6 +405,9 @@ export class TeamService {
   ) {
     const team = await this.assertTeamCaptain(teamId, userId);
 
+    if (team.name === ADMIN_TEAM_NAME) {
+      throw new ForbiddenException("The admin team cannot be updated");
+    }
     if (team.eventId !== eventId)
       throw new BadRequestException("Team does not belong to this event");
 
