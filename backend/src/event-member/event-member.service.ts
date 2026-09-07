@@ -101,6 +101,15 @@ export class EventMemberService {
       throw new BadRequestException("User is already an admin of this event");
     }
 
+    const existingTeamMembership = await this.prisma.teamMember.findFirst({
+      where: { userId: dto.userIdToPromote, eventId: dto.eventId },
+    });
+    if (existingTeamMembership) {
+      throw new BadRequestException(
+        "User must leave their team before being promoted to admin",
+      );
+    }
+
     const updated = await this.prisma.eventMember.update({
       where: {
         userId_eventId: {
@@ -110,21 +119,6 @@ export class EventMemberService {
       },
       data: { role: "ADMIN" },
     });
-
-    // Remove from any regular team first (a user can only be on one team per event)
-    const existingMembership = await this.prisma.teamMember.findFirst({
-      where: { userId: dto.userIdToPromote, eventId: dto.eventId },
-    });
-    if (existingMembership) {
-      await this.prisma.teamMember.delete({
-        where: {
-          userId_teamId: {
-            userId: dto.userIdToPromote,
-            teamId: existingMembership.teamId,
-          },
-        },
-      });
-    }
 
     // Add to the _Admins team
     const adminTeam = await this.prisma.team.findFirst({

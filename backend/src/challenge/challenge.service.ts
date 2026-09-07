@@ -27,7 +27,7 @@ const CHALLENGE_SELECT = {
   fileName: true,
 } as const;
 
-const NOT_STARTED_MESSAGE = "Event did not start yet.";
+const NOT_STARTED_MESSAGE = "Event has not started yet.";
 
 const ENDED_MESSAGE = "Event has ended.";
 
