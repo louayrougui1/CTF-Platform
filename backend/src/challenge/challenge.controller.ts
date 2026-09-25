@@ -32,6 +32,8 @@ import {
 import { ChallengeResponseDto } from "./dto/challenge-response.dto";
 import { ChallengeStatsResponseDto } from "./dto/challenge-stats-response.dto";
 import { SubmissionResponseDto } from "./dto/submission-response.dto";
+import { Throttle, SkipThrottle } from "@nestjs/throttler";
+import { SubmissionThrottlerGuard } from "./guards/submission-throttler.guard";
 
 @Controller("events/:eventId/challenges")
 @UseGuards(JwtGuard)
@@ -194,6 +196,9 @@ export class ChallengeController {
 
   // sumbission of flag
 
+  @SkipThrottle()
+  @UseGuards(SubmissionThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post(":challengeId/submit")
   @ApiCreatedResponse({ type: SubmissionResponseDto })
   submitFlag(

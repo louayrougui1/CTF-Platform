@@ -30,11 +30,13 @@ import { ResetPasswordDto } from "./dto/reset-password.dto";
 import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 import { SetPasswordDto } from "./dto/set-password.dto";
 import { JwtGuard } from "./guards/jwt.guard";
+import { Throttle } from "@nestjs/throttler";
 
 @Controller("auth")
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Post("login")
   @UseGuards(LocalGuard)
   @ApiCreatedResponse({ type: AuthResponseDto })
@@ -46,6 +48,7 @@ export class AuthController {
     return this.authService.login(req.user, res);
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post("verify-email")
   @ApiCreatedResponse({ type: AuthResponseDto })
   verifyEmail(
@@ -55,12 +58,14 @@ export class AuthController {
     return this.authService.verifyEmail(dto, res);
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post("resend-otp")
   @ApiCreatedResponse({ type: AuthMessageResponseDto })
   resendOtp(@Body() dto: ResendOtpDto) {
     return this.authService.resendOtp(dto);
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post("register")
   @ApiCreatedResponse({ type: AuthMessageResponseDto })
   register(
@@ -78,6 +83,7 @@ export class AuthController {
     return this.authService.setPassword(req.user, dto);
   }
 
+  @Throttle({ default: { limit: 15, ttl: 60_000 } })
   @ApiCookieAuth("refresh_token")
   @Post("refresh")
   @ApiCreatedResponse({ type: AuthResponseDto })
@@ -128,6 +134,7 @@ export class AuthController {
     );
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @ApiCookieAuth("google_link_token")
   @Post("google/link")
   @ApiCreatedResponse({ type: AuthResponseDto })
@@ -143,12 +150,14 @@ export class AuthController {
     return this.authService.linkGoogleAccount(linkToken, res);
   }
 
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
   @Post("forgot-password")
   @ApiCreatedResponse({ type: AuthMessageResponseDto })
   forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.authService.forgotPassword(dto);
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post("verify-reset-otp")
   @ApiCreatedResponse({ type: AuthMessageResponseDto })
   verifyResetOtp(
@@ -158,6 +167,7 @@ export class AuthController {
     return this.authService.verifyResetOtp(dto, res);
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @ApiCookieAuth("reset_token")
   @Post("reset-password")
   @ApiCreatedResponse({ type: AuthMessageResponseDto })

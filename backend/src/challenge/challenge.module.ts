@@ -5,6 +5,7 @@ import { JwtStrategy } from '../auth/strategies/jwt.strategy';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { StorageModule } from '../storage/storage.module';
+import { SubmissionThrottlerGuard } from './guards/submission-throttler.guard';
 
 @Module({
   imports: [
@@ -17,6 +18,6 @@ import { StorageModule } from '../storage/storage.module';
     StorageModule,
   ],
   controllers: [ChallengeController],
-  providers: [ChallengeService, JwtStrategy],
+  providers: [ChallengeService, JwtStrategy, SubmissionThrottlerGuard],
 })
 export class ChallengeModule {}
