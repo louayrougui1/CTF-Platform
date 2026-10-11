@@ -179,7 +179,6 @@ function Landing() {
       });
   }, [setSession]);
 
-
   return (
     <>
       <section className="relative mx-[calc(50%_-_50vw)] -mt-8 flex min-h-[calc(100svh-3.5rem)] items-center justify-center overflow-hidden bg-card px-6 py-16 sm:px-12 md:min-h-[calc(100svh-4rem)]">
@@ -197,7 +196,10 @@ function Landing() {
           </h1>
           <p className="hero-reveal hero-reveal-command font-mono text-base text-muted-foreground sm:text-lg">
             {command}
-            <span className="ml-1 inline-block h-4 w-2 translate-y-0.5 animate-pulse bg-primary" aria-hidden />
+            <span
+              className="ml-1 inline-block h-4 w-2 translate-y-0.5 animate-pulse bg-primary"
+              aria-hidden
+            />
           </p>
           <p className="hero-reveal hero-reveal-copy text-lg text-muted-foreground sm:text-xl">
             FlagLab gives organisers full control over events, challenges and teams — and gives
@@ -250,9 +252,7 @@ function Landing() {
 
       <section aria-labelledby="how-it-works-title" className="mt-16">
         <div className="mx-auto max-w-2xl space-y-2 text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">
-            How it works
-          </p>
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">How it works</p>
           <h2 id="how-it-works-title" className="font-display text-2xl font-semibold sm:text-3xl">
             Three steps to your first flag
           </h2>
@@ -278,7 +278,10 @@ function Landing() {
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">
             Pick your battlefield
           </p>
-          <h2 id="challenge-categories-title" className="font-display text-2xl font-semibold sm:text-3xl">
+          <h2
+            id="challenge-categories-title"
+            className="font-display text-2xl font-semibold sm:text-3xl"
+          >
             Challenge categories
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -301,11 +304,14 @@ function Landing() {
                 key={label}
                 className="group flex items-center gap-4 px-4 py-4 transition-colors duration-200 hover:bg-primary-soft/40 sm:px-6"
               >
-                <Icon className="size-4 shrink-0 text-primary/70 transition-colors group-hover:text-primary" aria-hidden />
-                <span className="w-20 shrink-0 font-mono text-xs uppercase tracking-widest text-primary sm:w-24">
+                <Icon
+                  className="size-4 shrink-0 text-primary/70 transition-colors group-hover:text-primary"
+                  aria-hidden
+                />
+                <span className="whitespace-nowrap w-20 shrink-0 font-mono text-xs uppercase tracking-widest text-primary sm:w-24">
                   {label}
                 </span>
-                <div className="min-w-0">
+                <div className="min-w-0 ml-4">
                   <h3 className="text-sm font-semibold">{title}</h3>
                   <p className="truncate text-sm text-muted-foreground">{description}</p>
                 </div>
@@ -323,10 +329,11 @@ function Landing() {
 
       <section aria-labelledby="platform-features-title" className="mt-16">
         <div className="mx-auto max-w-2xl space-y-2 text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">
-            The platform
-          </p>
-          <h2 id="platform-features-title" className="font-display text-2xl font-semibold sm:text-3xl">
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">The platform</p>
+          <h2
+            id="platform-features-title"
+            className="font-display text-2xl font-semibold sm:text-3xl"
+          >
             Everything a CTF needs
           </h2>
         </div>
