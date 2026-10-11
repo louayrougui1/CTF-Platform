@@ -13,7 +13,7 @@ import {
 import { useTheme } from "@/hooks/use-theme";
 import { useLogout, useSession } from "@/hooks/use-session";
 import { cn } from "@/lib/utils";
-import logoAsset from "@/assets/logo.png.asset.json";
+
 const NAV = [
   { to: "/dashboard", label: "Dashboard" },
   { to: "/events", label: "Browse events" },
@@ -41,7 +41,7 @@ export function ThemeToggle() {
 export function Brand() {
   return (
     <Link to="/" className="flex items-center gap-2.5" aria-label="FlagLab home">
-      <img src={logoAsset.url} alt="FlagLab logo" className="size-16 object-contain md:size-20" />
+      <img src="/favicon.svg" alt="FlagLab logo" className="size-16 object-contain md:size-20" />
 
       <span className="font-display text-xl font-semibold tracking-tight md:text-2xl">
         Flag<span className="text-primary">Lab</span>

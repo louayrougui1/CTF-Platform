@@ -4,7 +4,6 @@ import { Crown, Loader2, LogOut, Trash2, UserMinus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { teamsApi } from "@/api/teams";
-import { AppShell } from "@/components/app-shell";
 import { EventNav } from "@/components/event-nav";
 import { RequireAuth } from "@/components/require-auth";
 import { ErrorState, LoadingBlock, PageHeader } from "@/components/ui-states";
@@ -35,7 +34,7 @@ import { useEventAccess, useMyTeam } from "@/hooks/use-event-access";
 import { useSession } from "@/hooks/use-session";
 import { apiErrorMessage, apiMessage } from "@/lib/api-client";
 
-export const Route = createFileRoute("/events/$eventId/teams/$teamId")({
+export const Route = createFileRoute("/_app/events/$eventId/teams/$teamId")({
   head: () => ({
     meta: [
       { title: "Team details — FlagLab" },
@@ -141,7 +140,7 @@ function TeamDetailsPage() {
 
 
   return (
-    <AppShell>
+    <>
       <PageHeader
         eyebrow="Team"
         title={team.data?.name ?? "Team"}
@@ -346,6 +345,6 @@ function TeamDetailsPage() {
           </div>
         )}
       </div>
-    </AppShell>
+    </>
   );
 }

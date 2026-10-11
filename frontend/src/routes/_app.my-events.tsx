@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
-import { AppShell } from "@/components/app-shell";
 import { EventCard } from "@/components/event-card";
 import { EventResult } from "@/components/event-result";
 import { RequireAuth } from "@/components/require-auth";
@@ -11,7 +10,7 @@ import { useJoinedEvents, useOwnedEvents } from "@/hooks/use-event-access";
 import { apiErrorMessage } from "@/lib/api-client";
 import { eventStatus } from "@/lib/format";
 
-export const Route = createFileRoute("/my-events")({
+export const Route = createFileRoute("/_app/my-events")({
   head: () => ({
     meta: [
       { title: "My events — FlagLab" },
@@ -34,7 +33,7 @@ function MyEventsPage() {
   const participating = (joined.data ?? []).filter((e) => !ownedIds.has(e.id));
 
   return (
-    <AppShell>
+    <>
       <PageHeader
         eyebrow="My events"
         title="Your competitions"
@@ -109,6 +108,6 @@ function MyEventsPage() {
           )}
         </TabsContent>
       </Tabs>
-    </AppShell>
+    </>
   );
 }

@@ -1,6 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Copy, Loader2, Pencil, Plus, RefreshCw, ShieldPlus, ShieldMinus, Trash2, UserMinus } from "lucide-react";
+import {
+  Copy,
+  Loader2,
+  Pencil,
+  Plus,
+  RefreshCw,
+  ShieldPlus,
+  ShieldMinus,
+  Trash2,
+  UserMinus,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { challengesApi, type ChallengeFormValues } from "@/api/challenges";
@@ -13,7 +23,6 @@ import {
   type ChallengeCategory,
   type ChallengeDifficulty,
 } from "@/api/types";
-import { AppShell } from "@/components/app-shell";
 import { MarkdownEditor } from "@/components/markdown-editor";
 import { EventNav } from "@/components/event-nav";
 import { RequireAuth } from "@/components/require-auth";
@@ -64,13 +73,16 @@ import { useSession } from "@/hooks/use-session";
 import { apiErrorMessage } from "@/lib/api-client";
 import { fromDateTimeLocal, toDateTimeLocal } from "@/lib/format";
 
-export const Route = createFileRoute("/events/$eventId/manage")({
+export const Route = createFileRoute("/_app/events/$eventId/manage")({
   head: () => ({
     meta: [
       { title: "Manage event — FlagLab" },
       { name: "description", content: "Edit event settings, challenges, members and admins." },
       { property: "og:title", content: "Manage event — FlagLab" },
-      { property: "og:description", content: "Edit event settings, challenges, members and admins." },
+      {
+        property: "og:description",
+        content: "Edit event settings, challenges, members and admins.",
+      },
     ],
   }),
   component: () => (
@@ -90,26 +102,20 @@ function ManageEventPage() {
   });
 
   if (access.isLoading || event.isLoading) {
-    return (
-      <AppShell>
-        <LoadingBlock label="Loading event…" />
-      </AppShell>
-    );
+    return <LoadingBlock label="Loading event…" />;
   }
 
   if (!access.isAdmin) {
     return (
-      <AppShell>
-        <EmptyState
-          title="Organisers only"
-          description="You need to be the owner or an admin of this event to manage it."
-        />
-      </AppShell>
+      <EmptyState
+        title="Organisers only"
+        description="You need to be the owner or an admin of this event to manage it."
+      />
     );
   }
 
   return (
-    <AppShell>
+    <>
       <PageHeader
         eyebrow="Manage"
         title={event.data?.title ?? "Event"}
@@ -138,7 +144,7 @@ function ManageEventPage() {
           <EventSettings eventId={eventId} isOwner={access.isOwner} />
         </TabsContent>
       </Tabs>
-    </AppShell>
+    </>
   );
 }
 
@@ -324,7 +330,7 @@ function ChallengeFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] w-[calc(100%-2rem)] max-w-[76rem] overflow-y-auto sm:max-w-[76rem]">
         <DialogHeader>
           <DialogTitle>{challenge ? "Edit challenge" : "New challenge"}</DialogTitle>
           <DialogDescription>
@@ -462,6 +468,7 @@ function ChallengeFormDialog({
           <div className="space-y-2">
             <Label htmlFor="c-file">Attachment</Label>
             <Input
+              className="cursor-pointer"
               id="c-file"
               type="file"
               onChange={(e) => setValues((v) => ({ ...v, file: e.target.files?.[0] ?? null }))}
@@ -516,7 +523,9 @@ function MembersManager({ eventId, isOwner }: { eventId: string; isOwner: boolea
 
   if (members.isLoading) return <LoadingBlock />;
   if (members.isError)
-    return <ErrorState message={apiErrorMessage(members.error)} onRetry={() => members.refetch()} />;
+    return (
+      <ErrorState message={apiErrorMessage(members.error)} onRetry={() => members.refetch()} />
+    );
   if ((members.data?.length ?? 0) === 0)
     return <EmptyState title="No members yet" description="Share your event to get people in." />;
 
@@ -875,7 +884,9 @@ function EventSettings({ eventId, isOwner }: { eventId: string; isOwner: boolean
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => remove.mutate()}>Delete event</AlertDialogAction>
+                  <AlertDialogAction onClick={() => remove.mutate()}>
+                    Delete event
+                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>

@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { authApi } from "@/api/auth";
 import { userApi } from "@/api/user";
-import { AppShell } from "@/components/app-shell";
 import { RequireAuth } from "@/components/require-auth";
 import { ErrorState, LoadingBlock, PageHeader } from "@/components/ui-states";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { apiErrorMessage } from "@/lib/api-client";
 import { useAuthStore } from "@/lib/auth-store";
 
-export const Route = createFileRoute("/profile")({
+export const Route = createFileRoute("/_app/profile")({
   head: () => ({
     meta: [
       { title: "Your profile — FlagLab" },
@@ -65,7 +64,7 @@ function ProfilePage() {
   });
 
   return (
-    <AppShell>
+    <>
       <PageHeader
         eyebrow="Account"
         title="Your profile"
@@ -188,6 +187,6 @@ function ProfilePage() {
           </section>
         </div>
       ) : null}
-    </AppShell>
+    </>
   );
 }

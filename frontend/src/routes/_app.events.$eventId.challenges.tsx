@@ -5,7 +5,6 @@ import { useMemo, useState } from "react";
 import { challengesApi } from "@/api/challenges";
 import { eventsApi } from "@/api/events";
 import { CHALLENGE_CATEGORIES, type Challenge } from "@/api/types";
-import { AppShell } from "@/components/app-shell";
 import { ChallengeCard } from "@/components/challenge-card";
 import { ChallengeModal } from "@/components/challenge-modal";
 import { EventNav } from "@/components/event-nav";
@@ -15,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { useEventAccess, useMyTeam } from "@/hooks/use-event-access";
 import { apiErrorMessage, isInformationalResponse } from "@/lib/api-client";
 
-export const Route = createFileRoute("/events/$eventId/challenges")({
+export const Route = createFileRoute("/_app/events/$eventId/challenges")({
   head: () => ({
     meta: [
       { title: "Challenges — FlagLab" },
@@ -85,7 +84,7 @@ function ChallengesPage() {
   const solved = (challenges.data ?? []).filter((c) => c.solved).length;
 
   return (
-    <AppShell>
+    <>
       <PageHeader
         eyebrow={event.data?.title ?? "Event"}
         title="Challenges"
@@ -192,6 +191,6 @@ function ChallengesPage() {
           if (!open) setSelected(null);
         }}
       />
-    </AppShell>
+    </>
   );
 }

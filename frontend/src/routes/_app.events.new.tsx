@@ -4,7 +4,6 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { eventsApi } from "@/api/events";
-import { AppShell } from "@/components/app-shell";
 import { RequireAuth } from "@/components/require-auth";
 import { PageHeader } from "@/components/ui-states";
 import { Button } from "@/components/ui/button";
@@ -15,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { apiErrorMessage } from "@/lib/api-client";
 import { fromDateTimeLocal } from "@/lib/format";
 
-export const Route = createFileRoute("/events/new")({
+export const Route = createFileRoute("/_app/events/new")({
   head: () => ({
     meta: [
       { title: "Create an event — FlagLab" },
@@ -58,7 +57,7 @@ function CreateEventPage() {
   });
 
   return (
-    <AppShell>
+    <div className="mx-auto max-w-2xl">
       <PageHeader
         eyebrow="New event"
         title="Create an event"
@@ -66,7 +65,7 @@ function CreateEventPage() {
       />
 
       <form
-        className="surface-card mt-6 max-w-2xl space-y-5 p-6"
+        className="surface-card mt-6 space-y-5 p-6"
         onSubmit={(e) => {
           e.preventDefault();
           create.mutate();
@@ -123,6 +122,6 @@ function CreateEventPage() {
           Create event
         </Button>
       </form>
-    </AppShell>
+    </div>
   );
 }

@@ -3,7 +3,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { eventsApi } from "@/api/events";
-import { AppShell } from "@/components/app-shell";
 import { EventCard } from "@/components/event-card";
 import { JoinEventButton } from "@/components/join-event-button";
 import { JoinByCodeForm } from "@/components/join-by-code";
@@ -16,7 +15,7 @@ import { useSession } from "@/hooks/use-session";
 import { apiErrorMessage } from "@/lib/api-client";
 import { eventStatus, type EventStatusValue } from "@/lib/format";
 
-export const Route = createFileRoute("/events/")({
+export const Route = createFileRoute("/_app/events/")({
   head: () => ({
     meta: [
       { title: "Browse CTF events — FlagLab" },
@@ -64,7 +63,7 @@ function BrowseEventsPage() {
   }, [events.data, query, filter]);
 
   return (
-    <AppShell>
+    <>
       <PageHeader
         eyebrow="Events"
         title="Browse events"
@@ -162,6 +161,6 @@ function BrowseEventsPage() {
           </div>
         )}
       </div>
-    </AppShell>
+    </>
   );
 }

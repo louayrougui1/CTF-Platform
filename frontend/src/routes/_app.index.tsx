@@ -14,7 +14,6 @@ import {
   FileSearch,
   Eye,
 } from "lucide-react";
-import { AppShell } from "@/components/app-shell";
 import { HomeMiniChallenge } from "@/components/home-mini-challenge";
 import { Button } from "@/components/ui/button";
 import { userApi } from "@/api/user";
@@ -22,7 +21,7 @@ import { useAuthStore } from "@/lib/auth-store";
 import { useSession } from "@/hooks/use-session";
 import { useTypewriterCycle } from "@/hooks/use-typewriter-cycle";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_app/")({
   head: () => ({
     meta: [
       { title: "FlagLab — Run and play Capture The Flag events" },
@@ -182,7 +181,7 @@ function Landing() {
 
 
   return (
-    <AppShell>
+    <>
       <section className="relative mx-[calc(50%_-_50vw)] -mt-8 flex min-h-[calc(100svh-3.5rem)] items-center justify-center overflow-hidden bg-card px-6 py-16 sm:px-12 md:min-h-[calc(100svh-4rem)]">
         <div className="hero-ambient-glow pointer-events-none absolute inset-0" aria-hidden />
         <div className="grid-backdrop pointer-events-none absolute inset-0" aria-hidden />
@@ -358,6 +357,6 @@ function Landing() {
           </Button>
         </section>
       )}
-    </AppShell>
+    </>
   );
 }

@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CalendarClock, Flag, Plus, Trophy } from "lucide-react";
 import type { ReactNode } from "react";
-import { AppShell } from "@/components/app-shell";
 import { EventCard } from "@/components/event-card";
 import { RequireAuth } from "@/components/require-auth";
 import { JoinByCodeForm } from "@/components/join-by-code";
@@ -12,7 +11,7 @@ import { useSession } from "@/hooks/use-session";
 import { apiErrorMessage } from "@/lib/api-client";
 import { eventStatus } from "@/lib/format";
 
-export const Route = createFileRoute("/dashboard")({
+export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard — FlagLab" },
@@ -37,7 +36,7 @@ function DashboardPage() {
   const upcoming = (joined.data ?? []).filter((e) => eventStatus(e) === "Upcoming");
 
   return (
-    <AppShell>
+    <>
       <PageHeader
         eyebrow="Dashboard"
         title={`Welcome back, ${user?.username ?? "hacker"}`}
@@ -128,7 +127,7 @@ function DashboardPage() {
           />
         )}
       </Section>
-    </AppShell>
+    </>
   );
 }
 

@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { eventsApi } from "@/api/events";
-import { AppShell } from "@/components/app-shell";
 import { EventStatusBadge } from "@/components/event-card";
 import { EventNav } from "@/components/event-nav";
 import { JoinEventButton, JoinWithCode } from "@/components/join-event-button";
@@ -36,7 +35,7 @@ import { useSession } from "@/hooks/use-session";
 import { apiErrorMessage } from "@/lib/api-client";
 import { eventStatus, formatDate } from "@/lib/format";
 
-export const Route = createFileRoute("/events/$eventId/")({
+export const Route = createFileRoute("/_app/events/$eventId/")({
   head: () => ({
     meta: [
       { title: "Event details — FlagLab" },
@@ -78,26 +77,18 @@ function EventDetailsPage() {
   });
 
   if (event.isLoading) {
-    return (
-      <AppShell>
-        <LoadingBlock label="Loading event…" />
-      </AppShell>
-    );
+    return <LoadingBlock label="Loading event…" />;
   }
 
   if (event.isError || !event.data) {
-    return (
-      <AppShell>
-        <ErrorState message={apiErrorMessage(event.error)} onRetry={() => event.refetch()} />
-      </AppShell>
-    );
+    return <ErrorState message={apiErrorMessage(event.error)} onRetry={() => event.refetch()} />;
   }
 
   const data = event.data;
   const hasEnded = eventStatus(data) === "Ended";
 
   return (
-    <AppShell>
+    <>
       <PageHeader
         eyebrow="Event"
         title={data.title}
@@ -138,7 +129,9 @@ function EventDetailsPage() {
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => leave.mutate()}>Leave event</AlertDialogAction>
+                    <AlertDialogAction onClick={() => leave.mutate()}>
+                      Leave event
+                    </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
@@ -209,70 +202,70 @@ function EventDetailsPage() {
               </Button>
             </>
           ) : (
-          <>
-          <h2 className="font-display text-lg font-semibold">
-            {access.isMember ? "You're in" : "Join this event"}
-          </h2>
+            <>
+              <h2 className="font-display text-lg font-semibold">
+                {access.isMember ? "You're in" : "Join this event"}
+              </h2>
 
-          {!isAuthenticated ? (
-            <>
-              <p className="text-sm text-muted-foreground">
-                Log in or create an account to join this competition.
-              </p>
-              <Button asChild className="w-full">
-                <Link to="/login">Log in to join</Link>
-              </Button>
+              {!isAuthenticated ? (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    Log in or create an account to join this competition.
+                  </p>
+                  <Button asChild className="w-full">
+                    <Link to="/login">Log in to join</Link>
+                  </Button>
+                </>
+              ) : access.isMember ? (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    {access.isOwner
+                      ? "You own this event."
+                      : access.role === "ADMIN"
+                        ? "You're an event admin."
+                        : "You're a participant. Join or create a team, then start solving."}
+                  </p>
+                  <div className="grid gap-2">
+                    <Button asChild variant="outline" className="w-full">
+                      <Link to="/events/$eventId/challenges" params={{ eventId }}>
+                        <Flag className="size-4" aria-hidden />
+                        Challenges
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" className="w-full">
+                      <Link to="/events/$eventId/teams" params={{ eventId }}>
+                        <Users className="size-4" aria-hidden />
+                        {access.isAdmin ? "Teams" : "MyTeam"}
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" className="w-full">
+                      <Link to="/events/$eventId/leaderboard" params={{ eventId }}>
+                        <Trophy className="size-4" aria-hidden />
+                        Leaderboard
+                      </Link>
+                    </Button>
+                  </div>
+                </>
+              ) : data.isPublic ? (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    This event is public — join instantly and pick a team.
+                  </p>
+                  <JoinEventButton eventId={eventId} size="default" label="Join event" />
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    This event is private. Enter the invite code the organiser gave you.
+                  </p>
+                  <JoinWithCode eventId={eventId} />
+                </>
+              )}
             </>
-          ) : access.isMember ? (
-            <>
-              <p className="text-sm text-muted-foreground">
-                {access.isOwner
-                  ? "You own this event."
-                  : access.role === "ADMIN"
-                    ? "You're an event admin."
-                    : "You're a participant. Join or create a team, then start solving."}
-              </p>
-              <div className="grid gap-2">
-                <Button asChild variant="outline" className="w-full">
-                  <Link to="/events/$eventId/challenges" params={{ eventId }}>
-                    <Flag className="size-4" aria-hidden />
-                    Challenges
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" className="w-full">
-                  <Link to="/events/$eventId/teams" params={{ eventId }}>
-                    <Users className="size-4" aria-hidden />
-                    {access.isAdmin ? "Teams" : "MyTeam"}
-                  </Link>
-                </Button>
-                <Button asChild variant="outline" className="w-full">
-                  <Link to="/events/$eventId/leaderboard" params={{ eventId }}>
-                    <Trophy className="size-4" aria-hidden />
-                    Leaderboard
-                  </Link>
-                </Button>
-              </div>
-            </>
-          ) : data.isPublic ? (
-            <>
-              <p className="text-sm text-muted-foreground">
-                This event is public — join instantly and pick a team.
-              </p>
-              <JoinEventButton eventId={eventId} size="default" label="Join event" />
-            </>
-          ) : (
-            <>
-              <p className="text-sm text-muted-foreground">
-                This event is private. Enter the invite code the organiser gave you.
-              </p>
-              <JoinWithCode eventId={eventId} />
-            </>
-          )}
-          </>
           )}
         </aside>
       </div>
-    </AppShell>
+    </>
   );
 }
 

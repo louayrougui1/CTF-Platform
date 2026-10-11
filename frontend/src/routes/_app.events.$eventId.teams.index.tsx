@@ -5,7 +5,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { eventsApi } from "@/api/events";
 import { teamsApi } from "@/api/teams";
-import { AppShell } from "@/components/app-shell";
 import { EventNav } from "@/components/event-nav";
 import { RequireAuth } from "@/components/require-auth";
 import { CardSkeletonGrid, EmptyState, ErrorState, PageHeader } from "@/components/ui-states";
@@ -25,7 +24,7 @@ import { useEventAccess, useMyTeam } from "@/hooks/use-event-access";
 import { apiErrorMessage, apiMessage } from "@/lib/api-client";
 import { eventStatus } from "@/lib/format";
 
-export const Route = createFileRoute("/events/$eventId/teams/")({
+export const Route = createFileRoute("/_app/events/$eventId/teams/")({
   head: () => ({
     meta: [
       { title: "Teams — FlagLab" },
@@ -73,7 +72,7 @@ function TeamsPage() {
   };
 
   return (
-    <AppShell>
+    <>
       <PageHeader
         eyebrow={event.data?.title ?? "Event"}
         title={access.isAdmin ? "Teams" : "MyTeam"}
@@ -198,7 +197,7 @@ function TeamsPage() {
           )}
         </>
       )}
-    </AppShell>
+    </>
   );
 }
 

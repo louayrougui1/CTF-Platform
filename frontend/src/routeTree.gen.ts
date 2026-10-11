@@ -9,34 +9,29 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as GoogleLinkRouteImport } from './routes/google-link'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as MyEventsRouteImport } from './routes/my-events'
-import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
-import { Route as EventsIndexRouteImport } from './routes/events.index'
-import { Route as EventsNewRouteImport } from './routes/events.new'
+import { Route as AppIndexRouteImport } from './routes/_app.index'
+import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppMyEventsRouteImport } from './routes/_app.my-events'
+import { Route as AppProfileRouteImport } from './routes/_app.profile'
 import { Route as GoogleLinkConfirmationRouteImport } from './routes/google.link-confirmation'
-import { Route as EventsEventIdIndexRouteImport } from './routes/events.$eventId.index'
-import { Route as EventsEventIdChallengesRouteImport } from './routes/events.$eventId.challenges'
-import { Route as EventsEventIdLeaderboardRouteImport } from './routes/events.$eventId.leaderboard'
-import { Route as EventsEventIdManageRouteImport } from './routes/events.$eventId.manage'
-import { Route as EventsEventIdTeamsIndexRouteImport } from './routes/events.$eventId.teams.index'
-import { Route as EventsEventIdTeamsTeamIdRouteImport } from './routes/events.$eventId.teams.$teamId'
+import { Route as AppEventsIndexRouteImport } from './routes/_app.events.index'
+import { Route as AppEventsNewRouteImport } from './routes/_app.events.new'
+import { Route as AppEventsEventIdIndexRouteImport } from './routes/_app.events.$eventId.index'
+import { Route as AppEventsEventIdChallengesRouteImport } from './routes/_app.events.$eventId.challenges'
+import { Route as AppEventsEventIdLeaderboardRouteImport } from './routes/_app.events.$eventId.leaderboard'
+import { Route as AppEventsEventIdManageRouteImport } from './routes/_app.events.$eventId.manage'
+import { Route as AppEventsEventIdTeamsIndexRouteImport } from './routes/_app.events.$eventId.teams.index'
+import { Route as AppEventsEventIdTeamsTeamIdRouteImport } from './routes/_app.events.$eventId.teams.$teamId'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -54,16 +49,6 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MyEventsRoute = MyEventsRouteImport.update({
-  id: '/my-events',
-  path: '/my-events',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -79,133 +64,156 @@ const VerifyEmailRoute = VerifyEmailRouteImport.update({
   path: '/verify-email',
   getParentRoute: () => rootRouteImport,
 } as any)
-const EventsIndexRoute = EventsIndexRouteImport.update({
-  id: '/events/',
-  path: '/events/',
-  getParentRoute: () => rootRouteImport,
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
 } as any)
-const EventsNewRoute = EventsNewRouteImport.update({
-  id: '/events/new',
-  path: '/events/new',
-  getParentRoute: () => rootRouteImport,
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMyEventsRoute = AppMyEventsRouteImport.update({
+  id: '/my-events',
+  path: '/my-events',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRoute,
 } as any)
 const GoogleLinkConfirmationRoute = GoogleLinkConfirmationRouteImport.update({
   id: '/google/link-confirmation',
   path: '/google/link-confirmation',
   getParentRoute: () => rootRouteImport,
 } as any)
-const EventsEventIdIndexRoute = EventsEventIdIndexRouteImport.update({
+const AppEventsIndexRoute = AppEventsIndexRouteImport.update({
+  id: '/events/',
+  path: '/events/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEventsNewRoute = AppEventsNewRouteImport.update({
+  id: '/events/new',
+  path: '/events/new',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEventsEventIdIndexRoute = AppEventsEventIdIndexRouteImport.update({
   id: '/events/$eventId/',
   path: '/events/$eventId/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
-const EventsEventIdChallengesRoute = EventsEventIdChallengesRouteImport.update({
-  id: '/events/$eventId/challenges',
-  path: '/events/$eventId/challenges',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EventsEventIdLeaderboardRoute =
-  EventsEventIdLeaderboardRouteImport.update({
+const AppEventsEventIdChallengesRoute =
+  AppEventsEventIdChallengesRouteImport.update({
+    id: '/events/$eventId/challenges',
+    path: '/events/$eventId/challenges',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppEventsEventIdLeaderboardRoute =
+  AppEventsEventIdLeaderboardRouteImport.update({
     id: '/events/$eventId/leaderboard',
     path: '/events/$eventId/leaderboard',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AppRoute,
   } as any)
-const EventsEventIdManageRoute = EventsEventIdManageRouteImport.update({
+const AppEventsEventIdManageRoute = AppEventsEventIdManageRouteImport.update({
   id: '/events/$eventId/manage',
   path: '/events/$eventId/manage',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
-const EventsEventIdTeamsIndexRoute = EventsEventIdTeamsIndexRouteImport.update({
-  id: '/events/$eventId/teams/',
-  path: '/events/$eventId/teams/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EventsEventIdTeamsTeamIdRoute =
-  EventsEventIdTeamsTeamIdRouteImport.update({
+const AppEventsEventIdTeamsIndexRoute =
+  AppEventsEventIdTeamsIndexRouteImport.update({
+    id: '/events/$eventId/teams/',
+    path: '/events/$eventId/teams/',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppEventsEventIdTeamsTeamIdRoute =
+  AppEventsEventIdTeamsTeamIdRouteImport.update({
     id: '/events/$eventId/teams/$teamId',
     path: '/events/$eventId/teams/$teamId',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AppRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
+  '/': typeof AppIndexRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/google-link': typeof GoogleLinkRoute
   '/login': typeof LoginRoute
-  '/my-events': typeof MyEventsRoute
-  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/verify-email': typeof VerifyEmailRoute
-  '/events/new': typeof EventsNewRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/my-events': typeof AppMyEventsRoute
+  '/profile': typeof AppProfileRoute
   '/google/link-confirmation': typeof GoogleLinkConfirmationRoute
-  '/events/': typeof EventsIndexRoute
-  '/events/$eventId/challenges': typeof EventsEventIdChallengesRoute
-  '/events/$eventId/leaderboard': typeof EventsEventIdLeaderboardRoute
-  '/events/$eventId/manage': typeof EventsEventIdManageRoute
-  '/events/$eventId/': typeof EventsEventIdIndexRoute
-  '/events/$eventId/teams/$teamId': typeof EventsEventIdTeamsTeamIdRoute
-  '/events/$eventId/teams/': typeof EventsEventIdTeamsIndexRoute
+  '/events/new': typeof AppEventsNewRoute
+  '/events/': typeof AppEventsIndexRoute
+  '/events/$eventId/challenges': typeof AppEventsEventIdChallengesRoute
+  '/events/$eventId/leaderboard': typeof AppEventsEventIdLeaderboardRoute
+  '/events/$eventId/manage': typeof AppEventsEventIdManageRoute
+  '/events/$eventId/': typeof AppEventsEventIdIndexRoute
+  '/events/$eventId/teams/$teamId': typeof AppEventsEventIdTeamsTeamIdRoute
+  '/events/$eventId/teams/': typeof AppEventsEventIdTeamsIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/google-link': typeof GoogleLinkRoute
   '/login': typeof LoginRoute
-  '/my-events': typeof MyEventsRoute
-  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/verify-email': typeof VerifyEmailRoute
-  '/events/new': typeof EventsNewRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/my-events': typeof AppMyEventsRoute
+  '/profile': typeof AppProfileRoute
   '/google/link-confirmation': typeof GoogleLinkConfirmationRoute
-  '/events': typeof EventsIndexRoute
-  '/events/$eventId/challenges': typeof EventsEventIdChallengesRoute
-  '/events/$eventId/leaderboard': typeof EventsEventIdLeaderboardRoute
-  '/events/$eventId/manage': typeof EventsEventIdManageRoute
-  '/events/$eventId': typeof EventsEventIdIndexRoute
-  '/events/$eventId/teams/$teamId': typeof EventsEventIdTeamsTeamIdRoute
-  '/events/$eventId/teams': typeof EventsEventIdTeamsIndexRoute
+  '/': typeof AppIndexRoute
+  '/events/new': typeof AppEventsNewRoute
+  '/events': typeof AppEventsIndexRoute
+  '/events/$eventId/challenges': typeof AppEventsEventIdChallengesRoute
+  '/events/$eventId/leaderboard': typeof AppEventsEventIdLeaderboardRoute
+  '/events/$eventId/manage': typeof AppEventsEventIdManageRoute
+  '/events/$eventId': typeof AppEventsEventIdIndexRoute
+  '/events/$eventId/teams/$teamId': typeof AppEventsEventIdTeamsTeamIdRoute
+  '/events/$eventId/teams': typeof AppEventsEventIdTeamsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
+  '/_app': typeof AppRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/google-link': typeof GoogleLinkRoute
   '/login': typeof LoginRoute
-  '/my-events': typeof MyEventsRoute
-  '/profile': typeof ProfileRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/verify-email': typeof VerifyEmailRoute
-  '/events/new': typeof EventsNewRoute
+  '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/my-events': typeof AppMyEventsRoute
+  '/_app/profile': typeof AppProfileRoute
   '/google/link-confirmation': typeof GoogleLinkConfirmationRoute
-  '/events/': typeof EventsIndexRoute
-  '/events/$eventId/challenges': typeof EventsEventIdChallengesRoute
-  '/events/$eventId/leaderboard': typeof EventsEventIdLeaderboardRoute
-  '/events/$eventId/manage': typeof EventsEventIdManageRoute
-  '/events/$eventId/': typeof EventsEventIdIndexRoute
-  '/events/$eventId/teams/$teamId': typeof EventsEventIdTeamsTeamIdRoute
-  '/events/$eventId/teams/': typeof EventsEventIdTeamsIndexRoute
+  '/_app/': typeof AppIndexRoute
+  '/_app/events/new': typeof AppEventsNewRoute
+  '/_app/events/': typeof AppEventsIndexRoute
+  '/_app/events/$eventId/challenges': typeof AppEventsEventIdChallengesRoute
+  '/_app/events/$eventId/leaderboard': typeof AppEventsEventIdLeaderboardRoute
+  '/_app/events/$eventId/manage': typeof AppEventsEventIdManageRoute
+  '/_app/events/$eventId/': typeof AppEventsEventIdIndexRoute
+  '/_app/events/$eventId/teams/$teamId': typeof AppEventsEventIdTeamsTeamIdRoute
+  '/_app/events/$eventId/teams/': typeof AppEventsEventIdTeamsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/dashboard'
     | '/forgot-password'
     | '/google-link'
     | '/login'
-    | '/my-events'
-    | '/profile'
     | '/register'
     | '/reset-password'
     | '/verify-email'
-    | '/events/new'
+    | '/dashboard'
+    | '/my-events'
+    | '/profile'
     | '/google/link-confirmation'
+    | '/events/new'
     | '/events/'
     | '/events/$eventId/challenges'
     | '/events/$eventId/leaderboard'
@@ -215,18 +223,18 @@ export interface FileRouteTypes {
     | '/events/$eventId/teams/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
-    | '/dashboard'
     | '/forgot-password'
     | '/google-link'
     | '/login'
-    | '/my-events'
-    | '/profile'
     | '/register'
     | '/reset-password'
     | '/verify-email'
-    | '/events/new'
+    | '/dashboard'
+    | '/my-events'
+    | '/profile'
     | '/google/link-confirmation'
+    | '/'
+    | '/events/new'
     | '/events'
     | '/events/$eventId/challenges'
     | '/events/$eventId/leaderboard'
@@ -236,63 +244,46 @@ export interface FileRouteTypes {
     | '/events/$eventId/teams'
   id:
     | '__root__'
-    | '/'
-    | '/dashboard'
+    | '/_app'
     | '/forgot-password'
     | '/google-link'
     | '/login'
-    | '/my-events'
-    | '/profile'
     | '/register'
     | '/reset-password'
     | '/verify-email'
-    | '/events/new'
+    | '/_app/dashboard'
+    | '/_app/my-events'
+    | '/_app/profile'
     | '/google/link-confirmation'
-    | '/events/'
-    | '/events/$eventId/challenges'
-    | '/events/$eventId/leaderboard'
-    | '/events/$eventId/manage'
-    | '/events/$eventId/'
-    | '/events/$eventId/teams/$teamId'
-    | '/events/$eventId/teams/'
+    | '/_app/'
+    | '/_app/events/new'
+    | '/_app/events/'
+    | '/_app/events/$eventId/challenges'
+    | '/_app/events/$eventId/leaderboard'
+    | '/_app/events/$eventId/manage'
+    | '/_app/events/$eventId/'
+    | '/_app/events/$eventId/teams/$teamId'
+    | '/_app/events/$eventId/teams/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  DashboardRoute: typeof DashboardRoute
+  AppRoute: typeof AppRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   GoogleLinkRoute: typeof GoogleLinkRoute
   LoginRoute: typeof LoginRoute
-  MyEventsRoute: typeof MyEventsRoute
-  ProfileRoute: typeof ProfileRoute
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
-  EventsNewRoute: typeof EventsNewRoute
   GoogleLinkConfirmationRoute: typeof GoogleLinkConfirmationRoute
-  EventsIndexRoute: typeof EventsIndexRoute
-  EventsEventIdChallengesRoute: typeof EventsEventIdChallengesRoute
-  EventsEventIdLeaderboardRoute: typeof EventsEventIdLeaderboardRoute
-  EventsEventIdManageRoute: typeof EventsEventIdManageRoute
-  EventsEventIdIndexRoute: typeof EventsEventIdIndexRoute
-  EventsEventIdTeamsTeamIdRoute: typeof EventsEventIdTeamsTeamIdRoute
-  EventsEventIdTeamsIndexRoute: typeof EventsEventIdTeamsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
+    '/_app': {
+      id: '/_app'
+      path: ''
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -316,20 +307,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/my-events': {
-      id: '/my-events'
-      path: '/my-events'
-      fullPath: '/my-events'
-      preLoaderRoute: typeof MyEventsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/register': {
       id: '/register'
       path: '/register'
@@ -351,19 +328,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VerifyEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/events/': {
-      id: '/events/'
-      path: '/events'
-      fullPath: '/events/'
-      preLoaderRoute: typeof EventsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_app/': {
+      id: '/_app/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/events/new': {
-      id: '/events/new'
-      path: '/events/new'
-      fullPath: '/events/new'
-      preLoaderRoute: typeof EventsNewRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/my-events': {
+      id: '/_app/my-events'
+      path: '/my-events'
+      fullPath: '/my-events'
+      preLoaderRoute: typeof AppMyEventsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/profile': {
+      id: '/_app/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
     }
     '/google/link-confirmation': {
       id: '/google/link-confirmation'
@@ -372,71 +363,106 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GoogleLinkConfirmationRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/events/$eventId/': {
-      id: '/events/$eventId/'
+    '/_app/events/': {
+      id: '/_app/events/'
+      path: '/events'
+      fullPath: '/events/'
+      preLoaderRoute: typeof AppEventsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/events/new': {
+      id: '/_app/events/new'
+      path: '/events/new'
+      fullPath: '/events/new'
+      preLoaderRoute: typeof AppEventsNewRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/events/$eventId/': {
+      id: '/_app/events/$eventId/'
       path: '/events/$eventId'
       fullPath: '/events/$eventId/'
-      preLoaderRoute: typeof EventsEventIdIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppEventsEventIdIndexRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/events/$eventId/challenges': {
-      id: '/events/$eventId/challenges'
+    '/_app/events/$eventId/challenges': {
+      id: '/_app/events/$eventId/challenges'
       path: '/events/$eventId/challenges'
       fullPath: '/events/$eventId/challenges'
-      preLoaderRoute: typeof EventsEventIdChallengesRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppEventsEventIdChallengesRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/events/$eventId/leaderboard': {
-      id: '/events/$eventId/leaderboard'
+    '/_app/events/$eventId/leaderboard': {
+      id: '/_app/events/$eventId/leaderboard'
       path: '/events/$eventId/leaderboard'
       fullPath: '/events/$eventId/leaderboard'
-      preLoaderRoute: typeof EventsEventIdLeaderboardRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppEventsEventIdLeaderboardRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/events/$eventId/manage': {
-      id: '/events/$eventId/manage'
+    '/_app/events/$eventId/manage': {
+      id: '/_app/events/$eventId/manage'
       path: '/events/$eventId/manage'
       fullPath: '/events/$eventId/manage'
-      preLoaderRoute: typeof EventsEventIdManageRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppEventsEventIdManageRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/events/$eventId/teams/': {
-      id: '/events/$eventId/teams/'
+    '/_app/events/$eventId/teams/': {
+      id: '/_app/events/$eventId/teams/'
       path: '/events/$eventId/teams'
       fullPath: '/events/$eventId/teams/'
-      preLoaderRoute: typeof EventsEventIdTeamsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppEventsEventIdTeamsIndexRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/events/$eventId/teams/$teamId': {
-      id: '/events/$eventId/teams/$teamId'
+    '/_app/events/$eventId/teams/$teamId': {
+      id: '/_app/events/$eventId/teams/$teamId'
       path: '/events/$eventId/teams/$teamId'
       fullPath: '/events/$eventId/teams/$teamId'
-      preLoaderRoute: typeof EventsEventIdTeamsTeamIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppEventsEventIdTeamsTeamIdRouteImport
+      parentRoute: typeof AppRoute
     }
   }
 }
 
+interface AppRouteChildren {
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppMyEventsRoute: typeof AppMyEventsRoute
+  AppProfileRoute: typeof AppProfileRoute
+  AppIndexRoute: typeof AppIndexRoute
+  AppEventsNewRoute: typeof AppEventsNewRoute
+  AppEventsIndexRoute: typeof AppEventsIndexRoute
+  AppEventsEventIdChallengesRoute: typeof AppEventsEventIdChallengesRoute
+  AppEventsEventIdLeaderboardRoute: typeof AppEventsEventIdLeaderboardRoute
+  AppEventsEventIdManageRoute: typeof AppEventsEventIdManageRoute
+  AppEventsEventIdIndexRoute: typeof AppEventsEventIdIndexRoute
+  AppEventsEventIdTeamsTeamIdRoute: typeof AppEventsEventIdTeamsTeamIdRoute
+  AppEventsEventIdTeamsIndexRoute: typeof AppEventsEventIdTeamsIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppDashboardRoute: AppDashboardRoute,
+  AppMyEventsRoute: AppMyEventsRoute,
+  AppProfileRoute: AppProfileRoute,
+  AppIndexRoute: AppIndexRoute,
+  AppEventsNewRoute: AppEventsNewRoute,
+  AppEventsIndexRoute: AppEventsIndexRoute,
+  AppEventsEventIdChallengesRoute: AppEventsEventIdChallengesRoute,
+  AppEventsEventIdLeaderboardRoute: AppEventsEventIdLeaderboardRoute,
+  AppEventsEventIdManageRoute: AppEventsEventIdManageRoute,
+  AppEventsEventIdIndexRoute: AppEventsEventIdIndexRoute,
+  AppEventsEventIdTeamsTeamIdRoute: AppEventsEventIdTeamsTeamIdRoute,
+  AppEventsEventIdTeamsIndexRoute: AppEventsEventIdTeamsIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  DashboardRoute: DashboardRoute,
+  AppRoute: AppRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
   GoogleLinkRoute: GoogleLinkRoute,
   LoginRoute: LoginRoute,
-  MyEventsRoute: MyEventsRoute,
-  ProfileRoute: ProfileRoute,
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   VerifyEmailRoute: VerifyEmailRoute,
-  EventsNewRoute: EventsNewRoute,
   GoogleLinkConfirmationRoute: GoogleLinkConfirmationRoute,
-  EventsIndexRoute: EventsIndexRoute,
-  EventsEventIdChallengesRoute: EventsEventIdChallengesRoute,
-  EventsEventIdLeaderboardRoute: EventsEventIdLeaderboardRoute,
-  EventsEventIdManageRoute: EventsEventIdManageRoute,
-  EventsEventIdIndexRoute: EventsEventIdIndexRoute,
-  EventsEventIdTeamsTeamIdRoute: EventsEventIdTeamsTeamIdRoute,
-  EventsEventIdTeamsIndexRoute: EventsEventIdTeamsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

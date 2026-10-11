@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Trophy } from "lucide-react";
 import { eventsApi } from "@/api/events";
-import { AppShell } from "@/components/app-shell";
 import { EventNav } from "@/components/event-nav";
 import { RequireAuth } from "@/components/require-auth";
 import { EmptyState, ErrorState, LoadingBlock, PageHeader } from "@/components/ui-states";
@@ -18,7 +17,7 @@ import { useEventAccess, useMyTeam } from "@/hooks/use-event-access";
 import { apiErrorMessage } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/events/$eventId/leaderboard")({
+export const Route = createFileRoute("/_app/events/$eventId/leaderboard")({
   head: () => ({
     meta: [
       { title: "Leaderboard — FlagLab" },
@@ -52,7 +51,7 @@ function LeaderboardPage() {
   });
 
   return (
-    <AppShell>
+    <>
       <PageHeader
         eyebrow={event.data?.title ?? "Event"}
         title="Leaderboard"
@@ -126,6 +125,6 @@ function LeaderboardPage() {
           </div>
         )}
       </div>
-    </AppShell>
+    </>
   );
 }
