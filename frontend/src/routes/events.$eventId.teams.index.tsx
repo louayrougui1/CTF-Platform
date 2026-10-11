@@ -22,15 +22,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEventAccess, useMyTeam } from "@/hooks/use-event-access";
-import { apiErrorMessage } from "@/lib/api-client";
+import { apiErrorMessage, apiMessage } from "@/lib/api-client";
 import { eventStatus } from "@/lib/format";
 
 export const Route = createFileRoute("/events/$eventId/teams/")({
   head: () => ({
     meta: [
-      { title: "Teams — CaptureBase" },
+      { title: "Teams — FlagLab" },
       { name: "description", content: "Create or join a team for this Capture The Flag event." },
-      { property: "og:title", content: "Teams — CaptureBase" },
+      { property: "og:title", content: "Teams — FlagLab" },
       { property: "og:description", content: "Create or join a team for this CTF event." },
     ],
   }),
@@ -45,6 +45,7 @@ function TeamsPage() {
   const { eventId } = Route.useParams();
   const queryClient = useQueryClient();
   const access = useEventAccess(eventId);
+  const myTeam = useMyTeam(eventId, access.isMember);
 
   const event = useQuery({
     queryKey: ["event", eventId],
@@ -52,9 +53,6 @@ function TeamsPage() {
   });
 
   const hasEnded = event.data ? eventStatus(event.data) === "Ended" : false;
-  const isLive = event.data ? eventStatus(event.data) === "Live" : false;
-
-  const myTeam = useMyTeam(eventId, access.isMember && !hasEnded);
 
   // Only organisers get the full roster of teams; participants never fetch it.
   const teams = useQuery({
@@ -62,6 +60,11 @@ function TeamsPage() {
     queryFn: () => teamsApi.list(eventId),
     enabled: access.isMember && access.isAdmin,
   });
+
+  // The organiser's own "_Admin" team already appears in the "Your team" card.
+  const otherTeams = (teams.data ?? []).filter(
+    (team) => team.id !== myTeam.data?.id && !team.name.startsWith("_Admin"),
+  );
 
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: ["event", eventId, "teams"] });
@@ -73,8 +76,12 @@ function TeamsPage() {
     <AppShell>
       <PageHeader
         eyebrow={event.data?.title ?? "Event"}
-        title="Teams"
-        description="Teams score together. Join one with its name and password, or start your own."
+        title={access.isAdmin ? "Teams" : "MyTeam"}
+        description={
+          access.isAdmin
+            ? "Every team in this event, with its roster."
+            : "Teams score together. Join one with its name and password, or start your own."
+        }
       />
       <EventNav eventId={eventId} isAdmin={access.isAdmin} />
 
@@ -145,8 +152,11 @@ function TeamsPage() {
               {teams.isLoading ? (
                 <CardSkeletonGrid count={3} />
               ) : teams.isError ? (
-                <ErrorState message={apiErrorMessage(teams.error)} onRetry={() => teams.refetch()} />
-              ) : (teams.data?.length ?? 0) === 0 ? (
+                <ErrorState
+                  message={apiErrorMessage(teams.error)}
+                  onRetry={() => teams.refetch()}
+                />
+              ) : otherTeams.length === 0 ? (
                 <EmptyState
                   title="No teams yet"
                   description="Participants can create teams from this page."
@@ -154,7 +164,7 @@ function TeamsPage() {
                 />
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {teams.data?.map((team) => (
+                  {otherTeams.map((team) => (
                     <article key={team.id} className="surface-card flex flex-col gap-3 p-5">
                       <Link
                         to="/events/$eventId/teams/$teamId"
@@ -163,6 +173,13 @@ function TeamsPage() {
                       >
                         {team.name}
                       </Link>
+                      <p className="text-sm text-muted-foreground">
+                        {team.members?.length ?? 0} member
+                        {(team.members?.length ?? 0) === 1 ? "" : "s"}
+                        {team.members?.find((m) => m.role === "CAPTAIN")
+                          ? ` · captain ${team.members.find((m) => m.role === "CAPTAIN")!.user.username}`
+                          : ""}
+                      </p>
                       <div className="mt-auto flex gap-2 border-t border-border pt-4">
                         <Button variant="ghost" size="sm" asChild className="ml-auto">
                           <Link
@@ -192,8 +209,8 @@ function CreateTeamDialog({ eventId, onDone }: { eventId: string; onDone: () => 
 
   const create = useMutation({
     mutationFn: () => teamsApi.create(eventId, { name, teamPassword }),
-    onSuccess: () => {
-      toast.success("Team created.");
+    onSuccess: (data) => {
+      toast.success(apiMessage(data, "Team created."));
       setOpen(false);
       setName("");
       setTeamPassword("");
@@ -253,8 +270,8 @@ function JoinTeamDialog({ eventId, onDone }: { eventId: string; onDone: () => vo
 
   const join = useMutation({
     mutationFn: () => teamsApi.join(eventId, teamName.trim(), password),
-    onSuccess: () => {
-      toast.success(`You joined ${teamName.trim()}.`);
+    onSuccess: (data) => {
+      toast.success(apiMessage(data, `You joined ${teamName.trim()}.`));
       setOpen(false);
       setTeamName("");
       setPassword("");

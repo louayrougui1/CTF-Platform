@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-const FLAG = "flag{welcome_to_capturebase}";
+const FLAG = "flag{welcome_to_flaglab}";
 // base64 of the flag — the clue players must decode
 const ENCODED = "ZmxhZ3t3ZWxjb21lX3RvX2NhcHR1cmViYXNlfQ==";
 
@@ -41,7 +41,7 @@ export function HomeMiniChallenge() {
         <span className="size-2.5 rounded-full bg-primary/70" aria-hidden />
         <span className="ml-2 flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
           <Terminal className="size-3.5" aria-hidden />
-          capturebase — mini-challenge
+          flaglab — mini-challenge
         </span>
       </div>
 

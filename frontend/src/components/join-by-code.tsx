@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { eventsApi } from "@/api/events";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { apiErrorMessage } from "@/lib/api-client";
+import { apiErrorMessage, apiMessage } from "@/lib/api-client";
 
 /**
  * Join a private event with only an invite code (POST /event-member/join-by-code).
@@ -21,7 +21,7 @@ export function JoinByCodeForm() {
   const join = useMutation({
     mutationFn: (inviteCode: string) => eventsApi.joinByCode(inviteCode),
     onSuccess: (event) => {
-      toast.success("You joined the event.");
+      toast.success(apiMessage(event, "You joined the event."));
       setCode("");
       void queryClient.invalidateQueries({ queryKey: ["events"] });
       if (event?.id) {

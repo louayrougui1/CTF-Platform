@@ -1,14 +1,24 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Loader2, LogOut, Trash2, UserMinus } from "lucide-react";
+import { Crown, Loader2, LogOut, Trash2, UserMinus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { eventsApi } from "@/api/events";
 import { teamsApi } from "@/api/teams";
 import { AppShell } from "@/components/app-shell";
 import { EventNav } from "@/components/event-nav";
 import { RequireAuth } from "@/components/require-auth";
 import { ErrorState, LoadingBlock, PageHeader } from "@/components/ui-states";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,15 +33,14 @@ import {
 } from "@/components/ui/table";
 import { useEventAccess, useMyTeam } from "@/hooks/use-event-access";
 import { useSession } from "@/hooks/use-session";
-import { apiErrorMessage } from "@/lib/api-client";
-import { eventStatus } from "@/lib/format";
+import { apiErrorMessage, apiMessage } from "@/lib/api-client";
 
 export const Route = createFileRoute("/events/$eventId/teams/$teamId")({
   head: () => ({
     meta: [
-      { title: "Team details — CaptureBase" },
+      { title: "Team details — FlagLab" },
       { name: "description", content: "Team roster, captain controls and membership actions." },
-      { property: "og:title", content: "Team details — CaptureBase" },
+      { property: "og:title", content: "Team details — FlagLab" },
       { property: "og:description", content: "Team roster and captain controls." },
     ],
   }),
@@ -48,15 +57,7 @@ function TeamDetailsPage() {
   const queryClient = useQueryClient();
   const { user } = useSession();
   const access = useEventAccess(eventId);
-
-  const event = useQuery({
-    queryKey: ["event", eventId],
-    queryFn: () => eventsApi.byId(eventId),
-  });
-
-  const isLive = event.data ? eventStatus(event.data) === "Live" : false;
-
-  const myTeam = useMyTeam(eventId, access.isMember && isLive);
+  const myTeam = useMyTeam(eventId, access.isMember);
 
   const team = useQuery({
     queryKey: ["event", eventId, "team", teamId],
@@ -74,6 +75,10 @@ function TeamDetailsPage() {
   const isCaptain =
     team.data?.members.some((m) => m.userId === user?.id && m.role === "CAPTAIN") ?? false;
   const isMemberOfTeam = team.data?.members.some((m) => m.userId === user?.id) ?? false;
+  // The organiser's own "_Admin" team is managed by the backend: it must not be
+  // deleted or left from the UI.
+  const isAdminTeam =
+    access.isAdmin && (myTeam.data?.id === teamId || (team.data?.name ?? "").startsWith("_Admin"));
 
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: ["event", eventId, "team"] });
@@ -124,6 +129,17 @@ function TeamDetailsPage() {
     onError: (error) => toast.error(apiErrorMessage(error)),
   });
 
+  const transfer = useMutation({
+    mutationFn: (userId: string) => teamsApi.transferCaptain(eventId, teamId, userId),
+    onSuccess: (data) => {
+      toast.success(apiMessage(data, "Captain transferred successfully"));
+      invalidate();
+      void team.refetch();
+    },
+    onError: (error) => toast.error(apiErrorMessage(error)),
+  });
+
+
   return (
     <AppShell>
       <PageHeader
@@ -133,20 +149,32 @@ function TeamDetailsPage() {
           myTeam.data?.id === teamId ? "This is your team." : "Roster for this event team."
         }
         actions={
-          isMemberOfTeam ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => leave.mutate()}
-              disabled={leave.isPending}
-            >
-              {leave.isPending ? (
-                <Loader2 className="size-3.5 animate-spin" aria-hidden />
-              ) : (
-                <LogOut className="size-3.5" aria-hidden />
-              )}
-              Leave team
-            </Button>
+          isMemberOfTeam && !isAdminTeam ? (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" disabled={leave.isPending}>
+                  {leave.isPending ? (
+                    <Loader2 className="size-3.5 animate-spin" aria-hidden />
+                  ) : (
+                    <LogOut className="size-3.5" aria-hidden />
+                  )}
+                  Leave team
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Leave this team?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Warning: leaving removes all the points you earned for this team — every
+                    challenge you solved for them will no longer count towards their score.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => leave.mutate()}>Leave team</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           ) : null
         }
       />
@@ -183,15 +211,62 @@ function TeamDetailsPage() {
                       {isCaptain ? (
                         <TableCell className="text-right">
                           {member.userId === user?.id ? null : (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => kick.mutate(member.userId)}
-                              disabled={kick.isPending}
-                            >
-                              <UserMinus className="size-3.5" aria-hidden />
-                              Remove
-                            </Button>
+                            <div className="flex justify-end gap-1">
+                              {isAdminTeam ? null : (
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="sm" disabled={transfer.isPending}>
+                                      <Crown className="size-3.5" aria-hidden />
+                                      Make captain
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>
+                                        Transfer captain to {member.username}?
+                                      </AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        They will take over captain controls for this team, and you
+                                        become a regular member.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => transfer.mutate(member.userId)}
+                                      >
+                                        Transfer
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              )}
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="sm" disabled={kick.isPending}>
+                                    <UserMinus className="size-3.5" aria-hidden />
+                                    Remove
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                      Remove {member.username} from the team?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      The points they earned for this team will no longer count
+                                      towards its score.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => kick.mutate(member.userId)}>
+                                      Remove member
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
                           )}
                         </TableCell>
                       ) : null}
@@ -201,7 +276,7 @@ function TeamDetailsPage() {
               </Table>
             </section>
 
-            {isCaptain ? (
+            {isCaptain && !isAdminTeam ? (
               <aside className="surface-card space-y-4 p-6">
                 <h2 className="font-display text-lg font-semibold">Captain controls</h2>
                 <form
@@ -238,18 +313,33 @@ function TeamDetailsPage() {
                 </form>
 
                 <div className="border-t border-border pt-4">
-                  <Button
-                    variant="destructive"
-                    onClick={() => remove.mutate()}
-                    disabled={remove.isPending}
-                  >
-                    {remove.isPending ? (
-                      <Loader2 className="size-4 animate-spin" aria-hidden />
-                    ) : (
-                      <Trash2 className="size-4" aria-hidden />
-                    )}
-                    Delete team
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" disabled={remove.isPending}>
+                        {remove.isPending ? (
+                          <Loader2 className="size-4 animate-spin" aria-hidden />
+                        ) : (
+                          <Trash2 className="size-4" aria-hidden />
+                        )}
+                        Delete team
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete this team?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          All members are removed and the team's score is lost. This cannot be
+                          undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => remove.mutate()}>
+                          Delete team
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </aside>
             ) : null}

@@ -13,10 +13,10 @@ import { apiErrorMessage } from "@/lib/api-client";
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [
-      { title: "Choose a new password — CaptureBase" },
-      { name: "description", content: "Set a new password for your CaptureBase account." },
-      { property: "og:title", content: "Choose a new password — CaptureBase" },
-      { property: "og:description", content: "Set a new password for your CaptureBase account." },
+      { title: "Choose a new password — FlagLab" },
+      { name: "description", content: "Set a new password for your FlagLab account." },
+      { property: "og:title", content: "Choose a new password — FlagLab" },
+      { property: "og:description", content: "Set a new password for your FlagLab account." },
     ],
   }),
   component: ResetPasswordPage,

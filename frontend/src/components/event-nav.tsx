@@ -8,7 +8,11 @@ export function EventNav({ eventId, isAdmin }: { eventId: string; isAdmin?: bool
   const items = [
     { to: "/events/$eventId", label: "Overview", href: base },
     { to: "/events/$eventId/challenges", label: "Challenges", href: `${base}/challenges` },
-    { to: "/events/$eventId/teams", label: "Teams", href: `${base}/teams` },
+    {
+      to: "/events/$eventId/teams",
+      label: isAdmin ? "Teams" : "MyTeam",
+      href: `${base}/teams`,
+    },
     { to: "/events/$eventId/leaderboard", label: "Leaderboard", href: `${base}/leaderboard` },
     ...(isAdmin
       ? [{ to: "/events/$eventId/manage", label: "Manage", href: `${base}/manage` }]

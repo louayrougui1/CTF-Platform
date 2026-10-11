@@ -5,14 +5,14 @@ import { toast } from "sonner";
 import { eventsApi } from "@/api/events";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { apiErrorMessage } from "@/lib/api-client";
+import { apiErrorMessage, apiMessage } from "@/lib/api-client";
 
 export function useJoinEvent(eventId: string, onDone?: () => void) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (inviteCode?: string) => eventsApi.join(eventId, inviteCode),
-    onSuccess: () => {
-      toast.success("You joined the event.");
+    onSuccess: (data) => {
+      toast.success(apiMessage(data, "You joined the event."));
       void queryClient.invalidateQueries({ queryKey: ["events"] });
       void queryClient.invalidateQueries({ queryKey: ["event", eventId] });
       onDone?.();

@@ -7,15 +7,15 @@ export const Route = createFileRoute("/google/link-confirmation")({
   }),
   head: () => ({
     meta: [
-      { title: "Link your Google account — CaptureBase" },
+      { title: "Link your Google account — FlagLab" },
       {
         name: "description",
-        content: "Confirm linking your Google account to your existing CaptureBase account.",
+        content: "Confirm linking your Google account to your existing FlagLab account.",
       },
-      { property: "og:title", content: "Link your Google account — CaptureBase" },
+      { property: "og:title", content: "Link your Google account — FlagLab" },
       {
         property: "og:description",
-        content: "Confirm linking Google to your existing CaptureBase account.",
+        content: "Confirm linking Google to your existing FlagLab account.",
       },
     ],
   }),

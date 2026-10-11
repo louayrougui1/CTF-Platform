@@ -13,9 +13,9 @@ import { apiErrorMessage } from "@/lib/api-client";
 export const Route = createFileRoute("/forgot-password")({
   head: () => ({
     meta: [
-      { title: "Reset your password — CaptureBase" },
-      { name: "description", content: "Request a one-time code to reset your CaptureBase password." },
-      { property: "og:title", content: "Reset your password — CaptureBase" },
+      { title: "Reset your password — FlagLab" },
+      { name: "description", content: "Request a one-time code to reset your FlagLab password." },
+      { property: "og:title", content: "Reset your password — FlagLab" },
       { property: "og:description", content: "Request a one-time code to reset your password." },
     ],
   }),

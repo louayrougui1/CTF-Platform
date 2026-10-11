@@ -18,9 +18,9 @@ import { fromDateTimeLocal } from "@/lib/format";
 export const Route = createFileRoute("/events/new")({
   head: () => ({
     meta: [
-      { title: "Create an event — CaptureBase" },
+      { title: "Create an event — FlagLab" },
       { name: "description", content: "Set up a new Capture The Flag competition in minutes." },
-      { property: "og:title", content: "Create an event — CaptureBase" },
+      { property: "og:title", content: "Create an event — FlagLab" },
       { property: "og:description", content: "Set up a new Capture The Flag competition." },
     ],
   }),

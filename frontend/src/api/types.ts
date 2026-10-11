@@ -66,11 +66,20 @@ export type EventMember = {
   user: { id: string; username: string; email: string };
 };
 
+export type TeamRosterEntry = {
+  id: string;
+  role: TeamRole;
+  createdAt: string;
+  user: { id: string; username: string; email: string };
+};
+
+/** Admin/owner view of `GET /events/:eventId/teams`. */
 export type TeamListItem = {
   id: string;
   name: string;
   createdAt: string;
   updatedAt: string;
+  members: TeamRosterEntry[];
 };
 
 export type TeamMemberDetail = {

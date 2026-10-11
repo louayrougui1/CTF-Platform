@@ -14,15 +14,15 @@ import { apiErrorMessage } from "@/lib/api-client";
 export const Route = createFileRoute("/register")({
   head: () => ({
     meta: [
-      { title: "Create an account — CaptureBase" },
+      { title: "Create an account — FlagLab" },
       {
         name: "description",
-        content: "Register for CaptureBase and start competing in Capture The Flag events.",
+        content: "Register for FlagLab and start competing in Capture The Flag events.",
       },
-      { property: "og:title", content: "Create an account — CaptureBase" },
+      { property: "og:title", content: "Create an account — FlagLab" },
       {
         property: "og:description",
-        content: "Register for CaptureBase and start competing in CTF events.",
+        content: "Register for FlagLab and start competing in CTF events.",
       },
     ],
   }),

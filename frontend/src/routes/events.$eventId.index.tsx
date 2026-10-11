@@ -1,6 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { CalendarDays, Flag, Globe, Loader2, Lock, LogOut, Trophy, Users } from "lucide-react";
+import {
+  CalendarDays,
+  Copy,
+  Flag,
+  Globe,
+  Loader2,
+  Lock,
+  LogOut,
+  Trophy,
+  Users,
+} from "lucide-react";
 import { toast } from "sonner";
 import { eventsApi } from "@/api/events";
 import { AppShell } from "@/components/app-shell";
@@ -8,6 +18,17 @@ import { EventStatusBadge } from "@/components/event-card";
 import { EventNav } from "@/components/event-nav";
 import { JoinEventButton, JoinWithCode } from "@/components/join-event-button";
 import { ErrorState, LoadingBlock, PageHeader } from "@/components/ui-states";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useEventAccess } from "@/hooks/use-event-access";
@@ -18,9 +39,9 @@ import { eventStatus, formatDate } from "@/lib/format";
 export const Route = createFileRoute("/events/$eventId/")({
   head: () => ({
     meta: [
-      { title: "Event details — CaptureBase" },
+      { title: "Event details — FlagLab" },
       { name: "description", content: "Event schedule, teams, challenges and how to join." },
-      { property: "og:title", content: "Event details — CaptureBase" },
+      { property: "og:title", content: "Event details — FlagLab" },
       { property: "og:description", content: "Event schedule, teams, challenges and how to join." },
     ],
   }),
@@ -96,19 +117,31 @@ function EventDetailsPage() {
               )}
             </Badge>
             {isAuthenticated && access.isMember && !access.isOwner ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => leave.mutate()}
-                disabled={leave.isPending}
-              >
-                {leave.isPending ? (
-                  <Loader2 className="size-3.5 animate-spin" aria-hidden />
-                ) : (
-                  <LogOut className="size-3.5" aria-hidden />
-                )}
-                Leave event
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" size="sm" disabled={leave.isPending}>
+                    {leave.isPending ? (
+                      <Loader2 className="size-3.5 animate-spin" aria-hidden />
+                    ) : (
+                      <LogOut className="size-3.5" aria-hidden />
+                    )}
+                    Leave event
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Leave this event?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      You will lose access to its challenges and your team, and your solves will no
+                      longer count for them.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => leave.mutate()}>Leave event</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             ) : null}
           </div>
         }
@@ -127,6 +160,29 @@ function EventDetailsPage() {
             <InfoRow icon={CalendarDays} label="Starts" value={formatDate(data.startDate)} />
             <InfoRow icon={CalendarDays} label="Ends" value={formatDate(data.endDate)} />
           </div>
+
+          {access.isMember && data.inviteCode ? (
+            <div className="flex flex-wrap items-center gap-3 border-t border-border pt-4">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Invite code</p>
+                <p className="font-mono text-sm font-medium">{data.inviteCode}</p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="sm:ml-auto"
+                onClick={() => {
+                  void navigator.clipboard
+                    .writeText(data.inviteCode as string)
+                    .then(() => toast.success("Invite code copied."))
+                    .catch(() => toast.error("Couldn't copy the invite code."));
+                }}
+              >
+                <Copy className="size-3.5" aria-hidden />
+                Copy code
+              </Button>
+            </div>
+          ) : null}
 
           {access.isMember && stats.data ? (
             <div className="grid grid-cols-2 gap-3 border-t border-border pt-4 sm:grid-cols-4">
@@ -186,7 +242,7 @@ function EventDetailsPage() {
                 <Button asChild variant="outline" className="w-full">
                   <Link to="/events/$eventId/teams" params={{ eventId }}>
                     <Users className="size-4" aria-hidden />
-                    Teams
+                    {access.isAdmin ? "Teams" : "MyTeam"}
                   </Link>
                 </Button>
                 <Button asChild variant="outline" className="w-full">

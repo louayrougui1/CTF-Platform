@@ -12,4 +12,7 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Explicit Vercel target. The Lovable config defaults Nitro to
+  // "cloudflare-module", which would emit a Workers bundle Vercel cannot run.
+  nitro: { preset: "vercel" },
 });

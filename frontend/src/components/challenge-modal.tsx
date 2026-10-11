@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { MarkdownContent } from "@/components/markdown-content";
 import { toast } from "sonner";
 import { apiErrorMessage } from "@/lib/api-client";
 import { downloadFile } from "@/lib/download";
@@ -58,7 +59,7 @@ export function ChallengeModal({
 
   return (
     <Dialog open={Boolean(challenge)} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-xl">
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-3xl">
         {challenge ? (
           <>
             <DialogHeader>
@@ -87,9 +88,7 @@ export function ChallengeModal({
               <DialogDescription className="sr-only">Challenge details</DialogDescription>
             </DialogHeader>
 
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-secondary-foreground">
-              {challenge.description}
-            </p>
+            <MarkdownContent source={challenge.description ?? ""} />
 
             {challenge.hasFile && challenge.fileUrl ? (
               <button

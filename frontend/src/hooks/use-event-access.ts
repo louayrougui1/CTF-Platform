@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { eventsApi } from "@/api/events";
 import { teamsApi } from "@/api/teams";
-import type { EventRole } from "@/api/types";
+import type { EventMember, EventRole } from "@/api/types";
+import { apiStatus } from "@/lib/api-client";
 import { useSession } from "./use-session";
 
 export function useJoinedEvents(enabled = true) {
@@ -23,56 +23,69 @@ export function useOwnedEvents(enabled = true) {
 
 /**
  * Resolves the current user's role in an event.
- * The role (OWNER / ADMIN / MEMBER) is derived exclusively from the
- * event-member list returned by GET /event-member/{eventId}/members.
+ *
+ * `GET /event-member/:eventId/members` is admin/owner-only:
+ *   200 -> the caller is OWNER or ADMIN (their exact role comes from the list)
+ *   403 -> the caller is a normal MEMBER (expected, not an error)
+ *
+ * Membership itself still comes from /events/joined, which the join flows need
+ * anyway — it is not used for role detection.
  */
 export function useEventAccess(eventId: string) {
   const { user, isAuthenticated } = useSession();
 
   const joined = useJoinedEvents(isAuthenticated);
 
-  const isMember = Boolean(joined.data?.some((e) => e.id === eventId));
-
-  const members = useQuery({
+  const members = useQuery<EventMember[] | null>({
     queryKey: ["event", eventId, "members"],
-    queryFn: () => eventsApi.members(eventId),
-    enabled: isAuthenticated && isMember,
+    queryFn: async () => {
+      try {
+        return await eventsApi.members(eventId);
+      } catch (error) {
+        // 403 is the expected "you are a normal member" response.
+        if (apiStatus(error) === 403) return null;
+        throw error;
+      }
+    },
+    enabled: isAuthenticated,
+    retry: false,
+    // The role rarely changes, so cache it instead of re-asking on every page
+    // mount. A promotion is picked up on the next window focus after 5 minutes,
+    // or immediately when a flow invalidates ["event", eventId, "members"].
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: true,
   });
 
+  const isPrivileged = Array.isArray(members.data);
   const myMembership = members.data?.find((m) => m.user.id === user?.id);
-  const role: EventRole | null =
-    (myMembership?.role as EventRole | undefined) ?? (isMember ? "MEMBER" : null);
+  const isOwner = myMembership?.role === "OWNER";
+
+  const isMember =
+    isPrivileged || Boolean(joined.data?.some((e) => e.id === eventId));
+
+  const role: EventRole | null = isPrivileged
+    ? ((myMembership?.role as EventRole | undefined) ?? "ADMIN")
+    : isMember
+      ? "MEMBER"
+      : null;
 
   return {
     role,
-    isOwner: role === "OWNER",
-    isAdmin: role === "OWNER" || role === "ADMIN",
+    isOwner,
+    isAdmin: isPrivileged,
     isMember,
-    members: members.data,
-    isLoading: joined.isLoading,
+    members: members.data ?? undefined,
+    isLoading: members.isLoading || joined.isLoading,
   };
 }
 
 export function useMyTeam(eventId: string, enabled = true) {
   return useQuery({
     queryKey: ["event", eventId, "team", "me"],
-    queryFn: async () => {
-      try {
-        return await teamsApi.me(eventId);
-      } catch (error) {
-        if (
-          axios.isAxiosError(error) &&
-          error.response?.status === 400 &&
-          (error.response.data as { message?: string })?.message &&
-          /did not start yet|already ended/i.test(
-            (error.response.data as { message?: string })?.message ?? "",
-          )
-        ) {
-          return null;
-        }
-        throw error;
-      }
-    },
+    queryFn: () => teamsApi.me(eventId),
     enabled,
     retry: false,
   });

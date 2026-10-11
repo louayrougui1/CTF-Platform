@@ -21,9 +21,9 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/events/$eventId/leaderboard")({
   head: () => ({
     meta: [
-      { title: "Leaderboard — CaptureBase" },
+      { title: "Leaderboard — FlagLab" },
       { name: "description", content: "Live team standings for this Capture The Flag event." },
-      { property: "og:title", content: "Leaderboard — CaptureBase" },
+      { property: "og:title", content: "Leaderboard — FlagLab" },
       { property: "og:description", content: "Live team standings for this CTF event." },
     ],
   }),

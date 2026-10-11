@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, Moon, Shield, Sun, LogOut, User as UserIcon } from "lucide-react";
+import { Menu, Moon, Sun, LogOut, User as UserIcon } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +13,7 @@ import {
 import { useTheme } from "@/hooks/use-theme";
 import { useLogout, useSession } from "@/hooks/use-session";
 import { cn } from "@/lib/utils";
-
+import logoAsset from "@/assets/logo.png.asset.json";
 const NAV = [
   { to: "/dashboard", label: "Dashboard" },
   { to: "/events", label: "Browse events" },
@@ -40,11 +40,15 @@ export function ThemeToggle() {
 
 export function Brand() {
   return (
-    <Link to="/" className="flex items-center gap-2">
-      <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-        <Shield className="size-4" aria-hidden />
+    <Link to="/" className="flex items-center gap-2.5" aria-label="FlagLab home">
+      <img src={logoAsset.url} alt="FlagLab logo" className="size-16 object-contain md:size-20" />
+
+      <span className="font-display text-xl font-semibold tracking-tight md:text-2xl">
+        Flag<span className="text-primary">Lab</span>
+        <span className="ml-1.5 inline-block translate-y-[-6px] rounded-md border border-primary/30 bg-primary/10 px-1.5 py-px align-middle text-[10px] font-semibold uppercase tracking-wide text-primary">
+          Beta
+        </span>
       </span>
-      <span className="font-display text-lg font-semibold tracking-tight">CaptureBase</span>
     </Link>
   );
 }
@@ -56,9 +60,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen overflow-x-clip bg-background">
       <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 md:h-16">
           <div className="flex items-center gap-8">
             <Brand />
             {isAuthenticated ? (
@@ -152,8 +156,20 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <footer className="border-t border-border py-8">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <span>CaptureBase — competitive security training platform.</span>
-          <span className="font-mono">flag{"{"}play_fair{"}"}</span>
+          <span>
+            FlagLab — competitive Capture the flag platform. Made by{" "}
+            <a
+              href="https://louayrougui-portfolio.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-primary underline-offset-2 hover:underline"
+            >
+              Louay Rougui
+            </a>
+          </span>
+          <span className="font-mono">
+            flag{"{"}play_fair{"}"}
+          </span>
         </div>
       </footer>
     </div>

@@ -1,4 +1,5 @@
 import { NestFactory } from "@nestjs/core";
+import { NestExpressApplication } from "@nestjs/platform-express";
 import { AppModule } from "./app.module";
 import { ValidationPipe } from "@nestjs/common";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
@@ -6,7 +7,13 @@ import { writeFileSync } from "fs";
 import cookieParser from "cookie-parser";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Hosted behind a reverse proxy (Render/Vercel), so req.ip is the proxy's
+  // address unless Express is told to read X-Forwarded-For. Trust exactly one
+  // hop — never `true`, which would let clients spoof req.ip via a forged
+  // header and bypass the global rate limiter in app.module.ts.
+  app.set("trust proxy", 1);
 
   app.use(cookieParser());
 

@@ -90,3 +90,29 @@ export function apiErrorMessage(error: unknown, fallback = "Something went wrong
 export function asList<T>(data: T[]): T[] {
   return Array.isArray(data) ? data : [];
 }
+
+/** HTTP status of an API error, when the request actually reached the backend. */
+export function apiStatus(error: unknown): number | undefined {
+  return axios.isAxiosError(error) ? error.response?.status : undefined;
+}
+
+/**
+ * True when the backend answered with a 4xx that carries a user-facing message
+ * (e.g. "Event did not start yet.") — an expected informational state rather
+ * than an application failure.
+ */
+export function isInformationalResponse(error: unknown): boolean {
+  const status = apiStatus(error);
+  if (!status || status < 400 || status >= 500) return false;
+  if (!axios.isAxiosError(error)) return false;
+  const data = error.response?.data as { message?: string | string[] } | undefined;
+  const message = Array.isArray(data?.message) ? data?.message.join(", ") : data?.message;
+  return typeof message === "string" && message.trim().length > 0;
+}
+
+/** Prefer a backend-provided success message; fall back to a local one. */
+export function apiMessage(data: unknown, fallback: string): string {
+  const message = (data as { message?: string | string[] } | undefined)?.message;
+  if (Array.isArray(message)) return message.join(", ");
+  return typeof message === "string" && message.trim() ? message : fallback;
+}

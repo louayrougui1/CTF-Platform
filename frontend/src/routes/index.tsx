@@ -20,17 +20,18 @@ import { Button } from "@/components/ui/button";
 import { userApi } from "@/api/user";
 import { useAuthStore } from "@/lib/auth-store";
 import { useSession } from "@/hooks/use-session";
+import { useTypewriterCycle } from "@/hooks/use-typewriter-cycle";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "CaptureBase — Run and play Capture The Flag events" },
+      { title: "FlagLab — Run and play Capture The Flag events" },
       {
         name: "description",
         content:
           "A professional CTF platform: create events, form teams, solve security challenges and climb live leaderboards.",
       },
-      { property: "og:title", content: "CaptureBase — Capture The Flag platform" },
+      { property: "og:title", content: "FlagLab — Capture The Flag platform" },
       {
         property: "og:description",
         content: "Create events, form teams, solve challenges and climb live leaderboards.",
@@ -132,9 +133,25 @@ const CATEGORIES = [
   },
 ];
 
+const TYPEWRITER_WORDS = [
+  "--start",
+  "--hunt",
+  "--exploit",
+  "--pwn",
+  "--capture",
+  "--climb",
+  "--score",
+  "--leaderboard",
+  "--flag",
+  "--win",
+] as const;
+
+const HERO_PARTICLES = ["0", "1", "*", "{}", "<>", "/", "#", "01", "$_", "//"] as const;
+
 function Landing() {
   const { isAuthenticated, hydrated } = useSession();
   const setSession = useAuthStore((s) => s.setSession);
+  const command = useTypewriterCycle("$ ./flaglab ", TYPEWRITER_WORDS);
 
   // Google OAuth callback returns to "/?token=<access_token>".
   useEffect(() => {
@@ -163,33 +180,31 @@ function Landing() {
       });
   }, [setSession]);
 
+
   return (
     <AppShell>
-      <section className="relative overflow-hidden rounded-3xl border border-border bg-card px-6 py-16 sm:px-12 sm:py-20">
+      <section className="relative mx-[calc(50%_-_50vw)] -mt-8 flex min-h-[calc(100svh-3.5rem)] items-center justify-center overflow-hidden bg-card px-6 py-16 sm:px-12 md:min-h-[calc(100svh-4rem)]">
+        <div className="hero-ambient-glow pointer-events-none absolute inset-0" aria-hidden />
         <div className="grid-backdrop pointer-events-none absolute inset-0" aria-hidden />
-        <div className="relative max-w-2xl space-y-6">
-          <p className="inline-flex items-center gap-2 rounded-full bg-primary-soft px-3 py-1 font-mono text-xs uppercase tracking-[0.2em] text-primary-soft-foreground">
-            <span
-              className="inline-block size-1.5 animate-pulse rounded-full bg-current"
-              aria-hidden
-            />
-            Capture the flag
-          </p>
-          <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">
-            Run serious CTF events. Play them even better.
+        <div className="hero-particles pointer-events-none absolute inset-0" aria-hidden>
+          {HERO_PARTICLES.map((symbol, index) => (
+            <span key={`${symbol}-${index}`}>{symbol}</span>
+          ))}
+        </div>
+        <div className="relative mx-auto max-w-2xl space-y-6 text-center">
+          <h1 className="hero-reveal hero-reveal-heading text-5xl font-semibold leading-tight sm:text-6xl md:text-7xl">
+            <span className="block">Every challenge hides a story.</span>
+            <span className="block">Every flag tells it.</span>
           </h1>
-          <p className="font-mono text-sm text-muted-foreground">
-            $ ./capturebase --start
-            <span
-              className="ml-1 inline-block h-4 w-2 translate-y-0.5 animate-pulse bg-primary"
-              aria-hidden
-            />
+          <p className="hero-reveal hero-reveal-command font-mono text-base text-muted-foreground sm:text-lg">
+            {command}
+            <span className="ml-1 inline-block h-4 w-2 translate-y-0.5 animate-pulse bg-primary" aria-hidden />
           </p>
-          <p className="text-base text-muted-foreground sm:text-lg">
-            CaptureBase gives organisers full control over events, challenges and teams — and gives
+          <p className="hero-reveal hero-reveal-copy text-lg text-muted-foreground sm:text-xl">
+            FlagLab gives organisers full control over events, challenges and teams — and gives
             players a clean, fast surface to hunt flags and climb the scoreboard.
           </p>
-          <div className="flex flex-wrap gap-3">
+          <div className="hero-reveal hero-reveal-actions flex flex-wrap justify-center gap-3">
             <Button size="lg" asChild>
               <Link to={hydrated && isAuthenticated ? "/dashboard" : "/register"}>
                 {hydrated && isAuthenticated ? "Go to dashboard" : "Create your account"}
@@ -199,10 +214,10 @@ function Landing() {
               <Link to="/events">Browse events</Link>
             </Button>
           </div>
-          <p className="pt-2 font-mono text-sm text-muted-foreground">
+          <p className="hero-reveal hero-reveal-link pt-2 font-mono text-sm text-muted-foreground">
             No account needed to try —{" "}
             <a
-              href="#mini-challenge"
+              href="#try-a-challenge"
               className="inline-flex items-center gap-1.5 font-medium text-primary transition-colors hover:text-primary/80"
             >
               Solve your first challenge
@@ -213,8 +228,9 @@ function Landing() {
       </section>
 
       <section
+        id="try-a-challenge"
         aria-labelledby="try-challenge-title"
-        className="mt-16 scroll-mt-24 rounded-2xl border border-border bg-card/50 px-4 py-10 sm:px-8"
+        className="mt-16 scroll-mt-32 rounded-2xl border border-border bg-card/50 px-4 py-10 sm:px-8"
       >
         <div className="mx-auto max-w-2xl space-y-2 text-center">
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">
@@ -235,7 +251,9 @@ function Landing() {
 
       <section aria-labelledby="how-it-works-title" className="mt-16">
         <div className="mx-auto max-w-2xl space-y-2 text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">How it works</p>
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">
+            How it works
+          </p>
           <h2 id="how-it-works-title" className="font-display text-2xl font-semibold sm:text-3xl">
             Three steps to your first flag
           </h2>
@@ -261,10 +279,7 @@ function Landing() {
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">
             Pick your battlefield
           </p>
-          <h2
-            id="challenge-categories-title"
-            className="font-display text-2xl font-semibold sm:text-3xl"
-          >
+          <h2 id="challenge-categories-title" className="font-display text-2xl font-semibold sm:text-3xl">
             Challenge categories
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -287,14 +302,11 @@ function Landing() {
                 key={label}
                 className="group flex items-center gap-4 px-4 py-4 transition-colors duration-200 hover:bg-primary-soft/40 sm:px-6"
               >
-                <Icon
-                  className="size-4 shrink-0 text-primary/70 transition-colors group-hover:text-primary"
-                  aria-hidden
-                />
-                <span className="whitespace-nowrap w-20 shrink-0 font-mono text-xs uppercase tracking-widest text-primary sm:w-24">
+                <Icon className="size-4 shrink-0 text-primary/70 transition-colors group-hover:text-primary" aria-hidden />
+                <span className="w-20 shrink-0 font-mono text-xs uppercase tracking-widest text-primary sm:w-24">
                   {label}
                 </span>
-                <div className="min-w-0 ml-4">
+                <div className="min-w-0">
                   <h3 className="text-sm font-semibold">{title}</h3>
                   <p className="truncate text-sm text-muted-foreground">{description}</p>
                 </div>
@@ -312,11 +324,10 @@ function Landing() {
 
       <section aria-labelledby="platform-features-title" className="mt-16">
         <div className="mx-auto max-w-2xl space-y-2 text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">The platform</p>
-          <h2
-            id="platform-features-title"
-            className="font-display text-2xl font-semibold sm:text-3xl"
-          >
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">
+            The platform
+          </p>
+          <h2 id="platform-features-title" className="font-display text-2xl font-semibold sm:text-3xl">
             Everything a CTF needs
           </h2>
         </div>

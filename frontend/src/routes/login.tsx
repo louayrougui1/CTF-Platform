@@ -16,10 +16,10 @@ import { useSession } from "@/hooks/use-session";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Log in — CaptureBase" },
-      { name: "description", content: "Log in to your CaptureBase CTF account." },
-      { property: "og:title", content: "Log in — CaptureBase" },
-      { property: "og:description", content: "Log in to your CaptureBase CTF account." },
+      { title: "Log in — FlagLab" },
+      { name: "description", content: "Log in to your FlagLab CTF account." },
+      { property: "og:title", content: "Log in — FlagLab" },
+      { property: "og:description", content: "Log in to your FlagLab CTF account." },
     ],
   }),
   component: LoginPage,

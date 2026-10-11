@@ -29,4 +29,10 @@ export const teamsApi = {
 
   kick: (eventId: string, teamId: string, userId: string) =>
     api.delete(`/events/${eventId}/teams/${teamId}/members/${userId}`).then((r) => r.data),
+
+  /** Hand the captain role to another member of the team. */
+  transferCaptain: (eventId: string, teamId: string, userIdToPromote: string) =>
+    api
+      .patch(`/events/${eventId}/teams/${teamId}/captain`, { userIdToPromote })
+      .then((r) => r.data),
 };

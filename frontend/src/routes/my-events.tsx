@@ -14,9 +14,9 @@ import { eventStatus } from "@/lib/format";
 export const Route = createFileRoute("/my-events")({
   head: () => ({
     meta: [
-      { title: "My events — CaptureBase" },
+      { title: "My events — FlagLab" },
       { name: "description", content: "Events you have joined and events you organise." },
-      { property: "og:title", content: "My events — CaptureBase" },
+      { property: "og:title", content: "My events — FlagLab" },
       { property: "og:description", content: "Events you have joined and events you organise." },
     ],
   }),

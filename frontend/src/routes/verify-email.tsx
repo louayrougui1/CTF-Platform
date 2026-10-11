@@ -17,9 +17,9 @@ export const Route = createFileRoute("/verify-email")({
   }),
   head: () => ({
     meta: [
-      { title: "Verify your email — CaptureBase" },
-      { name: "description", content: "Enter the one-time code we emailed you to activate your CaptureBase account." },
-      { property: "og:title", content: "Verify your email — CaptureBase" },
+      { title: "Verify your email — FlagLab" },
+      { name: "description", content: "Enter the one-time code we emailed you to activate your FlagLab account." },
+      { property: "og:title", content: "Verify your email — FlagLab" },
       { property: "og:description", content: "Enter your one-time verification code." },
     ],
   }),

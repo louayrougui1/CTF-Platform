@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Copy, Loader2, Pencil, Plus, RefreshCw, ShieldPlus, ShieldMinus, Trash2 } from "lucide-react";
+import { Copy, Loader2, Pencil, Plus, RefreshCw, ShieldPlus, ShieldMinus, Trash2, UserMinus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { challengesApi, type ChallengeFormValues } from "@/api/challenges";
 import { eventsApi } from "@/api/events";
+import { teamsApi } from "@/api/teams";
 import {
   CHALLENGE_CATEGORIES,
   CHALLENGE_DIFFICULTIES,
@@ -13,9 +14,21 @@ import {
   type ChallengeDifficulty,
 } from "@/api/types";
 import { AppShell } from "@/components/app-shell";
+import { MarkdownEditor } from "@/components/markdown-editor";
 import { EventNav } from "@/components/event-nav";
 import { RequireAuth } from "@/components/require-auth";
 import { EmptyState, ErrorState, LoadingBlock, PageHeader } from "@/components/ui-states";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,15 +60,16 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useEventAccess } from "@/hooks/use-event-access";
+import { useSession } from "@/hooks/use-session";
 import { apiErrorMessage } from "@/lib/api-client";
 import { fromDateTimeLocal, toDateTimeLocal } from "@/lib/format";
 
 export const Route = createFileRoute("/events/$eventId/manage")({
   head: () => ({
     meta: [
-      { title: "Manage event — CaptureBase" },
+      { title: "Manage event — FlagLab" },
       { name: "description", content: "Edit event settings, challenges, members and admins." },
-      { property: "og:title", content: "Manage event — CaptureBase" },
+      { property: "og:title", content: "Manage event — FlagLab" },
       { property: "og:description", content: "Edit event settings, challenges, members and admins." },
     ],
   }),
@@ -107,6 +121,7 @@ function ManageEventPage() {
         <TabsList>
           <TabsTrigger value="challenges">Challenges</TabsTrigger>
           <TabsTrigger value="members">Members</TabsTrigger>
+          <TabsTrigger value="admin-team">Admin Team</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
@@ -115,6 +130,9 @@ function ManageEventPage() {
         </TabsContent>
         <TabsContent value="members" className="mt-6">
           <MembersManager eventId={eventId} isOwner={access.isOwner} />
+        </TabsContent>
+        <TabsContent value="admin-team" className="mt-6">
+          <AdminTeamManager eventId={eventId} isOwner={access.isOwner} />
         </TabsContent>
         <TabsContent value="settings" className="mt-6">
           <EventSettings eventId={eventId} isOwner={access.isOwner} />
@@ -217,15 +235,29 @@ function ChallengesManager({ eventId }: { eventId: string }) {
                         <Pencil className="size-3.5" aria-hidden />
                         Edit
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => remove.mutate(challenge.id)}
-                        disabled={remove.isPending}
-                      >
-                        <Trash2 className="size-3.5" aria-hidden />
-                        Delete
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="sm" disabled={remove.isPending}>
+                            <Trash2 className="size-3.5" aria-hidden />
+                            Delete
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete “{challenge.title}”?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This permanently removes the challenge and its submissions. This
+                              cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => remove.mutate(challenge.id)}>
+                              Delete challenge
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -258,6 +290,7 @@ function ChallengeFormDialog({
 }) {
   const queryClient = useQueryClient();
   const [values, setValues] = useState<ChallengeFormValues>(EMPTY_FORM);
+  const [descMode, setDescMode] = useState<"normal" | "markdown">("normal");
 
   useEffect(() => {
     if (!open) return;
@@ -318,14 +351,47 @@ function ChallengeFormDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="c-description">Description</Label>
-            <Textarea
-              id="c-description"
-              rows={4}
-              required
-              value={values.description}
-              onChange={(e) => setValues((v) => ({ ...v, description: e.target.value }))}
-            />
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="c-description">Description</Label>
+              <div
+                role="tablist"
+                aria-label="Description editor mode"
+                className="inline-flex rounded-md border border-border bg-surface p-0.5 text-xs font-medium"
+              >
+                {(["normal", "markdown"] as const).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    role="tab"
+                    aria-selected={descMode === m}
+                    onClick={() => setDescMode(m)}
+                    className={
+                      descMode === m
+                        ? "rounded px-3 py-1 bg-card text-foreground shadow-[var(--shadow-card)]"
+                        : "rounded px-3 py-1 text-muted-foreground hover:text-foreground"
+                    }
+                  >
+                    {m === "normal" ? "Normal" : "Markdown"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {descMode === "normal" ? (
+              <Textarea
+                id="c-description"
+                rows={4}
+                required
+                value={values.description}
+                onChange={(e) => setValues((v) => ({ ...v, description: e.target.value }))}
+              />
+            ) : (
+              <MarkdownEditor
+                id="c-description"
+                required
+                value={values.description}
+                onChange={(description) => setValues((v) => ({ ...v, description }))}
+              />
+            )}
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
@@ -478,15 +544,31 @@ function MembersManager({ eventId, isOwner }: { eventId: string; isOwner: boolea
               {isOwner ? (
                 <TableCell className="text-right">
                   {member.role === "OWNER" ? null : member.role === "ADMIN" ? (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => demote.mutate(member.user.id)}
-                      disabled={demote.isPending}
-                    >
-                      <ShieldMinus className="size-3.5" aria-hidden />
-                      Remove admin
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="sm" disabled={demote.isPending}>
+                          <ShieldMinus className="size-3.5" aria-hidden />
+                          Remove admin
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Remove admin from {member.user.username}?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            They keep their membership but lose all organiser controls for this
+                            event.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => demote.mutate(member.user.id)}>
+                            Remove admin
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   ) : (
                     <Button
                       variant="ghost"
@@ -497,6 +579,105 @@ function MembersManager({ eventId, isOwner }: { eventId: string; isOwner: boolea
                       <ShieldPlus className="size-3.5" aria-hidden />
                       Make admin
                     </Button>
+                  )}
+                </TableCell>
+              ) : null}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
+/* ---------------------------------- Admin team --------------------------------- */
+
+function AdminTeamManager({ eventId, isOwner }: { eventId: string; isOwner: boolean }) {
+  const queryClient = useQueryClient();
+  const { user } = useSession();
+
+  const teams = useQuery({
+    queryKey: ["event", eventId, "teams"],
+    queryFn: () => teamsApi.list(eventId),
+  });
+
+  const adminTeam = teams.data?.find((t) => t.name.startsWith("_Admin"));
+
+  const kick = useMutation({
+    mutationFn: (userId: string) => teamsApi.kick(eventId, adminTeam!.id, userId),
+    onSuccess: () => {
+      toast.success("Member removed from the admin team.");
+      void queryClient.invalidateQueries({ queryKey: ["event", eventId, "teams"] });
+    },
+    onError: (error) => toast.error(apiErrorMessage(error)),
+  });
+
+  if (teams.isLoading) return <LoadingBlock />;
+  if (teams.isError)
+    return <ErrorState message={apiErrorMessage(teams.error)} onRetry={() => teams.refetch()} />;
+  if (!adminTeam)
+    return (
+      <EmptyState
+        title="No admin team found"
+        description="The organiser admin team is created automatically with the event."
+      />
+    );
+
+  return (
+    <div className="surface-card overflow-hidden">
+      <div className="border-b border-border p-5">
+        <h2 className="font-display text-lg font-semibold">{adminTeam.name}</h2>
+        <p className="text-sm text-muted-foreground">
+          The organiser team is managed automatically — its name and password can't be changed and
+          it can't be deleted.
+        </p>
+      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Member</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Role</TableHead>
+            {isOwner ? <TableHead className="text-right">Actions</TableHead> : null}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {adminTeam.members.map((member) => (
+            <TableRow key={member.id}>
+              <TableCell className="font-medium">{member.user.username}</TableCell>
+              <TableCell className="text-sm text-muted-foreground">{member.user.email}</TableCell>
+              <TableCell>
+                <Badge variant={member.role === "CAPTAIN" ? "default" : "outline"}>
+                  {member.role}
+                </Badge>
+              </TableCell>
+              {isOwner ? (
+                <TableCell className="text-right">
+                  {member.user.id === user?.id ? null : (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="sm" disabled={kick.isPending}>
+                          <UserMinus className="size-3.5" aria-hidden />
+                          Remove
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Remove {member.user.username} from the admin team?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            They will no longer be part of the organiser team.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => kick.mutate(member.user.id)}>
+                            Remove member
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   )}
                 </TableCell>
               ) : null}
@@ -673,19 +854,31 @@ function EventSettings({ eventId, isOwner }: { eventId: string; isOwner: boolean
             <p className="text-sm text-muted-foreground">
               Deleting an event removes its challenges, teams and submissions.
             </p>
-            <Button
-              variant="destructive"
-              className="w-full"
-              onClick={() => remove.mutate()}
-              disabled={remove.isPending}
-            >
-              {remove.isPending ? (
-                <Loader2 className="size-4 animate-spin" aria-hidden />
-              ) : (
-                <Trash2 className="size-4" aria-hidden />
-              )}
-              Delete event
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="w-full" disabled={remove.isPending}>
+                  {remove.isPending ? (
+                    <Loader2 className="size-4 animate-spin" aria-hidden />
+                  ) : (
+                    <Trash2 className="size-4" aria-hidden />
+                  )}
+                  Delete event
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete this event?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This permanently removes the event with all its challenges, teams and
+                    submissions. This cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => remove.mutate()}>Delete event</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </section>
         ) : null}
       </aside>

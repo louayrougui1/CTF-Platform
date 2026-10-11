@@ -8,22 +8,23 @@ import { EventCard } from "@/components/event-card";
 import { JoinEventButton } from "@/components/join-event-button";
 import { JoinByCodeForm } from "@/components/join-by-code";
 import { CardSkeletonGrid, EmptyState, ErrorState, PageHeader } from "@/components/ui-states";
+import { RequireAuth } from "@/components/require-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useJoinedEvents } from "@/hooks/use-event-access";
 import { useSession } from "@/hooks/use-session";
 import { apiErrorMessage } from "@/lib/api-client";
 import { eventStatus, type EventStatusValue } from "@/lib/format";
-import { RequireAuth } from "@/components/require-auth";
+
 export const Route = createFileRoute("/events/")({
   head: () => ({
     meta: [
-      { title: "Browse CTF events — CaptureBase" },
+      { title: "Browse CTF events — FlagLab" },
       {
         name: "description",
         content: "Discover public Capture The Flag competitions and join one in a click.",
       },
-      { property: "og:title", content: "Browse CTF events — CaptureBase" },
+      { property: "og:title", content: "Browse CTF events — FlagLab" },
       {
         property: "og:description",
         content: "Discover public Capture The Flag competitions and join one in a click.",
@@ -50,14 +51,16 @@ function BrowseEventsPage() {
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return (events.data ?? []).filter((event) => {
-      const matchesQuery =
-        !q ||
-        event.title.toLowerCase().includes(q) ||
-        (event.description ?? "").toLowerCase().includes(q);
-      const matchesFilter = filter === "All" || eventStatus(event) === filter;
-      return matchesQuery && matchesFilter;
-    });
+    return (events.data ?? [])
+      .filter((event) => {
+        const matchesQuery =
+          !q ||
+          event.title.toLowerCase().includes(q) ||
+          (event.description ?? "").toLowerCase().includes(q);
+        const matchesFilter = filter === "All" || eventStatus(event) === filter;
+        return matchesQuery && matchesFilter;
+      })
+      .sort((a, b) => +new Date(b.startDate) - +new Date(a.startDate));
   }, [events.data, query, filter]);
 
   return (

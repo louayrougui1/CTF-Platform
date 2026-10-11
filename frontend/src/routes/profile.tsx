@@ -17,9 +17,9 @@ import { useAuthStore } from "@/lib/auth-store";
 export const Route = createFileRoute("/profile")({
   head: () => ({
     meta: [
-      { title: "Your profile — CaptureBase" },
-      { name: "description", content: "Manage your CaptureBase username, password and Google link." },
-      { property: "og:title", content: "Your profile — CaptureBase" },
+      { title: "Your profile — FlagLab" },
+      { name: "description", content: "Manage your FlagLab username, password and Google link." },
+      { property: "og:title", content: "Your profile — FlagLab" },
       { property: "og:description", content: "Manage your username, password and Google link." },
     ],
   }),

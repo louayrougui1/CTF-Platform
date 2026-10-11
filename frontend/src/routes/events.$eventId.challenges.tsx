@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Flag, Trophy } from "lucide-react";
-import axios from "axios";
-import { useMemo, useRef, useState } from "react";
+import { Flag } from "lucide-react";
+import { useMemo, useState } from "react";
 import { challengesApi } from "@/api/challenges";
 import { eventsApi } from "@/api/events";
 import { CHALLENGE_CATEGORIES, type Challenge } from "@/api/types";
@@ -14,15 +13,14 @@ import { RequireAuth } from "@/components/require-auth";
 import { CardSkeletonGrid, EmptyState, ErrorState, PageHeader } from "@/components/ui-states";
 import { Button } from "@/components/ui/button";
 import { useEventAccess, useMyTeam } from "@/hooks/use-event-access";
-import { apiErrorMessage } from "@/lib/api-client";
-import { eventStatus } from "@/lib/format";
+import { apiErrorMessage, isInformationalResponse } from "@/lib/api-client";
 
 export const Route = createFileRoute("/events/$eventId/challenges")({
   head: () => ({
     meta: [
-      { title: "Challenges — CaptureBase" },
+      { title: "Challenges — FlagLab" },
       { name: "description", content: "Browse event challenges and submit flags." },
-      { property: "og:title", content: "Challenges — CaptureBase" },
+      { property: "og:title", content: "Challenges — FlagLab" },
       { property: "og:description", content: "Browse event challenges and submit flags." },
     ],
   }),
@@ -38,45 +36,22 @@ function ChallengesPage() {
   const access = useEventAccess(eventId);
   const [selected, setSelected] = useState<Challenge | null>(null);
   const [category, setCategory] = useState<string>("ALL");
-  const eventNotStartedRef = useRef(false);
 
   const event = useQuery({
     queryKey: ["event", eventId],
     queryFn: () => eventsApi.byId(eventId),
   });
 
-  const status = event.data ? eventStatus(event.data) : null;
-  const isUpcoming = status === "Upcoming";
-  const isLive = status === "Live";
-  const isEnded = status === "Ended";
-
-  // The backend only serves /teams/me and the challenge list to normal members
-  // while the event is live; before start and after end it rejects with 400.
-  // Skip those calls entirely outside of the live window so the backend's
-  // expected responses never surface as console network errors.
-  const myTeam = useMyTeam(eventId, !access.isAdmin && access.isMember && isLive);
+  // Participants must scope the list to their team; owners/admins must not.
+  const myTeam = useMyTeam(eventId, !access.isAdmin && access.isMember);
   const teamId = access.isAdmin ? undefined : myTeam.data?.id;
   const ready = access.isAdmin || Boolean(teamId);
 
   const challenges = useQuery({
     queryKey: ["event", eventId, "challenges", teamId ?? "admin"],
-    queryFn: async () => {
-      try {
-        eventNotStartedRef.current = false;
-        return await challengesApi.list(eventId, teamId);
-      } catch (error) {
-        if (
-          axios.isAxiosError(error) &&
-          error.response?.status === 400 &&
-          (error.response.data as { message?: string })?.message === "Event did not start yet"
-        ) {
-          eventNotStartedRef.current = true;
-          return [];
-        }
-        throw error;
-      }
-    },
-    enabled: access.isMember && ready && (access.isAdmin || isLive),
+    queryFn: () => challengesApi.list(eventId, teamId),
+    enabled: access.isMember && ready,
+    retry: false,
   });
 
   const visible = useMemo(
@@ -84,9 +59,6 @@ function ChallengesPage() {
       (challenges.data ?? []).filter((c) => category === "ALL" || c.category === category),
     [challenges.data, category],
   );
-
-  const isEventNotStarted =
-    eventNotStartedRef.current && challenges.isSuccess && (challenges.data ?? []).length === 0;
 
   // When "ALL" is selected, group challenges under their category header
   // instead of showing one unordered list.
@@ -132,25 +104,6 @@ function ChallengesPage() {
             description="Challenges are only visible to event members."
           />
         </div>
-      ) : !access.isAdmin && isUpcoming ? (
-        <div className="mt-6 rounded-lg border border-border bg-muted/50 p-6 text-center text-sm text-muted-foreground">
-          Event did not start yet.
-        </div>
-      ) : !access.isAdmin && isEnded ? (
-        <div className="mt-6">
-          <EmptyState
-            title="This event has ended"
-            description="Teams can no longer be created or joined — check the final standings."
-            icon={<Trophy className="size-5" aria-hidden />}
-            action={
-              <Button asChild size="sm">
-                <Link to="/events/$eventId/leaderboard" params={{ eventId }}>
-                  View leaderboard
-                </Link>
-              </Button>
-            }
-          />
-        </div>
       ) : !access.isAdmin && !myTeam.isLoading && !teamId ? (
         <div className="mt-6">
           <EmptyState
@@ -177,30 +130,37 @@ function ChallengesPage() {
           <div className="mt-6">
             {challenges.isLoading || myTeam.isLoading ? (
               <CardSkeletonGrid />
-            ) : isEventNotStarted ? (
-              <div className="mt-6 rounded-lg border border-border bg-muted/50 p-6 text-center text-sm text-muted-foreground">
-                Event did not start yet.
-              </div>
+            ) : challenges.isError && isInformationalResponse(challenges.error) ? (
+              // Expected backend state (e.g. "Event did not start yet.") —
+              // show the backend message verbatim, not an error UI.
+              <EmptyState title={apiErrorMessage(challenges.error)} />
             ) : challenges.isError ? (
               <ErrorState
                 message={apiErrorMessage(challenges.error)}
                 onRetry={() => challenges.refetch()}
               />
             ) : visible.length === 0 ? (
-              <EmptyState
-                title={access.isAdmin ? "No challenges yet" : "No challenges here yet"}
-                description={
-                  access.isAdmin
-                    ? "Create your first challenge to get started."
-                    : "Check back once the organiser publishes tasks."
-                }
-              />
+              access.isAdmin ? (
+                <EmptyState
+                  title="Create Challenges"
+                  icon={<Flag className="size-5" aria-hidden />}
+                  action={
+                    <Button asChild size="sm">
+                      <Link to="/events/$eventId/manage" params={{ eventId }}>
+                        Create Challenges
+                      </Link>
+                    </Button>
+                  }
+                />
+              ) : (
+                <EmptyState title="No challenges match this filter." />
+              )
             ) : (
               <div className="space-y-8">
                 {groups.map((group) => (
                   <section key={group.name}>
                     <div className="mb-3 flex items-center gap-3">
-                      <h2 className="font-mono text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                      <h2 className="font-mono text-base font-semibold uppercase tracking-widest text-foreground sm:text-lg">
                         {group.name}
                       </h2>
                       <span className="text-xs text-muted-foreground">
