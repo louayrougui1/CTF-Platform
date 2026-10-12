@@ -206,17 +206,14 @@ export class AuthService {
           OtpPurpose.EMAIL_VERIFICATION,
         );
       } catch (mailError: any) {
-        // The user and OTP rows were created successfully — only the email
-        // delivery failed (e.g. the host blocks outbound SMTP). Don't turn
-        // this into a 500 "Failed to create user": the account exists and
-        // still needs its email verified, so report that distinctly.
+        // The user and OTP rows were created successfully — only the email delivery failed
         this.logger.error(
           `Failed to send verification email to ${user.email}: ${
             mailError?.message ?? mailError
           }`,
         );
         throw new BadRequestException(
-          "Account created, but we couldn't send the verification email. Your email still needs confirmation — use 'Resend code' to get a new verification code.",
+          "Account created, but verification email failed to send. Tap ‘Resend code’ on Login page to verify your email.",
         );
       }
 
