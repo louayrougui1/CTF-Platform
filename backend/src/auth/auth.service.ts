@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  Logger,
   UnauthorizedException,
   ConflictException,
 } from "@nestjs/common";
@@ -24,6 +25,8 @@ import { ResetPasswordDto } from "./dto/reset-password.dto";
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
@@ -196,11 +199,26 @@ export class AuthService {
         OtpPurpose.EMAIL_VERIFICATION,
       );
 
-      await this.mailService.sendOtpEmail(
-        user.email,
-        otp,
-        OtpPurpose.EMAIL_VERIFICATION,
-      );
+      try {
+        await this.mailService.sendOtpEmail(
+          user.email,
+          otp,
+          OtpPurpose.EMAIL_VERIFICATION,
+        );
+      } catch (mailError: any) {
+        // The user and OTP rows were created successfully — only the email
+        // delivery failed (e.g. the host blocks outbound SMTP). Don't turn
+        // this into a 500 "Failed to create user": the account exists and
+        // still needs its email verified, so report that distinctly.
+        this.logger.error(
+          `Failed to send verification email to ${user.email}: ${
+            mailError?.message ?? mailError
+          }`,
+        );
+        throw new BadRequestException(
+          "Account created, but we couldn't send the verification email. Your email still needs confirmation — use 'Resend code' to get a new verification code.",
+        );
+      }
 
       return {
         message: "Verification code sent.",
@@ -219,8 +237,10 @@ export class AuthService {
       if (
         error instanceof BadRequestException ||
         error instanceof ConflictException
-      )
+      ) {
         throw error;
+      }
+      console.error("Error during user registration:", error);
       throw new InternalServerErrorException("Failed to create user");
     }
   }
@@ -611,11 +631,23 @@ export class AuthService {
       OtpPurpose.EMAIL_VERIFICATION,
     );
 
-    await this.mailService.sendOtpEmail(
-      user.email,
-      otp,
-      OtpPurpose.EMAIL_VERIFICATION,
-    );
+    try {
+      await this.mailService.sendOtpEmail(
+        user.email,
+        otp,
+        OtpPurpose.EMAIL_VERIFICATION,
+      );
+    } catch (mailError: any) {
+      this.logger.error(
+        `Failed to resend verification email to ${user.email}: ${
+          mailError?.message ?? mailError
+        }`,
+      );
+      return {
+        message:
+          "We couldn't send a new verification code right now. Please try again in a few minutes.",
+      };
+    }
 
     return {
       message: "A new verification code has been sent.",

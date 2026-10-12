@@ -1,50 +1,53 @@
 Hey everyone! 👋
 
-🚩 **FlagLab — Full-Stack CTF Platform**
+🚩 **FlagLab — A Full-Stack CTF Platform**
 
-I built FlagLab, a platform where users can create CTF events, join competitions, form teams, solve cybersecurity challenges, and compete on leaderboards.
+I’ve been working on a project called **FlagLab**, a platform where you can create CTF events, join competitions, team up with others, solve cybersecurity challenges, and compete on leaderboards.
 
-**Features:**
+Here’s what you can do with it 👇
 
-- 🏆 Create and manage public or private CTF events
-- 👥 Join events and collaborate in teams with role-based permissions
-- 🚩 Create and solve challenges across Web, Crypto, Pwn, Reverse Engineering, Forensics, OSINT, and Misc
-- 📊 Track scores and compete on per-event leaderboards
-- 🔐 Authentication with email OTP verification, password reset, and Google sign-in
-- 📁 Upload and download challenge files
-- 🛡️ Rate limiting for authentication and flag submissions
+🏆 Create and manage public or private CTF events
 
-🛠️ Technologies I used
+👥 Join events and form teams to collaborate with other players
 
-Frontend:
-• React 19 + TypeScript
-• TanStack Start + TanStack Router (file-based routing)
-• Vite
-• Tailwind CSS + shadcn/ui (Radix UI)
-• TanStack Query + Zustand
-• Axios, react-hook-form + Zod
+🚩 Create and solve challenges across different categories with file uploads and downloads
 
-Backend:
-• NestJS
-• Prisma ORM + PostgreSQL
-• Passport.js (Local, JWT, Google OAuth 2.0) + bcrypt
-• JWT access tokens with httpOnly refresh cookies
-• Nodemailer for OTP emails
-• NestJS Throttler for rate limiting
-• Swagger / OpenAPI
+📊 Track scores and compete on per-event leaderboards
 
-Infrastructure & Deployment (All On Free Tiers):
-• Supabase — PostgreSQL database and file storage
-• Render — backend API hosting
-• Vercel — frontend hosting
+🛠️ **Tech stack**
 
-🌱 Building this taught me a lot about full-stack development, REST APIs and DTOs, database relationships, authentication flows, file uploads, and deployment.
+**Frontend:**
 
-My goal is to build something practical while sharpening both my software engineering and cybersecurity skills.
+- React 19 + TypeScript
+- TanStack Start + TanStack Router
+- Vite
+- Tailwind CSS + shadcn/ui (Radix UI)
+- TanStack Query + Zustand
+- Axios
 
-🔗 Try FlagLab: [https://flaglab-nine.vercel.app]
-💻 Source code: https://github.com/louayrougui1/CTF-Platform
+**Backend:**
 
-I'd love to hear your feedback and ideas for future features!
+- NestJS
+- Prisma ORM + PostgreSQL
+- Passport.js (Local, JWT, Google OAuth 2.0) + bcrypt
+- JWT access tokens with httpOnly cookies
+- Email OTP verification and password reset with Nodemailer
+- NestJS Throttler for rate limiting
+
+**Infrastructure & Deployment (all on free tiers):**
+
+- Supabase — PostgreSQL database and file storage
+- Render — Backend API hosting _(using the free tier, so the API might have a cold start after being inactive for a while)_
+- Vercel — Frontend hosting
+
+Building FlagLab has been a fun learning experience and a great way to get hands-on with full-stack development, database design, authentication, APIs, and deployment while improving my skills along the way.
+
+🚀 Give it a try and let me know what you think!
+
+🔗 **Live demo:** https://flaglab-nine.vercel.app
+
+💻 **Source code:** https://github.com/louayrougui1/CTF-Platform
+
+I’ll keep improving FlagLab and adding new features along the way. I’d love to hear your feedback and suggestions! 🙌
 
 #FlagLab #FullStackDevelopment #React #TypeScript #NestJS #Prisma #PostgreSQL #Supabase #Cybersecurity #CTF #TanStack #WebDevelopment #LearningByBuilding
