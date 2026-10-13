@@ -1,133 +1,90 @@
-# FlagLab 🚩
+# 🚩 FlagLab — CTF Platform
 
-A full-featured Capture The Flag (CTF) platform where users register, create and join CTF events, form teams, and solve cybersecurity challenges.
-
-Each event is managed independently by its creator, who assigns roles (**owner**, **admin**, **member**) to participants. Teams compete on challenges, and every event has its own leaderboard. It's built for both small private competitions (invite-code events) and larger public ones.
-
-## Links
-
-- **Live app:** _add your frontend URL (Vercel)_
-- **API:** _add your backend URL (Render)_ — Swagger docs at `/docs`
-- **Source:** https://github.com/louayrougui1/CTF-Platform
+FlagLab is a full-stack Capture The Flag (CTF) platform where users can create and manage events, join competitions, form teams, solve cybersecurity challenges, and compete on event-specific leaderboards.
 
 ## Features
 
-- **Accounts** — register with email OTP verification, password reset, and Google sign-in with account linking.
-- **Events** — create public or private events (private ones use an invite code); owner/admin/member roles; a management page for organizers.
-- **Teams** — create or join teams within an event, with captain/member roles and a team join password.
-- **Challenges** — seven categories (Web, Crypto, Pwn, Reverse, Forensics, OSINT, Misc), four difficulties (Easy → Expert), configurable points, and optional file attachments.
-- **Submissions & scoring** — teams submit flags per challenge; per-event leaderboards show rankings and points.
-- **Files** — challenge attachments are stored in Supabase Storage and served through signed URLs.
+* **CTF Events:** Create and manage public or private events.
+* **Teams:** Join events, create teams, and collaborate with other players.
+* **Challenges:** Create and solve challenges across multiple cybersecurity categories, with configurable difficulty and points.
+* **File Sharing:** Upload and download challenge attachments.
+* **Leaderboards:** Track team scores and rankings for each event.
+* **Authentication:** Email registration and verification, password reset, and Google OAuth sign-in.
+* **Security:** Password hashing, JWT-based authentication, and API rate limiting.
 
-## Tech stack
+## Tech Stack
 
 ### Frontend
 
-- React 19 + TypeScript
-- **TanStack Start** (SSR) + **TanStack Router** (file-based routing)
-- Vite 8, Tailwind CSS v4, shadcn/ui (Radix UI primitives)
-- TanStack Query (server state) + Zustand (client state)
-- Axios (sends credentials, auto-refreshes the access token on `401`), react-hook-form + Zod
-- Recharts, Lucide icons, Sonner
+* React 19 + TypeScript
+* TanStack Start and TanStack Router
+* Vite
+* Tailwind CSS and shadcn/ui
+* TanStack Query and Zustand
+* Axios
 
 ### Backend
 
-- NestJS 11 REST API
-- Prisma ORM + PostgreSQL (Supabase)
-- Passport.js — Local, JWT and Google OAuth 2.0 strategies; bcrypt password hashing
-- JWT access token (30 min) + httpOnly `refresh_token` cookie (7 days)
-- Email OTP via Nodemailer (registration, 2FA, password reset)
-- class-validator / class-transformer DTO validation
-- NestJS Throttler — global limit plus stricter per-route limits on auth and flag submission
-- Swagger / OpenAPI, served at `/docs`
+* NestJS
+* Prisma ORM and PostgreSQL
+* Passport.js (Local, JWT, Google OAuth 2.0)
+* bcrypt
+* Email OTP verification and password reset
+* NestJS Throttler
+* Swagger / OpenAPI
 
 ### Infrastructure
 
-- **Supabase** — PostgreSQL database and file storage
-- **Render** — backend API hosting
-- **Vercel** — frontend hosting (Nitro `vercel` preset)
+* **Supabase:** PostgreSQL database and file storage
+* **Render:** Backend API hosting
+* **Vercel:** Frontend hosting
 
-> Redis is **not** part of this project — rate limiting is handled in-process by NestJS Throttler.
-
-## Repository layout
-
-```
-backend/                    NestJS API (see backend/AGENTS.md)
-frontend/                   TanStack Start app (see frontend/AGENTS.md)
-backend/frontendPrompt.md   The auth/API contract the frontend is built against
-backend/openapi.json        Generated OpenAPI spec (regenerated on every boot, committed)
-```
-
-## Getting started
+## Getting Started
 
 ### Prerequisites
 
-- Node.js 20 or newer
-- A PostgreSQL database (Supabase works out of the box)
-- SMTP credentials for OTP emails, and Google OAuth credentials for Google sign-in
+Make sure you have the following installed or configured:
 
-### Backend
+* Node.js 20 or newer
+* npm
+* A PostgreSQL database (Supabase is supported)
+* Google OAuth credentials for Google sign-in
+* Gmail API or the configured email service credentials for email verification and password reset
 
-From `backend/`:
+### Installation
 
-```bash
-npm install            # then make the env vars below available to the process
-npx prisma generate    # required — there is no postinstall hook
-npx prisma migrate deploy   # apply the committed migrations (use `migrate dev` when changing the schema)
-npm run start:dev      # http://localhost:3000 (PORT)
+1. Clone the repository and install the dependencies in both the `backend/` and `frontend/` directories.
+2. Configure the required environment variables using the provided `.env.example` files.
+3. Set up your PostgreSQL database and configure the database connection.
+4. Configure Google OAuth and email credentials if you want to use Google sign-in and email-based features.
+5. Generate the Prisma Client and apply the database migrations.
+6. Start the backend and frontend development servers.
+
+Refer to the environment templates and project-specific documentation for configuration details.
+
+> **Note:** The backend requires its environment variables to be available in the process environment at startup. Ensure the required configuration is set before running the application.
+
+## API Documentation
+
+The backend provides Swagger documentation at `/docs` when the API server is running.
+
+## Repository Structure
+
+```text
+backend/     NestJS API and database configuration
+frontend/    React application
 ```
 
-> **Important:** the API reads configuration straight from the **process environment** — it does not load `.env` automatically. Copy `backend/.env.example` and make every variable available to the process before starting, e.g. `npx dotenv-cli -e .env -- npm run start:dev`. A missing variable fails at boot.
+## Deployment
 
-### Frontend
+* **Frontend:** Vercel
+* **Backend:** Render
+* **Database and file storage:** Supabase
 
-From `frontend/`:
+The backend's free hosting tier may experience cold starts after periods of inactivity.
 
-```bash
-npm install
-# .env (gitignored) — point at the API, no trailing slash:
-#   VITE_API_URL=http://localhost:3000
-npm run dev            # http://localhost:5173
-```
+## Links
 
-If the dev server uses a different port, set the backend's `FRONTEND_URL` to match exactly — it drives CORS and OAuth/password-reset redirects.
-
-## Environment variables
-
-Full templates live in `backend/.env.example` and `frontend/.env.example`.
-
-| Area | Variables |
-| --- | --- |
-| Database | `DATABASE_URL` (transaction pooler), `DIRECT_URL` (direct, used for migrations) |
-| Supabase Storage | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` |
-| Auth | `JWT_SECRET`, `JWT_REFRESH_SECRET`, `JWT_LINK_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_CALLBACK_URL` |
-| Email OTP | `MAIL_HOST`, `MAIL_PORT`, `MAIL_USER`, `MAIL_PASS`, `MAIL_FROM` |
-| App | `PORT`, `FRONTEND_URL`, `NODE_ENV`, `ADMIN_TEAM_PASSWORD` |
-| Frontend | `VITE_API_URL` |
-
-## API documentation
-
-Swagger UI is served at `/docs`. On every boot the app regenerates `backend/openapi.json` (committed) so clients can be generated against the current API.
-
-## Testing & code quality
-
-- **Backend:** `npm run build` is the verification gate. `npm run lint` and `npm run test` are red pre-existing — see `backend/AGENTS.md` for details and for focused test commands.
-- **Frontend:** there is no test runner; `npm run build` (`vite build`) does **not** typecheck. Use `npx tsc --noEmit` as the type gate.
-
-## Docs for contributors
-
-- `backend/AGENTS.md` — backend commands, Prisma/DB rules, env requirements, architecture and known gotchas.
-- `frontend/AGENTS.md` — frontend commands, routing/API/auth conventions and fragile files.
-- `backend/frontendPrompt.md` — the full auth orchestration (OTP, refresh, Google OAuth + linking, password reset).
-
-## Screenshots
-
-_Add screenshots here (landing page, events, challenge modal, leaderboard)._
-
-## Author
-
-**Louay Rougui** — [portfolio](https://louayrougui-portfolio.vercel.app/)
-
-## License
-
-No license file is included yet. Until one is added, all rights are reserved.
+* **Live Demo:** [FlagLab](https://flaglab-nine.vercel.app/)
+* **Source Code:** [GitHub Repository](https://github.com/louayrougui1/FlagLab---CTF-Platform)
+* **Author:** [Louay Rougui](https://louayrougui-portfolio.vercel.app/)
