@@ -60,10 +60,6 @@ Make sure you have the following installed or configured:
 5. Generate the Prisma Client and apply the database migrations.
 6. Start the backend and frontend development servers.
 
-Refer to the environment templates and project-specific documentation for configuration details.
-
-> **Note:** The backend requires its environment variables to be available in the process environment at startup. Ensure the required configuration is set before running the application.
-
 ## API Documentation
 
 The backend provides Swagger documentation at `/docs` when the API server is running.
